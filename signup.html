@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign up — Lexicon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A0D16;
+  --bg-1:#0F1320;
+  --bg-card:#171E30;
+  --ink:#EEF0F7;
+  --ink-dim:#9BA3BC;
+  --ink-faint:#5C6480;
+  --accent:#F2B84B;
+  --accent-ink:#1A1406;
+  --accent-soft:rgba(242,184,75,.14);
+  --accent-line:rgba(242,184,75,.35);
+  --error:#FF7A7A;
+  --error-soft:rgba(255,122,122,.14);
+  --success:#5EEAD4;
+  --success-soft:rgba(94,234,212,.14);
+  --border:rgba(255,255,255,.08);
+  --font-display:'Fraunces',serif;
+  --font-body:'Inter',-apple-system,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --shadow:0 20px 60px -20px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    radial-gradient(1200px 600px at 15% -10%, rgba(242,184,75,.07), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgba(94,234,212,.05), transparent 55%),
+    var(--bg);
+  color:var(--ink);
+  font-family:var(--font-body);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;
+}
+::selection{background:var(--accent-soft);color:var(--accent);}
+button{font-family:inherit;cursor:pointer;}
+input{font-family:inherit;}
+a{color:inherit;}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}
+}
+
+.wrap{width:100%;max-width:380px;animation:fadeIn .5s cubic-bezier(.22,1,.36,1);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+.brand{display:flex;align-items:baseline;justify-content:center;gap:10px;margin-bottom:32px;}
+.brand-mark{font-family:var(--font-display);font-weight:600;font-size:26px;}
+.brand-mark em{color:var(--accent);font-style:normal;}
+
+.card{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:20px;
+  padding:32px 28px;box-shadow:var(--shadow);
+}
+.card-title{font-family:var(--font-display);font-size:22px;font-weight:600;margin:0 0 6px;}
+.card-sub{font-size:13px;color:var(--ink-dim);margin:0 0 26px;line-height:1.5;}
+
+.field{margin-bottom:16px;}
+.field label{
+  display:block;font-family:var(--font-mono);font-size:10px;color:var(--ink-faint);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px;
+}
+.field input{
+  width:100%;background:var(--bg-1);border:2px solid var(--border);color:var(--ink);
+  border-radius:12px;padding:12px 14px;font-size:14px;outline:none;
+  transition:border-color .2s ease, box-shadow .2s ease;
+}
+.field input:focus{border-color:var(--accent-line);box-shadow:0 0 0 4px var(--accent-soft);}
+.field-hint{font-size:11px;color:var(--ink-faint);margin-top:6px;}
+
+.submit-btn{
+  width:100%;background:var(--accent);color:var(--accent-ink);border:none;
+  padding:13px;border-radius:100px;font-weight:600;font-size:14px;margin-top:6px;
+  transition:transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px -8px rgba(242,184,75,.5);}
+.submit-btn:disabled{opacity:.55;transform:none;box-shadow:none;cursor:default;}
+
+.msg{
+  font-size:13px;padding:10px 12px;border-radius:10px;margin-top:16px;line-height:1.5;display:none;
+}
+.msg.show{display:block;}
+.msg.err{background:var(--error-soft);color:var(--error);}
+.msg.ok{background:var(--success-soft);color:var(--success);}
+
+.foot{text-align:center;margin-top:22px;font-size:13px;color:var(--ink-dim);}
+.foot a{color:var(--accent);font-weight:600;text-decoration:none;}
+.foot a:hover{text-decoration:underline;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="brand">
+    <div class="brand-mark">Lex<em>icon</em></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Create your account</div>
+    <p class="card-sub">Your progress, score, and streak will follow you to any device.</p>
+
+    <form id="signupForm">
+      <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" autocomplete="nickname" minlength="2" maxlength="30" required />
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" autocomplete="email" required />
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" autocomplete="new-password" minlength="6" required />
+        <div class="field-hint">At least 6 characters.</div>
+      </div>
+      <div class="field">
+        <label for="confirm">Confirm password</label>
+        <input type="password" id="confirm" autocomplete="new-password" minlength="6" required />
+      </div>
+      <button type="submit" class="submit-btn" id="submitBtn">Sign up</button>
+      <div class="msg" id="msg"></div>
+    </form>
+
+    <div class="foot">Already have an account? <a href="login.html">Log in</a></div>
+  </div>
+</div>
+
+<script type="module">
+  import { auth, db } from './firebase-config.js';
+  import {
+    createUserWithEmailAndPassword,
+    updateProfile,
+    onAuthStateChanged,
+    signOut
+  } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+  import {
+    doc, setDoc, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+
+  // Already logged in (on page load)? Skip straight to the app.
+  // Ignored while a signup is actively in progress, since creating the
+  // account also signs the user in for a moment before we sign them out.
+  let signupInProgress = false;
+  onAuthStateChanged(auth, (user) => {
+    if (user && !signupInProgress) window.location.href = 'app.html';
+  });
+
+  const form = document.getElementById('signupForm');
+  const msg = document.getElementById('msg');
+  const submitBtn = document.getElementById('submitBtn');
+
+  function showMsg(text, type){
+    msg.textContent = text;
+    msg.className = 'msg show ' + type;
+  }
+
+  function friendlyError(code){
+    switch(code){
+      case 'auth/email-already-in-use': return 'An account with this email already exists.';
+      case 'auth/invalid-email': return 'That email address doesn\'t look right.';
+      case 'auth/weak-password': return 'Password should be at least 6 characters.';
+      default: return 'Something went wrong. Please try again.';
+    }
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const username = document.getElementById('username').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirm').value;
+
+    msg.className = 'msg';
+
+    if (password !== confirm) {
+      showMsg('Passwords don\'t match.', 'err');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Creating account…';
+    signupInProgress = true;
+
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(cred.user, { displayName: username });
+
+      // Create the user's profile + fresh progress document in Firestore.
+      await setDoc(doc(db, 'users', cred.user.uid), {
+        username: username,
+        email: email,
+        createdAt: serverTimestamp(),
+        progress: { learned: {}, index: 0, score: 0, streak: 0 }
+      });
+
+      // Account created — sign back out so the person logs in explicitly.
+      await signOut(auth);
+
+      showMsg('Account created! Redirecting you to log in…', 'ok');
+      setTimeout(() => {
+        window.location.href = 'login.html?signedUp=1';
+      }, 900);
+    } catch (err) {
+      signupInProgress = false;
+      showMsg(friendlyError(err.code), 'err');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Sign up';
+    }
+  });
+</script>
+</body>
+</html>
