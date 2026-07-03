@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lexicon — Learn the Oxford 5000</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -446,7 +446,12 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
   async function saveProgress(){
     if(!currentUser) return;
     try{
-      await setDoc(doc(db, 'users', currentUser.uid), { progress: Progress }, { merge: true });
+      // Firestore's write promise can stay pending indefinitely when offline/blocked,
+      // so race it against a timeout — the local Progress object is already updated,
+      // this call is just persistence and should never hold anything up.
+      var write = setDoc(doc(db, 'users', currentUser.uid), { progress: Progress }, { merge: true });
+      var timeout = new Promise(function(resolve){ setTimeout(resolve, 8000); });
+      await Promise.race([write, timeout]);
     }catch(e){ console.error('Failed to save progress', e); }
   }
 
@@ -657,7 +662,7 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
   }
 
   /* ---------------- study session ---------------- */
-  var session = { word:null, info:null, phase:null, repeatCount:0, maxRepeats:2, ringTimer:null, ringStart:0, attempts:0, sessionLearned:0 };
+  var session = { word:null, info:null, phase:null, attempts:0, sessionLearned:0 };
 
   function nextEntry(){
     while(Progress.index < TOTAL && Progress.learned[WORDS[Progress.index].word]){
@@ -718,7 +723,6 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
 
   function renderListenPhase(){
     session.phase = 'listen';
-    session.repeatCount = 0;
     var e = session.word, info = session.info;
     stage.innerHTML =
       '<div class="tags-row">' +
@@ -742,7 +746,6 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
     $('soundBtn').addEventListener('click', function(){ playPronunciation(true); });
 
     playPronunciation(false);
-    startRepeatCycle();
   }
 
   function playPronunciation(manual){
@@ -753,41 +756,11 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
     if(foot && !manual) foot.textContent = 'Listening to pronunciation…';
   }
 
-  function startRepeatCycle(){
-    clearRepeatCycle();
-    tickRing();
-  }
-  function clearRepeatCycle(){
-    if(session.ringTimer) clearInterval(session.ringTimer);
-    session.ringTimer = null;
-  }
-  function tickRing(){
-    var duration = 10; // seconds
-    var elapsed = 0;
-    var fill = $('soundFill');
-    session.ringTimer = setInterval(function(){
-      elapsed += 0.1;
-      var frac = elapsed/duration;
-      if(fill) fill.setAttribute('stroke-dashoffset', SOUND_CIRC * (1-frac));
-      if(elapsed >= duration){
-        elapsed = 0;
-        session.repeatCount++;
-        if(session.repeatCount >= session.maxRepeats){
-          clearRepeatCycle();
-          startVanishAndType();
-          return;
-        }
-        playPronunciation(false);
-      }
-    }, 100);
-  }
-
   function escapeHtml(s){
     return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
   function startVanishAndType(){
-    clearRepeatCycle();
     var wd = $('wordDisplay');
     if(wd){
       wd.classList.add('vanish');
@@ -856,7 +829,7 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
       };
       Progress.index++;
       session.sessionLearned++;
-      await saveProgress();
+      saveProgress(); // fire-and-forget: a slow/blocked write should never freeze the UI
       updateStudyHeader();
       setTimeout(function(){
         if(session.sessionLearned > 0 && session.sessionLearned % 10 === 0){
@@ -913,19 +886,12 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
 
   /* ---------------- init ---------------- */
   async function init(){
-    // Reveal the app immediately — don't make people stare at a loading
-    // screen while Firestore fetches their progress in the background.
-    var gate = $('authGate');
-    var appRoot = $('appRoot');
-    if(gate) gate.style.display = 'none';
-    if(appRoot) appRoot.style.display = '';
-
+    await loadProgress();
     renderHome();
     showView('home');
 
     $('cardOxford').addEventListener('click', startStudy);
     $('btnExit').addEventListener('click', function(){
-      clearRepeatCycle();
       if(currentAudioEl) currentAudioEl.pause();
       if('speechSynthesis' in window) speechSynthesis.cancel();
       showView('home');
@@ -940,40 +906,15 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
       window.location.href = 'login.html';
     });
 
-    // Fetch saved progress in the background. If Firestore is slow (flaky
-    // connection, blocked request, etc.) give up after 8s rather than
-    // leaving the person stuck — they just start from a blank state and
-    // saves will still work once the connection catches up.
-    var timedOut = new Promise(function(resolve){ setTimeout(resolve, 8000); });
-    await Promise.race([loadProgress(), timedOut]);
-    renderHome();
+    var gate = $('authGate');
+    var appRoot = $('appRoot');
+    if(gate) gate.style.display = 'none';
+    if(appRoot) appRoot.style.display = '';
   }
 
   function boot(){
     document.addEventListener('DOMContentLoaded', function(){
-      var settled = false;
-
-      // If Firebase hasn't told us the auth state within 6s (slow network,
-      // a blocked request, an ad/tracker blocker, etc.), stop staring at a
-      // spinner forever and give the person something actionable to do.
-      var stuckTimer = setTimeout(function(){
-        if(settled) return;
-        var gate = $('authGate');
-        if(gate){
-          gate.innerHTML =
-            '<div style="text-align:center;max-width:320px;padding:0 20px;">' +
-              '<div style="font-family:var(--font-mono);font-size:12px;color:var(--ink-faint);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;">This is taking longer than usual</div>' +
-              '<div style="font-size:13px;color:var(--ink-dim);line-height:1.6;margin-bottom:18px;">Your connection to the server may be slow, or a browser privacy/shield extension could be blocking it.</div>' +
-              '<button id="authRetryBtn" style="background:var(--accent);color:var(--accent-ink);border:none;padding:10px 22px;border-radius:100px;font-weight:600;font-size:13px;">Retry</button>' +
-            '</div>';
-          var retryBtn = document.getElementById('authRetryBtn');
-          if(retryBtn) retryBtn.addEventListener('click', function(){ window.location.reload(); });
-        }
-      }, 6000);
-
       onAuthStateChanged(auth, function(user){
-        settled = true;
-        clearTimeout(stuckTimer);
         if(!user){
           window.location.href = 'login.html';
           return;
