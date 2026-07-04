@@ -858,15 +858,11 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
       };
       Progress.index++;
       session.sessionLearned++;
-      saveProgress(); // fire-and-forget: a slow/blocked write should never freeze the UI
+      saveProgress().catch(function(e){ console.error('Failed to save progress', e); }); // fire-and-forget
       updateStudyHeader();
       setTimeout(function(){
-        if(session.sessionLearned > 0 && session.sessionLearned % 10 === 0){
-          renderCheckpoint();
-        } else {
-          loadNextWord();
-        }
-      }, 850);
+        loadNextWord();
+      }, 500);
     } else {
       session.attempts++;
       input.classList.remove('correct');
