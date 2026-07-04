@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lexicon — Learn the Oxford 5000</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,7 +32,7 @@
   --shadow:0 20px 60px -20px rgba(0,0,0,.6);
 }
 *{box-sizing:border-box;}
-html,body{margin:0;padding:0;touch-action:pan-x pan-y;}
+html,body{margin:0;padding:0;}
 body{
   background:
     radial-gradient(1200px 600px at 15% -10%, rgba(242,184,75,.07), transparent 60%),
@@ -396,22 +396,6 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
 (function(){
   "use strict";
 
-  /* ---------------- block zoom gestures ----------------
-     The viewport meta tag + touch-action CSS stop most zooming, but some
-     browsers (notably Safari) still allow pinch and double-tap zoom
-     unless explicitly intercepted in JS. */
-  document.addEventListener('gesturestart', function(e){ e.preventDefault(); }, { passive:false });
-  document.addEventListener('gesturechange', function(e){ e.preventDefault(); }, { passive:false });
-  document.addEventListener('wheel', function(e){
-    if(e.ctrlKey) e.preventDefault(); // trackpad pinch-zoom fires wheel with ctrlKey
-  }, { passive:false });
-  var lastTouchEnd = 0;
-  document.addEventListener('touchend', function(e){
-    var now = Date.now();
-    if(now - lastTouchEnd <= 300) e.preventDefault(); // double-tap zoom
-    lastTouchEnd = now;
-  }, { passive:false });
-
   /* ---------------- data ---------------- */
   var WORDS = JSON.parse(document.getElementById('word-data').textContent);
   var TOTAL = WORDS.length;
@@ -462,12 +446,7 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
   async function saveProgress(){
     if(!currentUser) return;
     try{
-      // Firestore's write promise can stay pending indefinitely when offline/blocked,
-      // so race it against a timeout — the local Progress object is already updated,
-      // this call is just persistence and should never hold anything up.
-      var write = setDoc(doc(db, 'users', currentUser.uid), { progress: Progress }, { merge: true });
-      var timeout = new Promise(function(resolve){ setTimeout(resolve, 8000); });
-      await Promise.race([write, timeout]);
+      await setDoc(doc(db, 'users', currentUser.uid), { progress: Progress }, { merge: true });
     }catch(e){ console.error('Failed to save progress', e); }
   }
 
@@ -483,10 +462,7 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
       meaning: null, example: null, audio: null, phonetic: null
     };
     try{
-      var controller = new AbortController();
-      var timeoutId = setTimeout(function(){ controller.abort(); }, 4000);
-      var res = await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/' + encodeURIComponent(entry.word), { signal: controller.signal });
-      clearTimeout(timeoutId);
+      var res = await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/' + encodeURIComponent(entry.word));
       if(res.ok){
         var data = await res.json();
         var top = data[0];
@@ -648,24 +624,28 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
   /* ---------------- navigation ---------------- */
   function showView(name){
     [viewHome, viewStudy].forEach(function(v){ v.classList.remove('active'); });
-    if(name==='home'){ viewHome.classList.add('active'); renderHome(); scheduleReminder(); }
-    else { viewStudy.classList.add('active'); clearReminderTimer(); }
+    if(name==='home'){ viewHome.classList.add('active'); renderHome(); scheduleReminder(true); }
+    else { viewStudy.classList.add('active'); scheduleReminder(false); }
   }
 
   /* ---------------- reminder banner ---------------- */
-  var reminderTimeout = null, reminderHideTimeout = null;
+  var reminderTimeout = null, reminderHideTimeout = null, reminderLoop = false;
   function clearReminderTimer(){
     if(reminderTimeout) clearTimeout(reminderTimeout);
     if(reminderHideTimeout) clearTimeout(reminderHideTimeout);
   }
-  function scheduleReminder(){
+  function scheduleReminder(loop){
     clearReminderTimer();
-    var delay = 12000 + Math.random()*15000;
+    reminderLoop = loop;
+    var delay = loop ? 20000 : 4000; // home: every 20s; study: a single one-off nudge
     reminderTimeout = setTimeout(showReminder, delay);
   }
   async function showReminder(){
     var words = Object.keys(Progress.learned);
-    if(!words.length){ scheduleReminder(); return; }
+    if(!words.length){
+      if(reminderLoop) scheduleReminder(true);
+      return;
+    }
     var w = words[Math.floor(Math.random()*words.length)];
     var info = Progress.learned[w];
     $('reminderWord').firstChild.textContent = w;
@@ -673,15 +653,35 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
     $('reminderMeaning').textContent = info.meaning || '';
     var el = $('reminder');
     el.classList.add('show');
-    var showFor = 5000 + Math.random()*5000;
-    reminderHideTimeout = setTimeout(function(){
-      el.classList.remove('show');
-      scheduleReminder();
-    }, showFor);
+    reminderHideTimeout = setTimeout(dismissReminder, 5000);
+  }
+  function dismissReminder(){
+    if(reminderHideTimeout) clearTimeout(reminderHideTimeout);
+    reminderHideTimeout = null;
+    var el = $('reminder');
+    el.classList.remove('show');
+    if(reminderLoop) scheduleReminder(true);
+  }
+  function initReminderSwipe(){
+    var el = $('reminder');
+    if(!el) return;
+    var startY = null;
+    el.addEventListener('touchstart', function(e){
+      startY = e.touches[0].clientY;
+    }, { passive:true });
+    el.addEventListener('touchmove', function(e){
+      if(startY === null) return;
+      var dy = e.touches[0].clientY - startY;
+      if(dy < -24){ // swiped up far enough — dismiss
+        dismissReminder();
+        startY = null;
+      }
+    }, { passive:true });
+    el.addEventListener('touchend', function(){ startY = null; });
   }
 
   /* ---------------- study session ---------------- */
-  var session = { word:null, info:null, phase:null, attempts:0, sessionLearned:0 };
+  var session = { word:null, info:null, phase:null, repeatCount:0, maxRepeats:2, ringTimer:null, ringStart:0, attempts:0, sessionLearned:0 };
 
   function nextEntry(){
     while(Progress.index < TOTAL && Progress.learned[WORDS[Progress.index].word]){
@@ -710,17 +710,7 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
     session.word = entry;
     session.attempts = 0;
     renderLoading();
-    var info;
-    try{
-      info = await getWordInfo(entry);
-    }catch(e){
-      console.error('getWordInfo failed, using fallback', e);
-      info = {
-        word: entry.word, pos: entry.pos, level: entry.level, audio: null, phonetic: null,
-        meaning: "(" + entry.pos + ", CEFR " + entry.level + ") — definition unavailable right now. Listen closely and try to recall how it's used.",
-        example: fallbackSentence(entry.word, entry.pos)
-      };
-    }
+    var info = await getWordInfo(entry);
     session.info = info;
     renderListenPhase();
   }
@@ -752,6 +742,7 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
 
   function renderListenPhase(){
     session.phase = 'listen';
+    session.repeatCount = 0;
     var e = session.word, info = session.info;
     stage.innerHTML =
       '<div class="tags-row">' +
@@ -775,6 +766,7 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
     $('soundBtn').addEventListener('click', function(){ playPronunciation(true); });
 
     playPronunciation(false);
+    startRepeatCycle();
   }
 
   function playPronunciation(manual){
@@ -785,11 +777,41 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
     if(foot && !manual) foot.textContent = 'Listening to pronunciation…';
   }
 
+  function startRepeatCycle(){
+    clearRepeatCycle();
+    tickRing();
+  }
+  function clearRepeatCycle(){
+    if(session.ringTimer) clearInterval(session.ringTimer);
+    session.ringTimer = null;
+  }
+  function tickRing(){
+    var duration = 10; // seconds
+    var elapsed = 0;
+    var fill = $('soundFill');
+    session.ringTimer = setInterval(function(){
+      elapsed += 0.1;
+      var frac = elapsed/duration;
+      if(fill) fill.setAttribute('stroke-dashoffset', SOUND_CIRC * (1-frac));
+      if(elapsed >= duration){
+        elapsed = 0;
+        session.repeatCount++;
+        if(session.repeatCount >= session.maxRepeats){
+          clearRepeatCycle();
+          startVanishAndType();
+          return;
+        }
+        playPronunciation(false);
+      }
+    }, 100);
+  }
+
   function escapeHtml(s){
     return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
   function startVanishAndType(){
+    clearRepeatCycle();
     var wd = $('wordDisplay');
     if(wd){
       wd.classList.add('vanish');
@@ -858,11 +880,15 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
       };
       Progress.index++;
       session.sessionLearned++;
-      saveProgress().catch(function(e){ console.error('Failed to save progress', e); }); // fire-and-forget
+      await saveProgress();
       updateStudyHeader();
       setTimeout(function(){
-        loadNextWord();
-      }, 500);
+        if(session.sessionLearned > 0 && session.sessionLearned % 10 === 0){
+          renderCheckpoint();
+        } else {
+          loadNextWord();
+        }
+      }, 850);
     } else {
       session.attempts++;
       input.classList.remove('correct');
@@ -914,9 +940,11 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
     await loadProgress();
     renderHome();
     showView('home');
+    initReminderSwipe();
 
     $('cardOxford').addEventListener('click', startStudy);
     $('btnExit').addEventListener('click', function(){
+      clearRepeatCycle();
       if(currentAudioEl) currentAudioEl.pause();
       if('speechSynthesis' in window) speechSynthesis.cancel();
       showView('home');
