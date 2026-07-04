@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
 <title>Lexicon — Learn the Oxford 5000</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,7 +32,7 @@
   --shadow:0 20px 60px -20px rgba(0,0,0,.6);
 }
 *{box-sizing:border-box;}
-html,body{margin:0;padding:0;}
+html,body{margin:0;padding:0;touch-action:pan-x pan-y;}
 body{
   background:
     radial-gradient(1200px 600px at 15% -10%, rgba(242,184,75,.07), transparent 60%),
@@ -396,6 +396,22 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
 (function(){
   "use strict";
 
+  /* ---------------- block zoom gestures ----------------
+     The viewport meta tag + touch-action CSS stop most zooming, but some
+     browsers (notably Safari) still allow pinch and double-tap zoom
+     unless explicitly intercepted in JS. */
+  document.addEventListener('gesturestart', function(e){ e.preventDefault(); }, { passive:false });
+  document.addEventListener('gesturechange', function(e){ e.preventDefault(); }, { passive:false });
+  document.addEventListener('wheel', function(e){
+    if(e.ctrlKey) e.preventDefault(); // trackpad pinch-zoom fires wheel with ctrlKey
+  }, { passive:false });
+  var lastTouchEnd = 0;
+  document.addEventListener('touchend', function(e){
+    var now = Date.now();
+    if(now - lastTouchEnd <= 300) e.preventDefault(); // double-tap zoom
+    lastTouchEnd = now;
+  }, { passive:false });
+
   /* ---------------- data ---------------- */
   var WORDS = JSON.parse(document.getElementById('word-data').textContent);
   var TOTAL = WORDS.length;
@@ -467,7 +483,10 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
       meaning: null, example: null, audio: null, phonetic: null
     };
     try{
-      var res = await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/' + encodeURIComponent(entry.word));
+      var controller = new AbortController();
+      var timeoutId = setTimeout(function(){ controller.abort(); }, 4000);
+      var res = await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/' + encodeURIComponent(entry.word), { signal: controller.signal });
+      clearTimeout(timeoutId);
       if(res.ok){
         var data = await res.json();
         var top = data[0];
@@ -691,7 +710,17 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
     session.word = entry;
     session.attempts = 0;
     renderLoading();
-    var info = await getWordInfo(entry);
+    var info;
+    try{
+      info = await getWordInfo(entry);
+    }catch(e){
+      console.error('getWordInfo failed, using fallback', e);
+      info = {
+        word: entry.word, pos: entry.pos, level: entry.level, audio: null, phonetic: null,
+        meaning: "(" + entry.pos + ", CEFR " + entry.level + ") — definition unavailable right now. Listen closely and try to recall how it's used.",
+        example: fallbackSentence(entry.word, entry.pos)
+      };
+    }
     session.info = info;
     renderListenPhase();
   }
