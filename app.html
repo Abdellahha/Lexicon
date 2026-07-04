@@ -295,10 +295,12 @@ a{color:inherit;}
 }
 .btn-solid:hover{transform:translateY(-2px);}
 
-.loading-dot{display:inline-flex;gap:4px;}
-.loading-dot span{width:6px;height:6px;border-radius:50%;background:var(--ink-faint);animation:loadingBounce 1.2s infinite ease-in-out;}
+.loading-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.loading-dot{display:inline-flex;gap:6px;}
+.loading-dot span{width:9px;height:9px;border-radius:50%;background:var(--accent);animation:loadingBounce 1.2s infinite ease-in-out;}
 .loading-dot span:nth-child(2){animation-delay:.15s;}
 .loading-dot span:nth-child(3){animation-delay:.3s;}
+.loading-label{font-family:var(--font-mono);font-size:12px;color:var(--ink-faint);letter-spacing:.08em;text-transform:uppercase;}
 @keyframes loadingBounce{0%,80%,100%{opacity:.3;transform:translateY(0);}40%{opacity:1;transform:translateY(-4px);}}
 
 .footer-note{text-align:center;color:var(--ink-faint);font-size:12px;margin-top:50px;font-family:var(--font-mono);}
@@ -497,9 +499,26 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
       word: entry.word, pos: entry.pos, level: entry.level,
       meaning: null, example: null, audio: null, phonetic: null, arabic: null
     };
+
+    function fetchWithTimeout(url, ms){
+      var controller = new AbortController();
+      var timeoutId = setTimeout(function(){ controller.abort(); }, ms);
+      return fetch(url, { signal: controller.signal }).finally(function(){ clearTimeout(timeoutId); });
+    }
+
+    var dictPromise = fetchWithTimeout(
+      'https://api.dictionaryapi.dev/api/v2/entries/en/' + encodeURIComponent(entry.word), 3500
+    ).catch(function(){ return null; });
+
+    var translatePromise = fetchWithTimeout(
+      'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(entry.word) + '&langpair=en|ar', 3500
+    ).catch(function(){ return null; });
+
+    var results = await Promise.all([dictPromise, translatePromise]);
+    var res = results[0], tRes = results[1];
+
     try{
-      var res = await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/' + encodeURIComponent(entry.word));
-      if(res.ok){
+      if(res && res.ok){
         var data = await res.json();
         var top = data[0];
         if(top){
@@ -525,14 +544,10 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
           }
         }
       }
-    }catch(e){ /* offline / blocked — fall back below */ }
+    }catch(e){ /* dictionary response malformed — fall back below */ }
 
     try{
-      var tController = new AbortController();
-      var tTimeoutId = setTimeout(function(){ tController.abort(); }, 4000);
-      var tRes = await fetch('https://api.mymemory.translated.net/get?q=' + encodeURIComponent(entry.word) + '&langpair=en|ar', { signal: tController.signal });
-      clearTimeout(tTimeoutId);
-      if(tRes.ok){
+      if(tRes && tRes.ok){
         var tData = await tRes.json();
         var translated = tData && tData.responseData && tData.responseData.translatedText;
         if(translated && translated.toLowerCase() !== entry.word.toLowerCase()){
@@ -786,7 +801,10 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
 
   function renderLoading(){
     stage.innerHTML =
-      '<div class="loading-dot"><span></span><span></span><span></span></div>';
+      '<div class="loading-wrap">' +
+        '<div class="loading-dot"><span></span><span></span><span></span></div>' +
+        '<div class="loading-label">Loading word…</div>' +
+      '</div>';
   }
 
   function svgSoundRing(){
