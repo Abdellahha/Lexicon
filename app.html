@@ -909,7 +909,7 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
       };
       Progress.index++;
       session.sessionLearned++;
-      await saveProgress();
+      saveProgress().catch(function(e){ console.error('Failed to save progress', e); });
       updateStudyHeader();
       setTimeout(function(){
         if(session.sessionLearned > 0 && session.sessionLearned % 10 === 0){
