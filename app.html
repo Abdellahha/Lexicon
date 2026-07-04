@@ -769,7 +769,6 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
 
   async function startStudy(){
     showView('study');
-    if(progressPromise) await progressPromise;
     updateStudyHeader();
     await loadNextWord();
   }
@@ -982,9 +981,8 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
   }
 
   /* ---------------- init ---------------- */
-  var progressPromise = null;
-
   async function init(){
+    await loadProgress();
     renderHome();
     showView('home');
     initReminderSwipe();
@@ -1005,16 +1003,10 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
       window.location.href = 'login.html';
     });
 
-    // Reveal the app immediately — don't make the person wait on the
-    // Firestore progress fetch just to see the home screen.
     var gate = $('authGate');
     var appRoot = $('appRoot');
     if(gate) gate.style.display = 'none';
     if(appRoot) appRoot.style.display = '';
-
-    progressPromise = loadProgress();
-    await progressPromise;
-    renderHome();
   }
 
   function boot(){
