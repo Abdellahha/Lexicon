@@ -194,6 +194,18 @@ a{color:inherit;}
   letter-spacing:-.01em;transition:opacity .45s ease, filter .45s ease, transform .45s ease;
 }
 .word-display.vanish{opacity:0;filter:blur(10px);transform:scale(.9);}
+.word-arabic{
+  direction:rtl;font-family:'Segoe UI',Tahoma,Arial,sans-serif;
+  font-size:20px;color:var(--accent);margin-top:6px;letter-spacing:0;
+}
+
+.action-row{display:flex;align-items:center;gap:12px;margin-top:28px;flex-wrap:wrap;justify-content:center;}
+.skip-btn{
+  background:transparent;color:var(--ink-dim);border:1px solid var(--border);
+  padding:12px 22px;border-radius:100px;font-weight:600;font-size:14px;
+  transition:border-color .2s ease, color .2s ease;
+}
+.skip-btn:hover{border-color:var(--ink-faint);color:var(--ink);}
 
 .sound-ring-wrap{margin:22px 0 20px;position:relative;width:78px;height:78px;}
 .sound-ring-svg{transform:rotate(-90deg);}
@@ -217,7 +229,7 @@ a{color:inherit;}
 .example-text b{color:var(--accent);font-style:normal;font-weight:600;}
 
 .ready-btn{
-  margin-top:28px;background:var(--accent);color:var(--accent-ink);border:none;
+  background:var(--accent);color:var(--accent-ink);border:none;
   padding:13px 28px;border-radius:100px;font-weight:600;font-size:14px;
   display:flex;align-items:center;gap:8px;transition:transform .2s ease, box-shadow .2s ease;
 }
@@ -459,7 +471,7 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
     }
     var info = {
       word: entry.word, pos: entry.pos, level: entry.level,
-      meaning: null, example: null, audio: null, phonetic: null
+      meaning: null, example: null, audio: null, phonetic: null, arabic: null
     };
     try{
       var res = await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/' + encodeURIComponent(entry.word));
@@ -490,6 +502,20 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
         }
       }
     }catch(e){ /* offline / blocked — fall back below */ }
+
+    try{
+      var tController = new AbortController();
+      var tTimeoutId = setTimeout(function(){ tController.abort(); }, 4000);
+      var tRes = await fetch('https://api.mymemory.translated.net/get?q=' + encodeURIComponent(entry.word) + '&langpair=en|ar', { signal: tController.signal });
+      clearTimeout(tTimeoutId);
+      if(tRes.ok){
+        var tData = await tRes.json();
+        var translated = tData && tData.responseData && tData.responseData.translatedText;
+        if(translated && translated.toLowerCase() !== entry.word.toLowerCase()){
+          info.arabic = translated;
+        }
+      }
+    }catch(e){ /* translation unavailable — arabic stays null and is simply not shown */ }
 
     if(!info.meaning){
       info.meaning = "(" + entry.pos + ", CEFR " + entry.level + ") — definition unavailable right now. Listen closely and try to recall how it's used.";
@@ -750,19 +776,24 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
         '<span class="tag tag-level">' + e.level + '</span>' +
       '</div>' +
       '<div class="word-display" id="wordDisplay">' + e.word + '</div>' +
+      (info.arabic ? '<div class="word-arabic" id="wordArabic">' + escapeHtml(info.arabic) + '</div>' : '') +
       svgSoundRing() +
       '<div class="meaning-block">' +
         '<div class="meaning-label">Meaning</div>' +
         '<div class="meaning-text">' + info.meaning + '</div>' +
         '<div class="example-text">"' + highlightWord(info.example, e.word) + '"</div>' +
       '</div>' +
-      '<button class="ready-btn" id="readyBtn">' +
-        "I've got it — let's type it" +
-        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
-      '</button>' +
+      '<div class="action-row">' +
+        '<button class="ready-btn" id="readyBtn">' +
+          "I've got it — let's type it" +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+        '</button>' +
+        '<button class="skip-btn" id="skipBtn" type="button">Skip</button>' +
+      '</div>' +
       '<div class="stage-footnote" id="stageFootnote">Listening to pronunciation…</div>';
 
     $('readyBtn').addEventListener('click', function(){ startVanishAndType(); });
+    $('skipBtn').addEventListener('click', skipWord);
     $('soundBtn').addEventListener('click', function(){ playPronunciation(true); });
 
     playPronunciation(false);
@@ -846,7 +877,10 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
       '<div class="type-form" id="typeForm">' +
         '<input type="text" class="type-input" id="typeInput" placeholder="Start typing…" autocomplete="off" autocapitalize="off" spellcheck="false" />' +
         '<div class="feedback" id="typeFeedback"></div>' +
-        '<button type="button" class="submit-btn" id="checkBtn">Check</button>' +
+        '<div class="action-row" style="margin-top:0;">' +
+          '<button type="button" class="submit-btn" id="checkBtn">Check</button>' +
+          '<button type="button" class="skip-btn" id="skipBtn">Skip</button>' +
+        '</div>' +
       '</div>';
 
     var input = $('typeInput');
@@ -854,12 +888,20 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
     input.focus();
 
     checkBtn.addEventListener('click', function(){ checkAnswer(input.value); });
+    $('skipBtn').addEventListener('click', skipWord);
     input.addEventListener('keydown', function(ev){
       if(ev.key === 'Enter'){
         ev.preventDefault();
         checkAnswer(input.value);
       }
     });
+  }
+
+  function skipWord(){
+    clearRepeatCycle();
+    if(session.word){ Progress.index++; }
+    saveProgress().catch(function(e){ console.error('Failed to save progress', e); });
+    loadNextWord();
   }
 
   async function checkAnswer(value){
