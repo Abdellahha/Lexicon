@@ -87,6 +87,53 @@ a{color:inherit;}
   100%{transform:translateX(350%);}
 }
 
+/* ---------- recent words (home) ---------- */
+.recent-list{display:flex;flex-direction:column;gap:8px;margin-bottom:8px;}
+.recent-row{
+  display:flex;align-items:center;gap:12px;background:var(--bg-card);border:1px solid var(--border);
+  border-radius:14px;padding:12px 16px;
+}
+.recent-word{font-family:var(--font-display);font-weight:600;font-size:15px;flex:0 0 auto;min-width:110px;}
+.recent-tags{display:flex;gap:6px;flex:0 0 auto;}
+.recent-meaning{font-size:13px;color:var(--ink-dim);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.history-cta{margin:18px 0 8px;}
+.history-cta .btn-ghost{width:100%;justify-content:center;padding:14px;}
+
+/* ---------- history view ---------- */
+.history-list{display:flex;flex-direction:column;gap:10px;padding-top:8px;}
+.history-row{
+  display:flex;align-items:center;gap:14px;background:var(--bg-card);border:1px solid var(--border);
+  border-radius:16px;padding:16px 18px;
+}
+.history-main{flex:1;min-width:0;}
+.history-word-row{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.history-word{font-family:var(--font-display);font-weight:600;font-size:17px;}
+.history-meaning{font-size:13px;color:var(--ink-dim);line-height:1.5;}
+.practice-btn{
+  flex:0 0 auto;background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line);
+  padding:9px 16px;border-radius:100px;font-weight:600;font-size:13px;white-space:nowrap;
+  transition:background .2s ease;
+}
+.practice-btn:hover{background:var(--accent-line);}
+.history-empty{color:var(--ink-faint);font-size:14px;padding:30px 0;text-align:center;}
+
+/* ---------- match game ---------- */
+.match-wrap{padding-top:8px;}
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;}
+@media(max-width:640px){.match-grid{gap:12px;}}
+.match-col{display:flex;flex-direction:column;gap:10px;}
+.match-item{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:14px;
+  padding:14px 16px;text-align:left;font-size:14px;color:var(--ink);line-height:1.4;
+  transition:border-color .2s ease, background .2s ease, transform .15s ease;
+}
+.match-item.word-item{font-family:var(--font-display);font-weight:600;font-size:16px;}
+.match-item:hover{border-color:var(--ink-faint);}
+.match-item.selected{border-color:var(--accent);background:var(--accent-soft);}
+.match-item.matched{border-color:var(--success);background:var(--success-soft);color:var(--ink-dim);cursor:default;}
+.match-item.wrong{animation:shake .4s ease;border-color:var(--error);}
+.match-complete{text-align:center;padding:40px 0;}
+
 /* ---------- reminder banner ---------- */
 .reminder-wrap{
   position:fixed;top:0;left:0;right:0;display:flex;justify-content:center;
@@ -203,6 +250,7 @@ a{color:inherit;}
 .tag{font-family:var(--font-mono);font-size:11px;padding:5px 11px;border-radius:100px;letter-spacing:.03em;}
 .tag-pos{background:rgba(255,255,255,.06);color:var(--ink-dim);}
 .tag-level{background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line);}
+.tag-review{background:var(--success-soft);color:var(--success);border:1px solid rgba(94,234,212,.35);}
 
 .word-display{
   font-family:var(--font-display);font-weight:600;font-size:clamp(38px,7vw,58px);
@@ -389,6 +437,16 @@ a{color:inherit;}
         <div class="card-foot"><span class="card-badge">Coming soon</span></div>
       </div>
     </div>
+
+    <div class="section-label" id="recentLabel" style="display:none;">Recently learned</div>
+    <div class="recent-list" id="recentList"></div>
+    <div class="history-cta" id="historyCta" style="display:none;">
+      <button class="btn-ghost" id="btnOpenHistory">
+        View your word history &amp; practice again
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
     <div class="footer-note">2,000 words · B2–C1 · © Oxford University Press word list</div>
   </div>
 
@@ -409,6 +467,33 @@ a{color:inherit;}
 
     <div class="stage" id="stage">
       <!-- injected per phase -->
+    </div>
+  </div>
+
+  <!-- HISTORY VIEW -->
+  <div class="view" id="view-history">
+    <div class="study-top">
+      <button class="btn-ghost" id="btnHistoryBack">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Home
+      </button>
+      <button class="btn-solid" id="btnStartMatch">Match meanings</button>
+    </div>
+    <div class="section-label">Your words (<span id="historyCount">0</span>)</div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+
+  <!-- MATCH VIEW -->
+  <div class="view" id="view-match">
+    <div class="study-top">
+      <button class="btn-ghost" id="btnMatchBack">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back
+      </button>
+      <div class="session-meta"><span>Matched <b id="matchScore">0</b>/<b id="matchTotal">0</b></span></div>
+    </div>
+    <div class="match-wrap" id="matchWrap">
+      <div class="match-grid" id="matchGrid"></div>
     </div>
   </div>
 
@@ -685,12 +770,21 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
 
   /* ---------------- dom refs ---------------- */
   var $ = function(id){ return document.getElementById(id); };
-  var viewHome = $('view-home'), viewStudy = $('view-study');
+  var viewHome = $('view-home'), viewStudy = $('view-study'), viewHistory = $('view-history'), viewMatch = $('view-match');
   var stage = $('stage');
 
   /* ---------------- home rendering ---------------- */
   function learnedCount(){ return Object.keys(Progress.learned).length; }
   function levelFromScore(score){ return Math.floor(score/100) + 1; }
+
+  /* most-recently-learned first — object key insertion order is preserved
+     for non-numeric string keys, which every word here is */
+  function historyEntriesDesc(){
+    return Object.keys(Progress.learned).slice().reverse().map(function(w){
+      var info = Progress.learned[w];
+      return { word: w, pos: info.pos, level: info.level, meaning: info.meaning };
+    });
+  }
 
   function renderHome(){
     var count = learnedCount();
@@ -703,13 +797,38 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
     $('statScore').textContent = Progress.score;
     $('cardProgressFill').style.width = pct + '%';
     $('levelText').textContent = 'Level ' + levelFromScore(Progress.score);
+
+    var recent = historyEntriesDesc().slice(0, 10);
+    var recentLabel = $('recentLabel'), recentList = $('recentList'), historyCta = $('historyCta');
+    if(recent.length){
+      recentLabel.style.display = '';
+      historyCta.style.display = '';
+      recentList.innerHTML = recent.map(function(e){
+        return '<div class="recent-row">' +
+          '<div class="recent-word">' + escapeHtml(e.word) + '</div>' +
+          '<div class="recent-tags"><span class="tag tag-pos">' + escapeHtml(e.pos||'') + '</span></div>' +
+          '<div class="recent-meaning">' + escapeHtml(e.meaning||'') + '</div>' +
+        '</div>';
+      }).join('');
+    } else {
+      recentLabel.style.display = 'none';
+      historyCta.style.display = 'none';
+      recentList.innerHTML = '';
+    }
   }
 
   /* ---------------- navigation ---------------- */
   function showView(name){
-    [viewHome, viewStudy].forEach(function(v){ v.classList.remove('active'); });
-    if(name==='home'){ viewHome.classList.add('active'); renderHome(); scheduleReminder(true); }
-    else { viewStudy.classList.add('active'); scheduleReminder(false); }
+    [viewHome, viewStudy, viewHistory, viewMatch].forEach(function(v){ if(v) v.classList.remove('active'); });
+    if(name==='home'){
+      viewHome.classList.add('active'); renderHome(); scheduleReminder(true);
+    } else if(name==='history'){
+      viewHistory.classList.add('active'); reminderLoop = false; dismissReminder();
+    } else if(name==='match'){
+      viewMatch.classList.add('active'); reminderLoop = false; dismissReminder();
+    } else {
+      viewStudy.classList.add('active'); scheduleReminder(false);
+    }
   }
 
   /* ---------------- reminder banner ---------------- */
@@ -746,26 +865,196 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
     el.classList.remove('show');
     if(reminderLoop) scheduleReminder(true);
   }
+  /* Press-and-hold the banner to pause its auto-dismiss timer while you're
+     reading it; lift your finger (or mouse) and it dismisses. A swipe in
+     either direction dismisses it right away too. Pointer events cover
+     touch, mouse and pen with one code path. */
   function initReminderSwipe(){
     var el = $('reminder');
     if(!el) return;
-    var startY = null;
-    el.addEventListener('touchstart', function(e){
-      startY = e.touches[0].clientY;
-    }, { passive:true });
-    el.addEventListener('touchmove', function(e){
+    var startY = null, holding = false;
+
+    el.addEventListener('pointerdown', function(e){
+      startY = e.clientY;
+      holding = true;
+      if(reminderHideTimeout){ clearTimeout(reminderHideTimeout); reminderHideTimeout = null; }
+    });
+    el.addEventListener('pointermove', function(e){
       if(startY === null) return;
-      var dy = e.touches[0].clientY - startY;
-      if(dy < -24){ // swiped up far enough — dismiss
-        dismissReminder();
+      if(Math.abs(e.clientY - startY) > 24){ // swiped far enough — dismiss
+        holding = false;
         startY = null;
+        dismissReminder();
       }
-    }, { passive:true });
-    el.addEventListener('touchend', function(){ startY = null; });
+    });
+    function release(){
+      if(holding) dismissReminder(); // finger/mouse lifted while holding — dismiss
+      holding = false;
+      startY = null;
+    }
+    el.addEventListener('pointerup', release);
+    el.addEventListener('pointercancel', release);
+  }
+
+  /* ---------------- word history & practice ---------------- */
+  function renderHistoryList(){
+    var entries = historyEntriesDesc();
+    $('historyCount').textContent = entries.length;
+    var list = $('historyList');
+    if(!entries.length){
+      list.innerHTML = '<div class="history-empty">You haven\'t learned any words yet — start a study session to build your history.</div>';
+      return;
+    }
+    list.innerHTML = entries.map(function(e, i){
+      return '<div class="history-row">' +
+        '<div class="history-main">' +
+          '<div class="history-word-row">' +
+            '<span class="history-word">' + escapeHtml(e.word) + '</span>' +
+            '<span class="tag tag-pos">' + escapeHtml(e.pos||'') + '</span>' +
+            '<span class="tag tag-level">' + escapeHtml(e.level||'') + '</span>' +
+          '</div>' +
+          '<div class="history-meaning">' + escapeHtml(e.meaning||'') + '</div>' +
+        '</div>' +
+        '<button class="practice-btn" type="button" data-idx="' + i + '">Practice</button>' +
+      '</div>';
+    }).join('');
+    Array.prototype.forEach.call(list.querySelectorAll('.practice-btn'), function(btn){
+      bindTap(btn, function(){
+        var idx = parseInt(btn.getAttribute('data-idx'), 10);
+        practiceWord(entries[idx]);
+      });
+    });
+  }
+
+  async function practiceWord(entry){
+    session.word = { word: entry.word, pos: entry.pos, level: entry.level };
+    session.info = null;
+    session.phase = null;
+    session.attempts = 0;
+    session.practiceMode = true;
+    showView('study');
+    updateStudyHeader();
+    renderLoading();
+    // getWordInfo hits the local dictionary cache from when this word was
+    // first studied, so this is fast and doesn't need a fresh network call.
+    var info = await getWordInfo(session.word);
+    session.info = info;
+    renderListenPhase();
+  }
+
+  /* ---------------- match-the-meaning game ---------------- */
+  var matchState = null;
+
+  function renderMatchGame(){
+    var pool = historyEntriesDesc();
+    if(pool.length < 2){
+      $('matchScore').textContent = '0';
+      $('matchTotal').textContent = '0';
+      $('matchWrap').innerHTML = '<div class="history-empty">Learn at least 2 words to unlock this game.</div>';
+      return;
+    }
+    var size = Math.min(6, pool.length);
+    var shuffled = pool.slice().sort(function(){ return Math.random()-0.5; });
+    var picked = shuffled.slice(0, size);
+
+    var words = picked.map(function(e,i){ return { id:i, word:e.word }; });
+    var meanings = picked.map(function(e,i){ return { id:i, meaning:e.meaning }; });
+    var shuffledMeanings = meanings.slice().sort(function(){ return Math.random()-0.5; });
+
+    matchState = { matchedCount:0, total:size, selectedWordId:null, selectedMeaningId:null };
+
+    $('matchScore').textContent = '0';
+    $('matchTotal').textContent = size;
+
+    $('matchWrap').innerHTML =
+      '<div class="match-grid">' +
+        '<div class="match-col" id="matchWordsCol">' +
+          words.map(function(w){ return '<button type="button" class="match-item word-item" data-id="'+w.id+'">' + escapeHtml(w.word) + '</button>'; }).join('') +
+        '</div>' +
+        '<div class="match-col" id="matchMeaningsCol">' +
+          shuffledMeanings.map(function(m){ return '<button type="button" class="match-item meaning-item" data-id="'+m.id+'">' + escapeHtml(m.meaning) + '</button>'; }).join('') +
+        '</div>' +
+      '</div>';
+
+    bindMatchHandlers();
+  }
+
+  function bindMatchHandlers(){
+    var wordsCol = $('matchWordsCol'), meaningsCol = $('matchMeaningsCol');
+    if(!wordsCol || !meaningsCol) return;
+    Array.prototype.forEach.call(wordsCol.querySelectorAll('.match-item'), function(btn){
+      bindTap(btn, function(){ onSelectMatchItem('word', btn); });
+    });
+    Array.prototype.forEach.call(meaningsCol.querySelectorAll('.match-item'), function(btn){
+      bindTap(btn, function(){ onSelectMatchItem('meaning', btn); });
+    });
+  }
+
+  function onSelectMatchItem(kind, btn){
+    if(!matchState || btn.classList.contains('matched')) return;
+    var id = parseInt(btn.getAttribute('data-id'), 10);
+
+    if(kind === 'word'){
+      if(matchState.selectedWordId === id){ btn.classList.remove('selected'); matchState.selectedWordId = null; return; }
+      var prev = document.querySelector('#matchWordsCol .match-item.selected');
+      if(prev) prev.classList.remove('selected');
+      btn.classList.add('selected');
+      matchState.selectedWordId = id;
+    } else {
+      if(matchState.selectedMeaningId === id){ btn.classList.remove('selected'); matchState.selectedMeaningId = null; return; }
+      var prevM = document.querySelector('#matchMeaningsCol .match-item.selected');
+      if(prevM) prevM.classList.remove('selected');
+      btn.classList.add('selected');
+      matchState.selectedMeaningId = id;
+    }
+
+    if(matchState.selectedWordId !== null && matchState.selectedMeaningId !== null){
+      checkMatchPair();
+    }
+  }
+
+  function checkMatchPair(){
+    var wordId = matchState.selectedWordId, meaningId = matchState.selectedMeaningId;
+    var wordBtn = document.querySelector('#matchWordsCol .match-item[data-id="'+wordId+'"]');
+    var meaningBtn = document.querySelector('#matchMeaningsCol .match-item[data-id="'+meaningId+'"]');
+
+    if(wordId === meaningId){
+      wordBtn.classList.remove('selected'); wordBtn.classList.add('matched');
+      meaningBtn.classList.remove('selected'); meaningBtn.classList.add('matched');
+      matchState.matchedCount++;
+      $('matchScore').textContent = matchState.matchedCount;
+      matchState.selectedWordId = null;
+      matchState.selectedMeaningId = null;
+      if(matchState.matchedCount >= matchState.total){
+        setTimeout(showMatchComplete, 500);
+      }
+    } else {
+      wordBtn.classList.add('wrong'); meaningBtn.classList.add('wrong');
+      setTimeout(function(){
+        wordBtn.classList.remove('selected','wrong');
+        meaningBtn.classList.remove('selected','wrong');
+      }, 450);
+      matchState.selectedWordId = null;
+      matchState.selectedMeaningId = null;
+    }
+  }
+
+  function showMatchComplete(){
+    $('matchWrap').innerHTML =
+      '<div class="match-complete">' +
+        '<div class="checkpoint-icon" style="margin:0 auto 18px;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
+        '<div class="checkpoint-title">All matched!</div>' +
+        '<div class="checkpoint-actions" style="justify-content:center;margin-top:18px;">' +
+          '<button class="btn-solid" id="btnMatchAgain">Play again</button>' +
+          '<button class="btn-ghost" id="btnMatchDone">Back to history</button>' +
+        '</div>' +
+      '</div>';
+    bindTap($('btnMatchAgain'), renderMatchGame);
+    bindTap($('btnMatchDone'), function(){ showView('history'); renderHistoryList(); });
   }
 
   /* ---------------- study session ---------------- */
-  var session = { word:null, info:null, phase:null, attempts:0, sessionLearned:0 };
+  var session = { word:null, info:null, phase:null, attempts:0, sessionLearned:0, practiceMode:false };
 
   function nextEntry(){
     while(Progress.index < TOTAL && Progress.learned[WORDS[Progress.index].word]){
@@ -783,6 +1072,7 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
   }
 
   async function startStudy(){
+    session.practiceMode = false;
     showView('study');
     updateStudyHeader();
     await loadNextWord();
@@ -830,6 +1120,7 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
       '<div class="tags-row">' +
         '<span class="tag tag-pos">' + e.pos + '</span>' +
         '<span class="tag tag-level">' + e.level + '</span>' +
+        (session.practiceMode ? '<span class="tag tag-review">Review</span>' : '') +
       '</div>' +
       '<div class="word-display" id="wordDisplay">' + e.word + '</div>' +
       (info.arabic ? '<div class="word-arabic" id="wordArabic">' + escapeHtml(info.arabic) + '</div>' : '') +
@@ -920,6 +1211,7 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
   }
 
   function skipWord(){
+    if(session.practiceMode){ showView('history'); renderHistoryList(); return; }
     if(session.word){ Progress.index++; }
     saveProgress().catch(function(e){ console.error('Failed to save progress', e); });
     loadNextWord();
@@ -933,6 +1225,14 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
     if(given === target){
       input.classList.remove('wrong');
       input.classList.add('correct');
+
+      if(session.practiceMode){
+        feedback.textContent = 'Correct! Nice review.';
+        feedback.className = 'feedback ok';
+        setTimeout(function(){ showView('history'); renderHistoryList(); }, 850);
+        return;
+      }
+
       var hintUsed = session.attempts >= 3;
       feedback.textContent = 'Correct! +' + (hintUsed?5:10) + ' points';
       feedback.className = 'feedback ok';
@@ -957,7 +1257,7 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
       input.classList.remove('correct');
       input.classList.add('wrong');
       setTimeout(function(){ input.classList.remove('wrong'); }, 400);
-      Progress.streak = 0;
+      if(!session.practiceMode) Progress.streak = 0;
       if(session.attempts >= 3){
         var hint = session.word.word.slice(0, Math.min(2, session.word.word.length));
         feedback.innerHTML = 'Not quite. Hint: starts with "' + hint + '…" (' + session.word.word.length + ' letters)';
@@ -1011,6 +1311,11 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
       if('speechSynthesis' in window) speechSynthesis.cancel();
       showView('home');
     });
+
+    bindTap($('btnOpenHistory'), function(){ showView('history'); renderHistoryList(); });
+    bindTap($('btnHistoryBack'), function(){ showView('home'); });
+    bindTap($('btnStartMatch'), function(){ showView('match'); renderMatchGame(); });
+    bindTap($('btnMatchBack'), function(){ showView('history'); renderHistoryList(); });
 
     var userText = $('userText');
     var userPill = $('userPill');
