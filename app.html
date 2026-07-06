@@ -503,7 +503,7 @@ a{color:inherit;}
 <script type="module">
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
-import { doc, getDoc, getDocFromCache, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
 (function(){
   "use strict";
@@ -552,9 +552,8 @@ import { doc, getDoc, getDocFromCache, setDoc } from "https://www.gstatic.com/fi
     streak: 0
   };
 
-  function applyProgressSnapshot(snap){
-    if(!snap || !snap.exists()) return;
-    var data = snap.data();
+  function applyProgressSnapshot(data){
+    if(!data) return;
     var parsed = data.progress || {};
     Progress.learned = parsed.learned || {};
     Progress.index = parsed.index || 0;
@@ -578,35 +577,21 @@ import { doc, getDoc, getDocFromCache, setDoc } from "https://www.gstatic.com/fi
 
   async function loadProgress(){
     if(!currentUser) return;
-    var ref = doc(db, 'users', currentUser.uid);
+    var userRef = ref(db, 'users/' + currentUser.uid);
 
-    // Fast path: read whatever's already cached on this device. This is
-    // local-only (no network round trip), so it resolves almost instantly
-    // on repeat visits and lets us get off the "checking your session"
-    // screen right away instead of always waiting on Firestore's servers.
-    var gotFromCache = false;
+    // Fetch from the Realtime Database, but cap how long we'll wait: a
+    // slow/flaky connection should never leave the person stuck staring
+    // at the loading screen — we just fall back to defaults if it times out.
     try{
-      var cacheSnap = await getDocFromCache(ref);
-      applyProgressSnapshot(cacheSnap);
-      gotFromCache = true;
-    }catch(e){ /* nothing cached yet on this device — that's fine */ }
-
-    // Always try to reconcile with the server too, but cap how long we'll
-    // wait: a slow/flaky connection should never leave the person stuck
-    // staring at the loading screen. If we already showed cached progress,
-    // do this refresh quietly in the background instead of blocking.
-    var serverFetch = getDoc(ref).then(applyProgressSnapshot)
-      .catch(function(e){ console.error('Failed to load progress from server', e); });
-
-    if(!gotFromCache){
-      try{ await withTimeout(serverFetch, 4000); }
-      catch(e){ console.error('Progress fetch timed out, continuing with defaults', e); }
-    }
+      var snap = await withTimeout(get(userRef), 4000);
+      if(snap.exists()) applyProgressSnapshot(snap.val());
+    }catch(e){ console.error('Failed to load progress', e); }
   }
   async function saveProgress(){
     if(!currentUser) return;
     try{
-      await setDoc(doc(db, 'users', currentUser.uid), { progress: Progress }, { merge: true });
+      // update() merges fields rather than overwriting the whole user record
+      await update(ref(db, 'users/' + currentUser.uid), { progress: Progress });
     }catch(e){ console.error('Failed to save progress', e); }
   }
 
@@ -1403,37 +1388,6 @@ import { doc, getDoc, getDocFromCache, setDoc } from "https://www.gstatic.com/fi
 
   boot();
 })();
-
-
-import { auth } from './firebase-config.js';
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
-import { loadUserData, saveUserData } from './user-data.js';
-
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.href = 'login.html'; // not logged in, bounce back
-    return;
-  }
-
-  const data = await loadUserData(user.uid);
-
-  if (data) {
-    // returning user — restore their vocab lists, progress, streak, etc.
-    renderApp(data);
-  } else {
-    // brand new user — set up defaults
-    const defaults = { words: [], streak: 0, createdAt: Date.now() };
-    await saveUserData(user.uid, defaults);
-    renderApp(defaults);
-  }
-});
-
-// call this any time the user's data changes (add a word, finish a lesson, etc.)
-async function onWordAdded(newWord) {
-  const uid = auth.currentUser.uid;
-  await saveUserData(uid, { words: firebase.arrayUnion(newWord) }); // or read-modify-write manually
-}
-
 </script>
 </body>
 </html>

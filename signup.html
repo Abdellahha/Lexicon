@@ -145,8 +145,8 @@ a{color:inherit;}
     signOut
   } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
   import {
-    doc, setDoc, serverTimestamp
-  } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+    ref, set, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
   // Already logged in (on page load)? Skip straight to the app.
   // Ignored while a signup is actively in progress, since creating the
@@ -197,8 +197,8 @@ a{color:inherit;}
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(cred.user, { displayName: username });
 
-      // Create the user's profile + fresh progress document in Firestore.
-      await setDoc(doc(db, 'users', cred.user.uid), {
+      // Create the user's profile + fresh progress record in the Realtime Database.
+      await set(ref(db, 'users/' + cred.user.uid), {
         username: username,
         email: email,
         createdAt: serverTimestamp(),
