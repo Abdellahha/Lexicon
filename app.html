@@ -794,11 +794,30 @@ import { doc, getDoc, getDocFromCache, setDoc } from "https://www.gstatic.com/fi
   function bindTap(el, handler){
     if(!el) return;
     var lastFired = 0;
+    var startX = 0, startY = 0, moved = false;
+    var MOVE_TOLERANCE = 10; // px of finger movement still counted as a tap
+
+    el.addEventListener('touchstart', function(ev){
+      var t = ev.touches[0];
+      startX = t.clientX;
+      startY = t.clientY;
+      moved = false;
+    }, { passive:true });
+
+    el.addEventListener('touchmove', function(ev){
+      var t = ev.touches[0];
+      if(Math.abs(t.clientX - startX) > MOVE_TOLERANCE || Math.abs(t.clientY - startY) > MOVE_TOLERANCE){
+        moved = true;
+      }
+    }, { passive:true });
+
     el.addEventListener('touchend', function(ev){
+      if(moved) return; // finger scrolled/swiped instead of tapping - ignore
       ev.preventDefault();
       lastFired = Date.now();
       handler(ev);
     }, { passive:false });
+
     el.addEventListener('click', function(ev){
       if(Date.now() - lastFired < 500) return; // already handled via touchend
       handler(ev);
