@@ -503,7 +503,7 @@ a{color:inherit;}
 <script type="module">
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
-import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+import { doc, getDoc, getDocFromCache, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
 (function(){
   "use strict";
@@ -552,19 +552,56 @@ import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/
     streak: 0
   };
 
+  function applyProgressSnapshot(snap){
+    if(!snap || !snap.exists()) return;
+    var data = snap.data();
+    var parsed = data.progress || {};
+    Progress.learned = parsed.learned || {};
+    Progress.index = parsed.index || 0;
+    Progress.score = parsed.score || 0;
+    Progress.streak = parsed.streak || 0;
+  }
+
+  function withTimeout(promise, ms){
+    return new Promise(function(resolve, reject){
+      var settled = false;
+      var timer = setTimeout(function(){
+        if(!settled){ settled = true; reject(new Error('timeout')); }
+      }, ms);
+      promise.then(function(v){
+        if(!settled){ settled = true; clearTimeout(timer); resolve(v); }
+      }, function(e){
+        if(!settled){ settled = true; clearTimeout(timer); reject(e); }
+      });
+    });
+  }
+
   async function loadProgress(){
     if(!currentUser) return;
+    var ref = doc(db, 'users', currentUser.uid);
+
+    // Fast path: read whatever's already cached on this device. This is
+    // local-only (no network round trip), so it resolves almost instantly
+    // on repeat visits and lets us get off the "checking your session"
+    // screen right away instead of always waiting on Firestore's servers.
+    var gotFromCache = false;
     try{
-      var snap = await getDoc(doc(db, 'users', currentUser.uid));
-      if(snap.exists()){
-        var data = snap.data();
-        var parsed = data.progress || {};
-        Progress.learned = parsed.learned || {};
-        Progress.index = parsed.index || 0;
-        Progress.score = parsed.score || 0;
-        Progress.streak = parsed.streak || 0;
-      }
-    }catch(e){ console.error('Failed to load progress', e); }
+      var cacheSnap = await getDocFromCache(ref);
+      applyProgressSnapshot(cacheSnap);
+      gotFromCache = true;
+    }catch(e){ /* nothing cached yet on this device — that's fine */ }
+
+    // Always try to reconcile with the server too, but cap how long we'll
+    // wait: a slow/flaky connection should never leave the person stuck
+    // staring at the loading screen. If we already showed cached progress,
+    // do this refresh quietly in the background instead of blocking.
+    var serverFetch = getDoc(ref).then(applyProgressSnapshot)
+      .catch(function(e){ console.error('Failed to load progress from server', e); });
+
+    if(!gotFromCache){
+      try{ await withTimeout(serverFetch, 4000); }
+      catch(e){ console.error('Progress fetch timed out, continuing with defaults', e); }
+    }
   }
   async function saveProgress(){
     if(!currentUser) return;
