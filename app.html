@@ -1404,6 +1404,36 @@ import { doc, getDoc, getDocFromCache, setDoc } from "https://www.gstatic.com/fi
   boot();
 })();
 
+
+import { auth } from './firebase-config.js';
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+import { loadUserData, saveUserData } from './user-data.js';
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = 'login.html'; // not logged in, bounce back
+    return;
+  }
+
+  const data = await loadUserData(user.uid);
+
+  if (data) {
+    // returning user — restore their vocab lists, progress, streak, etc.
+    renderApp(data);
+  } else {
+    // brand new user — set up defaults
+    const defaults = { words: [], streak: 0, createdAt: Date.now() };
+    await saveUserData(user.uid, defaults);
+    renderApp(defaults);
+  }
+});
+
+// call this any time the user's data changes (add a word, finish a lesson, etc.)
+async function onWordAdded(newWord) {
+  const uid = auth.currentUser.uid;
+  await saveUserData(uid, { words: firebase.arrayUnion(newWord) }); // or read-modify-write manually
+}
+
 </script>
 </body>
 </html>

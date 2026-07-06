@@ -22,3 +22,23 @@ export const auth = getAuth(app);
 export const db = initializeFirestore(app, {
   localCache: persistentLocalCache()
 });
+
+import { db } from './firebase-config.js';
+import {
+  doc,
+  getDoc,
+  setDoc
+} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+
+// Fetch the current user's saved data (or null if they're new)
+export async function loadUserData(uid) {
+  const ref = doc(db, 'users', uid);
+  const snap = await getDoc(ref);
+  return snap.exists() ? snap.data() : null;
+}
+
+// Save/merge data into the current user's document
+export async function saveUserData(uid, data) {
+  const ref = doc(db, 'users', uid);
+  await setDoc(ref, data, { merge: true }); // merge so partial saves don't wipe other fields
+}
