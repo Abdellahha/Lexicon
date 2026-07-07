@@ -552,6 +552,9 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     streak: 0
   };
 
+  // SAFETY GUARD: Prevents blank local values from overwriting your database
+  var isProgressLoaded = false;
+
   function applyProgressSnapshot(data){
     if(!data) return;
     var parsed = data.progress || {};
@@ -579,16 +582,24 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     if(!currentUser) return;
     var userRef = ref(db, 'users/' + currentUser.uid);
 
-    // Fetch from the Realtime Database, but cap how long we'll wait: a
-    // slow/flaky connection should never leave the person stuck staring
-    // at the loading screen — we just fall back to defaults if it times out.
+    // Increased timeout from 4s to 10s to account for initial WebSocket connections
     try{
-      var snap = await withTimeout(get(userRef), 4000);
-      if(snap.exists()) applyProgressSnapshot(snap.val());
-    }catch(e){ console.error('Failed to load progress', e); }
+      var snap = await withTimeout(get(userRef), 10000);
+      if(snap.exists()) {
+        applyProgressSnapshot(snap.val());
+      }
+      isProgressLoaded = true; // Safe to allow saves now
+    }catch(e){
+      console.error('Failed to load progress', e);
+    }
   }
+
   async function saveProgress(){
     if(!currentUser) return;
+    if(!isProgressLoaded) {
+      console.warn('Postponed saving progress: Data has not finished loading from the server.');
+      return;
+    }
     try{
       // update() merges fields rather than overwriting the whole user record
       await update(ref(db, 'users/' + currentUser.uid), { progress: Progress });
@@ -1389,74 +1400,6 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   boot();
 })();
 
-
-
-
-
-
-
-
-/* ---------------- progress state ---------------- */
-  var Progress = {
-    learned: {},      // word -> {meaning, example, pos, level}
-    index: 0,         // pointer into WORDS for next word to study
-    score: 0,
-    streak: 0
-  };
-
-  // SAFETY GUARD: Prevents blank local values from overwriting your database
-  var isProgressLoaded = false; 
-
-  function applyProgressSnapshot(data){
-    if(!data) return;
-    var parsed = data.progress || {};
-    Progress.learned = parsed.learned || {};
-    Progress.index = parsed.index || 0;
-    Progress.score = parsed.score || 0;
-    Progress.streak = parsed.streak || 0;
-  }
-
-  function withTimeout(promise, ms){
-    return new Promise(function(resolve, reject){
-      var settled = false;
-      var timer = setTimeout(function(){
-        if(!settled){ settled = true; reject(new Error('timeout')); }
-      }, ms);
-      promise.then(function(v){
-        if(!settled){ settled = true; clearTimeout(timer); resolve(v); }
-      }, function(e){
-        if(!settled){ settled = true; clearTimeout(timer); reject(e); }
-      });
-    });
-  }
-
-  async function loadProgress(){
-    if(!currentUser) return;
-    var userRef = ref(db, 'users/' + currentUser.uid);
-
-    // Increased timeout from 4s to 10s to account for initial WebSocket connections
-    try{
-      var snap = await withTimeout(get(userRef), 10000);
-      if(snap.exists()) {
-        applyProgressSnapshot(snap.val());
-      }
-      isProgressLoaded = true; // Safe to allow saves now
-    }catch(e){ 
-      console.error('Failed to load progress', e); 
-    }
-  }
-
-  async function saveProgress(){
-    if(!currentUser) return;
-    if(!isProgressLoaded) {
-      console.warn('Postponed saving progress: Data has not finished loading from the server.');
-      return; 
-    }
-    try{
-      // update() merges fields rather than overwriting the whole user record
-      await update(ref(db, 'users/' + currentUser.uid), { progress: Progress });
-    }catch(e){ console.error('Failed to save progress', e); }
-  }
 </script>
 </body>
 </html>
