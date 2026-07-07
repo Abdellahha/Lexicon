@@ -356,9 +356,11 @@ a{color:inherit;}
 </head>
 <body>
 
-<div id="authGate" style="position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:999;">
-  <div style="font-family:var(--font-mono);font-size:12px;color:var(--ink-faint);letter-spacing:.08em;text-transform:uppercase;">Checking your session…</div>
-  <div class="authgate-bar"><div class="authgate-fill"></div></div>
+<div id="authGate" style="position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:999;padding:24px;text-align:center;">
+  <div id="authGateStatus" style="font-family:var(--font-mono);font-size:12px;color:var(--ink-faint);letter-spacing:.08em;text-transform:uppercase;">Checking your session…</div>
+  <div class="authgate-bar" id="authGateBar"><div class="authgate-fill"></div></div>
+  <div id="authGateError" style="display:none;max-width:320px;font-size:13px;color:var(--error);line-height:1.5;"></div>
+  <button id="authGateRetry" style="display:none;background:var(--accent);color:var(--accent-ink);border:none;padding:10px 18px;border-radius:100px;font-weight:600;font-size:13px;">Retry</button>
 </div>
 
 <div class="reminder-wrap"><div class="reminder" id="reminder">
@@ -583,15 +585,11 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     var userRef = ref(db, 'users/' + currentUser.uid);
 
     // Increased timeout from 4s to 10s to account for initial WebSocket connections
-    try{
-      var snap = await withTimeout(get(userRef), 10000);
-      if(snap.exists()) {
-        applyProgressSnapshot(snap.val());
-      }
-      isProgressLoaded = true; // Safe to allow saves now
-    }catch(e){
-      console.error('Failed to load progress', e);
+    var snap = await withTimeout(get(userRef), 10000);
+    if(snap.exists()) {
+      applyProgressSnapshot(snap.val());
     }
+    isProgressLoaded = true; // Safe to allow saves now
   }
 
   async function saveProgress(){
@@ -603,7 +601,26 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     try{
       // update() merges fields rather than overwriting the whole user record
       await update(ref(db, 'users/' + currentUser.uid), { progress: Progress });
-    }catch(e){ console.error('Failed to save progress', e); }
+    }catch(e){
+      console.error('Failed to save progress', e);
+      showToast('Couldn\'t save your progress — check your connection.');
+    }
+  }
+
+  /* ---------------- lightweight toast for background errors ---------------- */
+  var toastTimer = null;
+  function showToast(text){
+    var el = document.getElementById('toastBanner');
+    if(!el){
+      el = document.createElement('div');
+      el.id = 'toastBanner';
+      el.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--error-soft);color:var(--error);border:1px solid rgba(255,122,122,.3);padding:10px 16px;border-radius:12px;font-size:13px;z-index:1000;max-width:90vw;text-align:center;';
+      document.body.appendChild(el);
+    }
+    el.textContent = text;
+    el.style.display = 'block';
+    if(toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ el.style.display = 'none'; }, 5000);
   }
 
   /* ---------------- dictionary lookup (runs in the user's browser) ---------------- */
@@ -1351,8 +1368,38 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   }
 
   /* ---------------- init ---------------- */
+  function showGateError(err){
+    var statusEl = $('authGateStatus');
+    var barEl = $('authGateBar');
+    var errEl = $('authGateError');
+    var retryEl = $('authGateRetry');
+    if(statusEl) statusEl.textContent = 'Couldn\'t reach your saved progress';
+    if(barEl) barEl.style.display = 'none';
+    if(errEl){
+      errEl.style.display = 'block';
+      errEl.textContent = 'This usually means the database URL, region, or access rules in firebase-config.js don\'t match your Firebase project. (' + (err && (err.code || err.message) || 'unknown error') + ')';
+    }
+    if(retryEl){
+      retryEl.style.display = 'inline-block';
+      retryEl.onclick = function(){
+        if(statusEl) statusEl.textContent = 'Checking your session…';
+        if(barEl) barEl.style.display = '';
+        if(errEl) errEl.style.display = 'none';
+        retryEl.style.display = 'none';
+        init();
+      };
+    }
+  }
+
   async function init(){
-    await loadProgress();
+    try{
+      await loadProgress();
+    }catch(e){
+      console.error('Failed to load progress', e);
+      showGateError(e);
+      return; // keep the gate up with the error instead of entering the app on bad/missing data
+    }
+
     renderHome();
     showView('home');
     initReminderSwipe();

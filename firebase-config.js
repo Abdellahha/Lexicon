@@ -9,7 +9,7 @@ const firebaseConfig = {
   storageBucket: "lexicon-app-59a7b.firebasestorage.app",
   messagingSenderId: "394018780013",
   appId: "1:394018780013:web:b31364d7edec352f8aa064",
-  databaseURL: "https://lexicon-app-59a7b-default-rtdb.firebaseio.com" // find this in console after creating DB
+  databaseURL: "https://lexicon-app-59a7b-default-rtdb.europe-west1.firebasedatabase.app"
 };
 
 export const app = initializeApp(firebaseConfig);
