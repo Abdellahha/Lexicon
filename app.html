@@ -3,47 +3,44 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Lexicon — Learn the Oxford 5000</title>
+<title>Lexicon — Learn Simple English</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0A0D16;
-  --bg-1:#0F1320;
-  --bg-2:#151B2C;
-  --bg-card:#171E30;
-  --ink:#EEF0F7;
-  --ink-dim:#9BA3BC;
-  --ink-faint:#5C6480;
-  --accent:#F2B84B;
-  --accent-ink:#1A1406;
-  --accent-soft:rgba(242,184,75,.14);
-  --accent-line:rgba(242,184,75,.35);
-  --success:#5EEAD4;
-  --success-soft:rgba(94,234,212,.14);
-  --error:#FF7A7A;
-  --error-soft:rgba(255,122,122,.14);
-  --border:rgba(255,255,255,.08);
-  --border-soft:rgba(255,255,255,.05);
+  --bg:#FAF9F6;
+  --bg-1:#F2F0EB;
+  --bg-2:#EAE7E1;
+  --bg-card:#FFFFFF;
+  --ink:#1C1C1C;
+  --ink-dim:#4A4A4A;
+  --ink-faint:#8C8C8C;
+  --accent:#1C1C1C;
+  --accent-ink:#FFFFFF;
+  --accent-soft:rgba(28,28,28,0.06);
+  --accent-line:rgba(28,28,28,0.15);
+  --success:#1B5E20;
+  --success-soft:rgba(27,94,32,0.07);
+  --error:#B71C1C;
+  --error-soft:rgba(183,28,28,0.06);
+  --border:rgba(28,28,28,0.12);
+  --border-soft:rgba(28,28,28,0.06);
   --font-display:'Fraunces',serif;
   --font-body:'Inter',-apple-system,sans-serif;
   --font-mono:'JetBrains Mono',monospace;
-  --shadow:0 20px 60px -20px rgba(0,0,0,.6);
+  --shadow:0 12px 45px -10px rgba(28,28,28,0.08);
 }
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;touch-action:pan-x pan-y;}
 body{
-  background:
-    radial-gradient(1200px 600px at 15% -10%, rgba(242,184,75,.07), transparent 60%),
-    radial-gradient(900px 500px at 100% 0%, rgba(94,234,212,.05), transparent 55%),
-    var(--bg);
+  background:var(--bg);
   color:var(--ink);
   font-family:var(--font-body);
   min-height:100vh;
   -webkit-font-smoothing:antialiased;
 }
-::selection{background:var(--accent-soft);color:var(--accent);}
+::selection{background:var(--accent-soft);color:var(--ink);}
 button{font-family:inherit;cursor:pointer;}
 input{font-family:inherit;}
 a{color:inherit;}
@@ -56,26 +53,38 @@ a{color:inherit;}
 .app{max-width:920px;margin:0 auto;padding:0 24px 80px;position:relative;}
 .topbar{
   display:flex;align-items:center;justify-content:space-between;
-  padding:28px 0 8px;
+  padding:32px 0 16px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:32px;
 }
-.brand{display:flex;align-items:baseline;gap:10px;}
+.brand{display:flex;flex-direction:column;align-items:flex-start;gap:4px;}
+.brand::before{
+  content:"VOLUME 01 / ISSUE 01";
+  font-family:var(--font-body);
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:0.2em;
+  text-transform:uppercase;
+  color:var(--ink-faint);
+  line-height:1;
+}
 .brand-mark{
-  font-family:var(--font-display);font-weight:600;font-size:24px;letter-spacing:.2px;
+  font-family:var(--font-display);font-weight:900;font-size:28px;letter-spacing:-0.03em;text-transform:uppercase;line-height:1;
 }
-.brand-mark em{color:var(--accent);font-style:normal;}
-.brand-tag{font-family:var(--font-mono);font-size:11px;color:var(--ink-faint);letter-spacing:.08em;text-transform:uppercase;}
+.brand-mark em{color:var(--ink);font-style:italic;font-weight:900;}
+.brand-tag{display:none;}
 .topbar-right{display:flex;align-items:center;gap:14px;}
 .level-pill{
-  font-family:var(--font-mono);font-size:12px;color:var(--accent);
-  background:var(--accent-soft);border:1px solid var(--accent-line);
-  padding:6px 12px;border-radius:100px;letter-spacing:.03em;
+  font-family:var(--font-mono);font-size:12px;color:var(--ink);
+  background:var(--bg-1);border:1px solid var(--border);
+  padding:6px 14px;border-radius:6px;letter-spacing:.03em;
   display:flex;align-items:center;gap:6px;
 }
 
 /* ---------- auth gate loading bar ---------- */
 .authgate-bar{
   width:180px;height:3px;border-radius:3px;
-  background:rgba(255,255,255,.08);overflow:hidden;position:relative;
+  background:rgba(28,28,28,.08);overflow:hidden;position:relative;
 }
 .authgate-fill{
   position:absolute;top:0;left:0;height:100%;width:40%;
@@ -91,9 +100,10 @@ a{color:inherit;}
 .recent-list{display:flex;flex-direction:column;gap:8px;margin-bottom:8px;}
 .recent-row{
   display:flex;align-items:center;gap:12px;background:var(--bg-card);border:1px solid var(--border);
-  border-radius:14px;padding:12px 16px;
+  border-radius:8px;padding:12px 16px;transition:border-color 0.2s ease, box-shadow 0.2s ease;
 }
-.recent-word{font-family:var(--font-display);font-weight:600;font-size:15px;flex:0 0 auto;min-width:110px;}
+.recent-row:hover{border-color:var(--ink);box-shadow:var(--shadow);}
+.recent-word{font-family:var(--font-display);font-style:italic;font-weight:700;font-size:18px;flex:0 0 auto;min-width:110px;}
 .recent-tags{display:flex;gap:6px;flex:0 0 auto;}
 .recent-meaning{font-size:13px;color:var(--ink-dim);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .history-cta{margin:18px 0 8px;}
@@ -103,18 +113,19 @@ a{color:inherit;}
 .history-list{display:flex;flex-direction:column;gap:10px;padding-top:8px;}
 .history-row{
   display:flex;align-items:center;gap:14px;background:var(--bg-card);border:1px solid var(--border);
-  border-radius:16px;padding:16px 18px;
+  border-radius:8px;padding:16px 18px;transition:border-color 0.2s ease;
 }
+.history-row:hover{border-color:var(--ink);}
 .history-main{flex:1;min-width:0;}
 .history-word-row{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
-.history-word{font-family:var(--font-display);font-weight:600;font-size:17px;}
+.history-word{font-family:var(--font-display);font-style:italic;font-weight:700;font-size:20px;}
 .history-meaning{font-size:13px;color:var(--ink-dim);line-height:1.5;}
 .practice-btn{
-  flex:0 0 auto;background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line);
-  padding:9px 16px;border-radius:100px;font-weight:600;font-size:13px;white-space:nowrap;
-  transition:background .2s ease;
+  flex:0 0 auto;background:var(--bg-1);color:var(--ink);border:1px solid var(--border);
+  padding:8px 16px;border-radius:6px;font-weight:600;font-size:13px;white-space:nowrap;
+  transition:background .2s ease, border-color .2s ease;
 }
-.practice-btn:hover{background:var(--accent-line);}
+.practice-btn:hover{background:var(--bg-2);border-color:var(--ink);}
 .history-empty{color:var(--ink-faint);font-size:14px;padding:30px 0;text-align:center;}
 .history-toggle-wrap{margin:16px 0 4px;}
 .history-toggle-wrap .btn-ghost{width:100%;justify-content:center;padding:14px;}
@@ -125,15 +136,15 @@ a{color:inherit;}
 @media(max-width:640px){.match-grid{gap:12px;}}
 .match-col{display:flex;flex-direction:column;gap:10px;}
 .match-item{
-  background:var(--bg-card);border:1px solid var(--border);border-radius:14px;
+  background:var(--bg-card);border:1px solid var(--border);border-radius:8px;
   padding:14px 16px;text-align:left;font-size:14px;color:var(--ink);line-height:1.4;
   transition:border-color .2s ease, background .2s ease, transform .15s ease;
 }
-.match-item.word-item{font-family:var(--font-display);font-weight:600;font-size:16px;}
-.match-item:hover{border-color:var(--ink-faint);}
-.match-item.selected{border-color:var(--accent);background:var(--accent-soft);}
-.match-item.matched{border-color:var(--success);background:var(--success-soft);color:var(--ink-dim);cursor:default;}
-.match-item.wrong{animation:shake .4s ease;border-color:var(--error);}
+.match-item.word-item{font-family:var(--font-display);font-style:italic;font-weight:700;font-size:17px;}
+.match-item:hover{border-color:var(--ink);}
+.match-item.selected{border-color:var(--ink);background:var(--bg-1);font-weight:600;}
+.match-item.matched{border-color:var(--success);background:var(--success-soft);color:var(--success);cursor:default;}
+.match-item.wrong{animation:shake .4s ease;border-color:var(--error);background:var(--error-soft);}
 .match-complete{text-align:center;padding:40px 0;}
 
 /* ---------- reminder banner ---------- */
@@ -144,27 +155,27 @@ a{color:inherit;}
 .reminder{
   pointer-events:auto;
   max-width:560px;width:calc(100% - 32px);
-  background:linear-gradient(180deg, var(--bg-2), var(--bg-1));
-  border:1px solid var(--accent-line);
-  box-shadow:var(--shadow), 0 0 0 1px rgba(242,184,75,.06);
-  border-radius:16px;
-  padding:14px 18px;
-  display:flex;align-items:flex-start;gap:12px;
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  box-shadow:var(--shadow);
+  border-radius:8px;
+  padding:16px 20px;
+  display:flex;align-items:flex-start;gap:14px;
   transform:translateY(-140%);
   opacity:0;
   transition:transform .5s cubic-bezier(.22,1,.36,1), opacity .5s ease;
 }
 .reminder.show{transform:translateY(0);opacity:1;}
 .reminder-icon{
-  flex:0 0 auto;width:32px;height:32px;border-radius:10px;
-  background:var(--accent-soft);display:flex;align-items:center;justify-content:center;
-  color:var(--accent);
+  flex:0 0 auto;width:32px;height:32px;border-radius:6px;
+  background:var(--bg-1);display:flex;align-items:center;justify-content:center;
+  color:var(--ink);border:1px solid var(--border);
 }
 .reminder-body{flex:1;min-width:0;}
 .reminder-label{font-family:var(--font-mono);font-size:10px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px;}
-.reminder-word{font-family:var(--font-display);font-size:18px;font-weight:600;color:var(--ink);}
-.reminder-word .pos{font-family:var(--font-mono);font-size:11px;color:var(--accent);margin-left:8px;font-weight:400;}
-.reminder-meaning{font-size:13px;color:var(--ink-dim);margin-top:2px;line-height:1.4;}
+.reminder-word{font-family:var(--font-display);font-style:italic;font-size:20px;font-weight:700;color:var(--ink);}
+.reminder-word .pos{font-family:var(--font-mono);font-size:11px;color:var(--ink-faint);margin-left:8px;font-weight:400;font-style:normal;}
+.reminder-meaning{font-size:13px;color:var(--ink-dim);margin-top:4px;line-height:1.4;}
 
 /* ---------- views ---------- */
 .view{display:none;}
@@ -173,27 +184,27 @@ a{color:inherit;}
 
 /* ---------- home hero ---------- */
 .hero{
-  padding:36px 0 8px;
-  display:grid;grid-template-columns:1.3fr 1fr;gap:28px;align-items:center;
+  padding:24px 0 16px;
+  display:grid;grid-template-columns:1.3fr 1fr;gap:36px;align-items:center;
 }
-@media(max-width:720px){.hero{grid-template-columns:1fr;}}
+@media(max-width:720px){.hero{grid-template-columns:1fr;gap:24px;}}
 .hero-title{
-  font-family:var(--font-display);font-weight:600;
-  font-size:clamp(30px,5vw,44px);line-height:1.08;letter-spacing:-.01em;
+  font-family:var(--font-display);font-weight:700;
+  font-size:clamp(32px,5vw,46px);line-height:1.1;letter-spacing:-.02em;
 }
-.hero-title .accent{color:var(--accent);font-style:italic;}
-.hero-sub{color:var(--ink-dim);font-size:15px;line-height:1.6;margin-top:12px;max-width:46ch;}
+.hero-title .accent{color:var(--ink);font-style:italic;}
+.hero-sub{color:var(--ink-dim);font-size:15px;line-height:1.6;margin-top:14px;max-width:46ch;}
 
 .ring-card{
-  background:var(--bg-card);border:1px solid var(--border);border-radius:20px;
-  padding:22px;display:flex;align-items:center;gap:18px;
-  box-shadow:var(--shadow);
+  background:var(--bg-card);border:1px solid var(--border);border-radius:8px;
+  padding:24px;display:flex;align-items:center;gap:20px;
+  box-shadow:none;
 }
 .ring-svg{flex:0 0 auto;transform:rotate(-90deg);}
-.ring-track{fill:none;stroke:var(--border);stroke-width:8;}
-.ring-fill{fill:none;stroke:var(--accent);stroke-width:8;stroke-linecap:round;
+.ring-track{fill:none;stroke:var(--bg-1);stroke-width:8;}
+.ring-fill{fill:none;stroke:var(--accent);stroke-width:8;stroke-linecap:square;
   transition:stroke-dashoffset .8s cubic-bezier(.22,1,.36,1);}
-.ring-stats-num{font-family:var(--font-display);font-size:26px;font-weight:600;}
+.ring-stats-num{font-family:var(--font-display);font-size:28px;font-weight:700;}
 .ring-stats-label{font-family:var(--font-mono);font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.08em;margin-top:2px;}
 .ring-stats-row{display:flex;gap:22px;margin-top:10px;}
 .ring-stat-mini b{display:block;font-family:var(--font-mono);font-size:15px;color:var(--ink);}
@@ -204,73 +215,74 @@ a{color:inherit;}
   font-family:var(--font-mono);font-size:11px;color:var(--ink-faint);
   text-transform:uppercase;letter-spacing:.12em;margin:36px 0 14px;
 }
-.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
 @media(max-width:780px){.cards{grid-template-columns:1fr;}}
 .card{
   position:relative;background:var(--bg-card);border:1px solid var(--border);
-  border-radius:18px;padding:22px;overflow:hidden;
-  transition:transform .35s cubic-bezier(.22,1,.36,1), border-color .35s ease, box-shadow .35s ease;
+  border-radius:8px;padding:24px;overflow:hidden;
+  transition:transform .3s cubic-bezier(.22,1,.36,1), border-color .3s ease, box-shadow .3s ease;
 }
 .card.active-card{cursor:pointer;}
-.card.active-card:hover{transform:translateY(-4px);border-color:var(--accent-line);box-shadow:var(--shadow);}
+.card.active-card:hover{transform:translateY(-2px);border-color:var(--ink);box-shadow:var(--shadow);}
 .card.locked{opacity:.5;}
 .card-index{font-family:var(--font-mono);font-size:11px;color:var(--ink-faint);}
-.card-title{font-family:var(--font-display);font-size:20px;font-weight:600;margin:10px 0 6px;}
-.card-desc{font-size:13px;color:var(--ink-dim);line-height:1.5;min-height:38px;}
+.card-title{font-family:var(--font-display);font-size:22px;font-weight:700;margin:10px 0 6px;}
+.card-desc{font-size:13.5px;color:var(--ink-dim);line-height:1.6;min-height:38px;}
 .card-foot{display:flex;align-items:center;justify-content:space-between;margin-top:16px;}
-.card-progress-bar{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-right:12px;}
-.card-progress-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .6s ease;}
+.card-progress-bar{flex:1;height:4px;background:var(--bg-1);border-radius:0;overflow:hidden;margin-right:12px;}
+.card-progress-fill{height:100%;background:var(--accent);border-radius:0;transition:width .6s ease;}
 .card-arrow{color:var(--accent);flex:0 0 auto;}
 .card-badge{
-  font-family:var(--font-mono);font-size:10px;color:var(--ink-faint);
-  background:rgba(255,255,255,.05);padding:4px 8px;border-radius:100px;
+  font-family:var(--font-mono);font-size:10px;color:var(--ink-dim);
+  background:var(--bg-1);padding:4px 10px;border-radius:4px;border:1px solid var(--border);
 }
 
 /* ---------- study view ---------- */
 .study-top{display:flex;align-items:center;justify-content:space-between;padding-top:26px;}
 .btn-ghost{
   background:transparent;border:1px solid var(--border);color:var(--ink-dim);
-  padding:8px 14px;border-radius:100px;font-size:13px;display:flex;align-items:center;gap:6px;
+  padding:8px 16px;border-radius:6px;font-size:13px;display:flex;align-items:center;gap:6px;
+  font-family:var(--font-body);text-transform:uppercase;letter-spacing:0.05em;font-weight:600;
   transition:border-color .2s ease,color .2s ease;
 }
-.btn-ghost:hover{border-color:var(--ink-faint);color:var(--ink);}
+.btn-ghost:hover{border-color:var(--ink);color:var(--ink);}
 .session-meta{display:flex;gap:16px;font-family:var(--font-mono);font-size:12px;color:var(--ink-dim);}
 .session-meta b{color:var(--accent);}
 
-.progress-track{height:4px;background:var(--border);border-radius:3px;margin:18px 0 30px;overflow:hidden;}
-.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--success));border-radius:3px;transition:width .5s ease;}
+.progress-track{height:3px;background:var(--bg-1);border-radius:0;margin:18px 0 30px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--accent);border-radius:0;transition:width .5s ease;}
 
 .stage{
-  background:var(--bg-card);border:1px solid var(--border);border-radius:22px;
-  padding:44px 40px;text-align:center;min-height:380px;
+  background:var(--bg-card);border:1px solid var(--border);border-radius:8px;
+  padding:48px 40px;text-align:center;min-height:420px;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   position:relative;box-shadow:var(--shadow);
 }
 @media(max-width:640px){.stage{padding:30px 20px;}}
 
 .tags-row{display:flex;gap:8px;margin-bottom:18px;}
-.tag{font-family:var(--font-mono);font-size:11px;padding:5px 11px;border-radius:100px;letter-spacing:.03em;}
-.tag-pos{background:rgba(255,255,255,.06);color:var(--ink-dim);}
-.tag-level{background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line);}
-.tag-review{background:var(--success-soft);color:var(--success);border:1px solid rgba(94,234,212,.35);}
+.tag{font-family:var(--font-mono);font-size:11px;padding:5px 12px;border-radius:4px;letter-spacing:.03em;text-transform:uppercase;}
+.tag-pos{background:var(--bg-1);color:var(--ink-dim);border:1px solid var(--border);}
+.tag-level{background:var(--bg-2);color:var(--ink);border:1px solid var(--border);}
+.tag-review{background:var(--success-soft);color:var(--success);border:1px solid rgba(46,125,50,0.25);}
 
 .word-display{
-  font-family:var(--font-display);font-weight:600;font-size:clamp(38px,7vw,58px);
-  letter-spacing:-.01em;transition:opacity .45s ease, filter .45s ease, transform .45s ease;
+  font-family:var(--font-display);font-weight:800;font-style:italic;font-size:clamp(44px,8vw,64px);
+  letter-spacing:-.02em;transition:opacity .45s ease, filter .45s ease, transform .45s ease;
 }
 .word-display.vanish{opacity:0;filter:blur(10px);transform:scale(.9);}
 .word-arabic{
   direction:rtl;font-family:'Segoe UI',Tahoma,Arial,sans-serif;
-  font-size:20px;color:var(--accent);margin-top:6px;letter-spacing:0;
+  font-size:22px;color:var(--ink-dim);margin-top:6px;letter-spacing:0;
 }
 
 .action-row{display:flex;align-items:center;gap:12px;margin-top:28px;flex-wrap:wrap;justify-content:center;}
 .skip-btn{
   background:transparent;color:var(--ink-dim);border:1px solid var(--border);
-  padding:12px 22px;border-radius:100px;font-weight:600;font-size:14px;
+  padding:12px 24px;border-radius:6px;font-weight:600;font-size:14px;
   transition:border-color .2s ease, color .2s ease;
 }
-.skip-btn:hover{border-color:var(--ink-faint);color:var(--ink);}
+.skip-btn:hover{border-color:var(--ink);color:var(--ink);}
 
 .sound-ring-wrap{margin:22px 0 20px;position:relative;width:78px;height:78px;display:flex;align-items:center;justify-content:center;}
 .sound-btn{
@@ -282,45 +294,47 @@ a{color:inherit;}
 .sound-btn:hover{transform:scale(1.06);}
 .sound-btn:active{transform:scale(.94);}
 .sound-btn.pulse{animation:pulseSound .5s ease;}
-@keyframes pulseSound{0%{box-shadow:0 0 0 0 rgba(242,184,75,.5);}100%{box-shadow:0 0 0 16px rgba(242,184,75,0);}}
+@keyframes pulseSound{0%{box-shadow:0 0 0 0 rgba(28,28,28,.3);}100%{box-shadow:0 0 0 16px rgba(28,28,28,0);}}
 
 .meaning-block{max-width:52ch;margin-top:6px;}
-.meaning-text{font-size:16px;color:var(--ink);line-height:1.55;}
+.meaning-text{font-size:17px;color:var(--ink);line-height:1.6;font-family:var(--font-body);}
 .meaning-label{font-family:var(--font-mono);font-size:10px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;}
-.example-text{font-size:14px;color:var(--ink-dim);line-height:1.6;margin-top:14px;font-style:italic;}
-.example-text b{color:var(--accent);font-style:normal;font-weight:600;}
+.example-text{font-size:14px;color:var(--ink-dim);line-height:1.65;margin-top:16px;font-style:italic;}
+.example-text b{color:var(--ink);font-style:normal;font-weight:700;text-decoration:underline;text-underline-offset:4px;}
+.synonyms-text{font-size:13px;color:var(--ink);margin-top:12px;font-family:var(--font-mono);background:var(--bg-1);padding:6px 12px;border-radius:4px;display:inline-block;border:1px solid var(--border);}
+.synonyms-label{color:var(--ink-faint);text-transform:uppercase;font-size:9.5px;letter-spacing:0.08em;margin-right:6px;font-weight:600;}
 
 .ready-btn{
-  background:var(--accent);color:var(--accent-ink);border:none;
-  padding:13px 28px;border-radius:100px;font-weight:600;font-size:14px;
-  display:flex;align-items:center;gap:8px;transition:transform .2s ease, box-shadow .2s ease;
+  background:var(--accent);color:var(--accent-ink);border:1px solid var(--accent);
+  padding:13px 32px;border-radius:6px;font-weight:600;font-size:14px;
+  display:flex;align-items:center;gap:8px;transition:transform .2s ease, background-color .2s ease, border-color .2s ease;
 }
-.ready-btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px -8px rgba(242,184,75,.5);}
+.ready-btn:hover{transform:translateY(-1px);background:var(--bg-1);color:var(--ink);border-color:var(--ink);}
 
 .type-hint-label{font-family:var(--font-mono);font-size:10px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px;}
-.cloze-sentence{font-size:17px;color:var(--ink);line-height:1.7;max-width:50ch;margin-bottom:26px;}
+.cloze-sentence{font-size:18px;color:var(--ink);line-height:1.7;max-width:50ch;margin-bottom:26px;}
 .cloze-blank{
   display:inline-block;min-width:70px;border-bottom:2px solid var(--accent);color:var(--accent);
-  font-family:var(--font-mono);text-align:center;
+  font-family:var(--font-mono);text-align:center;font-weight:600;
 }
 .type-form{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;}
 .type-input{
-  width:min(360px,100%);text-align:center;background:var(--bg-1);border:2px solid var(--border);
-  color:var(--ink);border-radius:14px;padding:14px 18px;font-size:19px;font-family:var(--font-display);
+  width:min(360px,100%);text-align:center;background:var(--bg-1);border:1px solid var(--border);
+  color:var(--ink);border-radius:8px;padding:14px 18px;font-size:20px;font-family:var(--font-display);
   outline:none;transition:border-color .25s ease, box-shadow .25s ease;
 }
-.type-input:focus{border-color:var(--accent-line);box-shadow:0 0 0 4px var(--accent-soft);}
-.type-input.wrong{animation:shake .4s ease;border-color:var(--error);}
-.type-input.correct{border-color:var(--success);}
+.type-input:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft);}
+.type-input.wrong{animation:shake .4s ease;border-color:var(--error);background:var(--error-soft);}
+.type-input.correct{border-color:var(--success);background:var(--success-soft);}
 @keyframes shake{
   10%,90%{transform:translateX(-3px);}20%,80%{transform:translateX(5px);}
   30%,50%,70%{transform:translateX(-7px);}40%,60%{transform:translateX(7px);}
 }
 .submit-btn{
-  background:var(--ink);color:var(--bg);border:none;padding:12px 26px;border-radius:100px;
-  font-weight:600;font-size:14px;transition:opacity .2s ease;
+  background:var(--ink);color:var(--bg-card);border:1px solid var(--ink);padding:12px 28px;border-radius:6px;
+  font-weight:600;font-size:14px;letter-spacing:0.05em;text-transform:uppercase;transition:background .2s ease, color .2s ease, transform .2s ease;
 }
-.submit-btn:hover{opacity:.85;}
+.submit-btn:hover{background:var(--bg-1);color:var(--ink);transform:translateY(-1px);}
 .feedback{font-size:13px;margin-top:6px;min-height:18px;font-family:var(--font-mono);}
 .feedback.err{color:var(--error);}
 .feedback.ok{color:var(--success);}
@@ -332,18 +346,19 @@ a{color:inherit;}
 .checkpoint-icon{
   width:64px;height:64px;border-radius:50%;background:var(--success-soft);
   display:flex;align-items:center;justify-content:center;color:var(--success);margin-bottom:18px;
+  border:1px solid rgba(46,125,50,0.2);
 }
-.checkpoint-title{font-family:var(--font-display);font-size:26px;font-weight:600;}
-.checkpoint-sub{color:var(--ink-dim);font-size:14px;margin-top:8px;max-width:40ch;}
-.checkpoint-stats{display:flex;gap:28px;margin:26px 0;}
-.cstat b{display:block;font-family:var(--font-mono);font-size:22px;color:var(--accent);}
+.checkpoint-title{font-family:var(--font-display);font-size:28px;font-weight:700;}
+.checkpoint-sub{color:var(--ink-dim);font-size:14.5px;margin-top:8px;max-width:40ch;line-height:1.6;}
+.checkpoint-stats{display:flex;gap:36px;margin:26px 0;}
+.cstat b{display:block;font-family:var(--font-mono);font-size:24px;color:var(--ink);}
 .cstat span{font-size:10px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em;}
 .checkpoint-actions{display:flex;gap:12px;}
 .btn-solid{
-  background:var(--accent);color:var(--accent-ink);border:none;padding:12px 24px;border-radius:100px;
-  font-weight:600;font-size:14px;transition:transform .2s ease;
+  background:var(--accent);color:var(--accent-ink);border:1px solid var(--accent);padding:12px 26px;border-radius:6px;
+  font-weight:600;font-size:14px;letter-spacing:0.05em;text-transform:uppercase;transition:transform .2s ease, background-color .2s ease, color .2s ease;
 }
-.btn-solid:hover{transform:translateY(-2px);}
+.btn-solid:hover{transform:translateY(-1px);background:var(--bg-1);color:var(--ink);}
 
 .loading-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;}
 .loading-dot{display:inline-flex;gap:6px;}
@@ -353,7 +368,187 @@ a{color:inherit;}
 .loading-label{font-family:var(--font-mono);font-size:12px;color:var(--ink-faint);letter-spacing:.08em;text-transform:uppercase;}
 @keyframes loadingBounce{0%,80%,100%{opacity:.3;transform:translateY(0);}40%{opacity:1;transform:translateY(-4px);}}
 
-.footer-note{text-align:center;color:var(--ink-faint);font-size:12px;margin-top:50px;font-family:var(--font-mono);}
+.footer-note{
+  color:var(--ink-faint);
+  font-size:9px;
+  margin-top:60px;
+  padding-top:24px;
+  border-top:1px solid var(--border);
+  font-family:var(--font-body);
+  text-transform:uppercase;
+  letter-spacing:0.15em;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.footer-note::before{
+  content:"LEXICON ENGLISH STUDY";
+  font-weight:700;
+  opacity:0.6;
+}
+.footer-note::after{
+  content:"PRINT-INSPIRED INTERFACE v1.0";
+  font-weight:700;
+  opacity:0.6;
+}
+@media(max-width:640px){
+  .footer-note {
+    flex-direction:column;
+    gap:8px;
+    text-align:center;
+  }
+}
+body.dark {
+  --bg:#121212;
+  --bg-1:#1A1A1A;
+  --bg-2:#242424;
+  --bg-card:#1A1A1A;
+  --ink:#FAF9F6;
+  --ink-dim:#C9C8C5;
+  --ink-faint:#7F7E7C;
+  --accent:#FAF9F6;
+  --accent-ink:#121212;
+  --accent-soft:rgba(250,249,246,0.08);
+  --accent-line:rgba(250,249,246,0.18);
+  --success:#81C784;
+  --success-soft:rgba(129,199,132,0.1);
+  --error:#E57373;
+  --error-soft:rgba(229,115,115,0.1);
+  --border:rgba(250,249,246,0.18);
+  --border-soft:rgba(250,249,246,0.10);
+  --shadow:0 12px 45px -10px rgba(0,0,0,0.6);
+}
+body {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+.card, .recent-row, .history-row, .stage, .type-input, .level-pill, .topbar {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.3s cubic-bezier(.22,1,.36,1), box-shadow 0.3s ease;
+}
+
+/* Custom media queries for mobile devices */
+@media (max-width: 640px) {
+  .app {
+    padding: 0 16px 60px;
+  }
+  .topbar {
+    padding: 20px 0 16px;
+    margin-bottom: 24px;
+  }
+  .recent-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 14px;
+  }
+  .recent-word {
+    min-width: unset;
+    font-size: 17px;
+  }
+  .recent-meaning {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.4;
+    width: 100%;
+  }
+  .history-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 14px;
+  }
+  .practice-btn {
+    text-align: center;
+    align-self: stretch;
+    width: 100%;
+    padding: 10px;
+  }
+  .stage {
+    padding: 24px 16px;
+    min-height: 360px;
+  }
+  .cloze-sentence {
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+  .type-input {
+    font-size: 18px;
+    padding: 12px 14px;
+  }
+  .word-display {
+    font-size: clamp(34px, 7vw, 48px);
+  }
+  .meaning-text {
+    font-size: 15px;
+  }
+  .example-text {
+    font-size: 13px;
+  }
+  .checkpoint-stats {
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .checkpoint-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+  .checkpoint-actions button, .checkpoint-actions a {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 540px) {
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .topbar-right {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .level-pill {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+  .match-grid {
+    gap: 8px;
+  }
+  .match-item {
+    padding: 10px;
+    font-size: 12px;
+    line-height: 1.3;
+  }
+  .match-item.word-item {
+    font-size: 14px;
+  }
+  .oxford-meter-container {
+    border-left: none !important;
+    padding-left: 0 !important;
+  }
+}
+
+@media (max-width: 440px) {
+  .ring-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 20px 16px;
+    gap: 16px;
+  }
+  .ring-stats-row {
+    justify-content: center;
+  }
+}
 </style>
 </head>
 <body>
@@ -382,6 +577,15 @@ a{color:inherit;}
       <div class="brand-mark">Lex<em>icon</em></div>
     </div>
     <div class="topbar-right">
+      <button class="level-pill" id="themeToggle" style="cursor:pointer; outline: none; border-radius: 6px; padding: 6px 12px;" title="Toggle Dark/Light Mode">
+        <span id="themeIconSun" style="display: flex; align-items: center;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        </span>
+        <span id="themeIconMoon" style="display: none; align-items: center;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        </span>
+        <span id="themeText" style="font-size: 11px; font-weight: 600;">Light</span>
+      </button>
       <div class="level-pill" id="levelPill">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 2 4 6v6c0 5 3.4 8.5 8 10 4.6-1.5 8-5 8-10V6l-8-4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
         <span id="levelText">Level 1</span>
@@ -398,22 +602,62 @@ a{color:inherit;}
     <div class="hero">
       <div>
         <div class="hero-title">Build your <span class="accent">vocabulary</span>,<br>one word at a time.</div>
-        <p class="hero-sub">Listen to real British pronunciation, see each word used in a sentence, then prove you've got it by typing it from memory.</p>
+        <p class="hero-sub">Listen to clear pronunciation, see each word used in a simple sentence, then prove you've got it by typing it from memory.</p>
       </div>
-      <div class="ring-card">
-        <svg class="ring-svg" width="96" height="96" viewBox="0 0 96 96">
-          <circle class="ring-track" cx="48" cy="48" r="42"></circle>
-          <circle class="ring-fill" id="homeRingFill" cx="48" cy="48" r="42" stroke-dasharray="264" stroke-dashoffset="264"></circle>
-        </svg>
-        <div>
-          <div class="ring-stats-num" id="homeRingNum">0%</div>
-          <div class="ring-stats-label">of Oxford 5000</div>
-          <div class="ring-stats-row">
-            <div class="ring-stat-mini"><b id="statLearned">0</b><span>Learned</span></div>
+      <div class="ring-card" style="display: flex; flex-direction: column; gap: 20px; align-items: stretch; width: 100%;">
+        <!-- Dual Percentage Meters -->
+        <div class="dual-meters" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; border-bottom: 1px dashed var(--border); padding-bottom: 16px;">
+          <!-- Meter 1: Daily Goal -->
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="position: relative; width: 68px; height: 68px; display: flex; align-items: center; justify-content: center;">
+              <svg class="ring-svg" width="68" height="68" viewBox="0 0 68 68" style="transform: rotate(-90deg); overflow: visible;">
+                <circle class="ring-track" cx="34" cy="34" r="30" style="stroke: var(--bg-1); fill: none; stroke-width: 5;"></circle>
+                <circle class="ring-fill" id="dailyRingFill" cx="34" cy="34" r="30" stroke-dasharray="188.5" stroke-dashoffset="188.5" style="stroke: var(--success); fill: none; stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset .8s cubic-bezier(.22,1,.36,1);"></circle>
+              </svg>
+              <!-- Small inner percentage text -->
+              <div id="dailyGoalPct" style="position: absolute; font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--ink);">0%</div>
+            </div>
+            <div>
+              <div style="font-family: var(--font-mono); font-size: 9px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .08em; font-weight: 600;">Daily Goal Progress</div>
+              <div id="dailyGoalProgressText" style="font-family: var(--font-display); font-size: 17px; font-weight: 700; color: var(--ink); margin-top: 1px;">0% Completed</div>
+              <div id="dailyGoalWordsCount" style="font-size: 11px; color: var(--ink-dim); margin-top: 2px; font-family: var(--font-mono);">0 of 10 words today</div>
+            </div>
+          </div>
+          
+          <!-- Meter 2: Entire 5000 Words -->
+          <div style="display: flex; align-items: center; gap: 14px; border-left: 1px solid var(--border); padding-left: 16px;" class="oxford-meter-container">
+            <div style="position: relative; width: 68px; height: 68px; display: flex; align-items: center; justify-content: center;">
+              <svg class="ring-svg" width="68" height="68" viewBox="0 0 68 68" style="transform: rotate(-90deg); overflow: visible;">
+                <circle class="ring-track" cx="34" cy="34" r="30" style="stroke: var(--bg-1); fill: none; stroke-width: 5;"></circle>
+                <circle class="ring-fill" id="oxfordRingFill" cx="34" cy="34" r="30" stroke-dasharray="188.5" stroke-dashoffset="188.5" style="stroke: var(--accent); fill: none; stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset .8s cubic-bezier(.22,1,.36,1);"></circle>
+              </svg>
+              <!-- Small inner percentage text -->
+              <div id="oxfordPctTextInner" style="position: absolute; font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--ink);">0.0%</div>
+            </div>
+            <div>
+              <div style="font-family: var(--font-mono); font-size: 9px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .08em; font-weight: 600;">Entire 5000 Words</div>
+              <div id="oxfordProgressText" style="font-family: var(--font-display); font-size: 17px; font-weight: 700; color: var(--ink); margin-top: 1px;">0.00% Learned</div>
+              <div id="oxfordWordsCount" style="font-size: 11px; color: var(--ink-dim); margin-top: 2px; font-family: var(--font-mono);">0 of 5000 words</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Secondary metrics & Curated Pack reference (keeps old elements for backward-compatibility) -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+          <div style="display: flex; gap: 20px;">
+            <div class="ring-stat-mini"><b id="statLearned">0</b><span>Total Learned</span></div>
             <div class="ring-stat-mini"><b id="statStreak">0</b><span>Streak</span></div>
             <div class="ring-stat-mini"><b id="statScore">0</b><span>Score</span></div>
           </div>
+          <div style="font-family: var(--font-mono); font-size: 10px; color: var(--ink-dim); background: var(--bg-1); padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border);">
+            Curated Pack: <span id="homeRingNum" style="font-weight: 700; color: var(--ink);">0%</span> <span id="homeRingLabel" style="display:none;"></span>
+          </div>
         </div>
+
+        <!-- Hidden backward-compatibility nodes to prevent script crashes if any are referenced elsewhere -->
+        <div id="homeRingSub" style="display:none !important;"></div>
+        <div id="dailyGoalBlock" style="display:none !important;"><span id="dailyGoalProgress"></span></div>
+        <svg style="display:none !important;"><circle id="homeRingFill"></circle></svg>
       </div>
     </div>
 
@@ -421,8 +665,8 @@ a{color:inherit;}
     <div class="cards">
       <div class="card active-card" id="cardOxford">
         <div class="card-index">01 · Vocabulary</div>
-        <div class="card-title">The Oxford 5000™</div>
-        <div class="card-desc">American English core words for B2–C1 learners, with meanings, example sentences and native audio.</div>
+        <div class="card-title">Advanced Core Words</div>
+        <div class="card-desc">High-level American Oxford 5000 words explained with simple meanings, synonyms, and helpful examples.</div>
         <div class="card-foot">
           <div class="card-progress-bar"><div class="card-progress-fill" id="cardProgressFill" style="width:0%"></div></div>
           <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -442,8 +686,10 @@ a{color:inherit;}
       </div>
     </div>
 
-    <div class="section-label" id="recentLabel" style="display:none;">Recently learned</div>
-    <div class="recent-list" id="recentList"></div>
+    <!-- Hidden elements for backward compatibility/JS safety -->
+    <div id="recentLabel" style="display:none !important;"></div>
+    <div id="recentList" style="display:none !important;"></div>
+
     <div class="history-cta" id="historyCta" style="display:none;">
       <button class="btn-ghost" id="btnOpenHistory">
         View your word history &amp; practice again
@@ -451,7 +697,15 @@ a{color:inherit;}
       </button>
     </div>
 
-    <div class="footer-note">2,000 words · B2–C1 · © Oxford University Press word list</div>
+    <div class="developer-contact" style="margin-top: 40px; text-align: center;">
+      <div style="font-size: 11px; color: var(--ink-faint); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 12px; font-weight: 500;">App Developer</div>
+      <a href="https://www.instagram.com/abdellah.7a?igsh=MXdmZDZxamR1dW5vNw%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" class="btn-ghost" style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; text-decoration: none; padding: 10px 20px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-1); color: var(--ink); cursor: pointer; transition: all 0.2s ease;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+        <span>Contact on Instagram</span>
+      </a>
+    </div>
+
+    <div class="footer-note">50 words · B2–C1 · American Oxford 5000 wordlist with simplified definitions &amp; synonyms</div>
   </div>
 
   <!-- STUDY VIEW -->
@@ -464,7 +718,7 @@ a{color:inherit;}
       <div class="session-meta">
         <span>Score <b id="studyScore">0</b></span>
         <span>Streak <b id="studyStreak">0</b></span>
-        <span><b id="studyCount">0</b>/2000</span>
+        <span><b id="studyCount">0</b>/50</span>
       </div>
     </div>
     <div class="progress-track"><div class="progress-fill" id="studyProgressFill" style="width:0%"></div></div>
@@ -506,7 +760,58 @@ a{color:inherit;}
 
 </div>
 
-<script id="word-data" type="application/json">[{"word": "abolish", "pos": "v", "level": "C1"}, {"word": "abortion", "pos": "n", "level": "C1"}, {"word": "absence", "pos": "n", "level": "C1"}, {"word": "absent", "pos": "adj", "level": "C1"}, {"word": "absorb", "pos": "v", "level": "B2"}, {"word": "abstract", "pos": "adj", "level": "B2"}, {"word": "absurd", "pos": "adj", "level": "C1"}, {"word": "abuse", "pos": "n", "level": "C1"}, {"word": "academy", "pos": "n", "level": "C1"}, {"word": "accelerate", "pos": "v", "level": "C1"}, {"word": "accent", "pos": "n", "level": "B2"}, {"word": "acceptance", "pos": "n", "level": "C1"}, {"word": "accessible", "pos": "adj", "level": "C1"}, {"word": "accidentally", "pos": "adv", "level": "B2"}, {"word": "accommodate", "pos": "v", "level": "B2"}, {"word": "accommodation", "pos": "n", "level": "B2"}, {"word": "accomplish", "pos": "v", "level": "B2"}, {"word": "accomplishment", "pos": "n", "level": "C1"}, {"word": "accordingly", "pos": "adv", "level": "C1"}, {"word": "accountability", "pos": "n", "level": "C1"}, {"word": "accountable", "pos": "adj", "level": "C1"}, {"word": "accountant", "pos": "n", "level": "B2"}, {"word": "accumulate", "pos": "v", "level": "C1"}, {"word": "accumulation", "pos": "n", "level": "C1"}, {"word": "accuracy", "pos": "n", "level": "B2"}, {"word": "accurately", "pos": "adv", "level": "B2"}, {"word": "accusation", "pos": "n", "level": "C1"}, {"word": "accused", "pos": "n", "level": "C1"}, {"word": "acid", "pos": "n", "level": "C1"}, {"word": "acquisition", "pos": "n", "level": "C1"}, {"word": "acre", "pos": "n", "level": "B2"}, {"word": "activate", "pos": "v", "level": "B2"}, {"word": "activation", "pos": "n", "level": "C1"}, {"word": "activist", "pos": "n", "level": "C1"}, {"word": "acute", "pos": "adj", "level": "C1"}, {"word": "adaptation", "pos": "n", "level": "C1"}, {"word": "addiction", "pos": "n", "level": "B2"}, {"word": "additionally", "pos": "adv", "level": "B2"}, {"word": "adequate", "pos": "adj", "level": "B2"}, {"word": "adequately", "pos": "adv", "level": "B2"}, {"word": "adhere", "pos": "v", "level": "C1"}, {"word": "adjacent", "pos": "adj", "level": "C1"}, {"word": "adjust", "pos": "v", "level": "B2"}, {"word": "adjustment", "pos": "n", "level": "C1"}, {"word": "administer", "pos": "v", "level": "C1"}, {"word": "administrative", "pos": "adj", "level": "C1"}, {"word": "administrator", "pos": "n", "level": "C1"}, {"word": "admission", "pos": "n", "level": "C1"}, {"word": "adolescent", "pos": "n", "level": "C1"}, {"word": "adoption", "pos": "n", "level": "C1"}, {"word": "adverse", "pos": "adj", "level": "C1"}, {"word": "advocate", "pos": "n", "level": "C1"}, {"word": "aesthetic", "pos": "adj", "level": "C1"}, {"word": "affection", "pos": "n", "level": "C1"}, {"word": "affordable", "pos": "adj", "level": "B2"}, {"word": "aftermath", "pos": "n", "level": "C1"}, {"word": "aged", "pos": "adj", "level": "B2"}, {"word": "aggression", "pos": "n", "level": "C1"}, {"word": "agricultural", "pos": "adj", "level": "C1"}, {"word": "agriculture", "pos": "n", "level": "B2"}, {"word": "aide", "pos": "n", "level": "C1"}, {"word": "AIDS", "pos": "n", "level": "B2"}, {"word": "alert", "pos": "v", "level": "C1"}, {"word": "alien", "pos": "n", "level": "C1"}, {"word": "align", "pos": "v", "level": "C1"}, {"word": "alignment", "pos": "n", "level": "C1"}, {"word": "alike", "pos": "adv", "level": "C1"}, {"word": "allegation", "pos": "n", "level": "C1"}, {"word": "allege", "pos": "v", "level": "C1"}, {"word": "allegedly", "pos": "adv", "level": "C1"}, {"word": "alliance", "pos": "n", "level": "C1"}, {"word": "allocate", "pos": "v", "level": "C1"}, {"word": "allocation", "pos": "n", "level": "C1"}, {"word": "allowance", "pos": "n", "level": "C1"}, {"word": "ally", "pos": "n", "level": "C1"}, {"word": "alongside", "pos": "prep", "level": "B2"}, {"word": "altogether", "pos": "adv", "level": "B2"}, {"word": "aluminum", "pos": "n", "level": "C1"}, {"word": "amateur", "pos": "adj", "level": "C1"}, {"word": "ambassador", "pos": "n", "level": "C1"}, {"word": "ambitious", "pos": "adj", "level": "B2"}, {"word": "ambulance", "pos": "n", "level": "B2"}, {"word": "amend", "pos": "v", "level": "C1"}, {"word": "amendment", "pos": "n", "level": "C1"}, {"word": "amid", "pos": "prep", "level": "C1"}, {"word": "amusing", "pos": "adj", "level": "B2"}, {"word": "analogy", "pos": "n", "level": "C1"}, {"word": "analyst", "pos": "n", "level": "B2"}, {"word": "ancestor", "pos": "n", "level": "B2"}, {"word": "anchor", "pos": "n", "level": "C1"}, {"word": "angel", "pos": "n", "level": "C1"}, {"word": "animation", "pos": "n", "level": "B2"}, {"word": "annually", "pos": "adv", "level": "B2"}, {"word": "anonymous", "pos": "adj", "level": "C1"}, {"word": "anticipate", "pos": "v", "level": "B2"}, {"word": "anxiety", "pos": "n", "level": "B2"}, {"word": "apology", "pos": "n", "level": "B2"}, {"word": "apparatus", "pos": "n", "level": "C1"}, {"word": "apparel", "pos": "n", "level": "C1"}, {"word": "appealing", "pos": "adj", "level": "C1"}, {"word": "appetite", "pos": "n", "level": "C1"}, {"word": "applaud", "pos": "v", "level": "C1"}, {"word": "applicable", "pos": "adj", "level": "C1"}, {"word": "applicant", "pos": "n", "level": "B2"}, {"word": "appoint", "pos": "v", "level": "C1"}, {"word": "appreciation", "pos": "n", "level": "C1"}, {"word": "appropriately", "pos": "adv", "level": "B2"}, {"word": "arbitrary", "pos": "adj", "level": "C1"}, {"word": "architectural", "pos": "adj", "level": "C1"}, {"word": "archive", "pos": "n", "level": "C1"}, {"word": "arena", "pos": "n", "level": "C1"}, {"word": "arm", "pos": "v", "level": "C1"}, {"word": "array", "pos": "n", "level": "C1"}, {"word": "arrow", "pos": "n", "level": "B2"}, {"word": "articulate", "pos": "v", "level": "C1"}, {"word": "artwork", "pos": "n", "level": "B2"}, {"word": "ash", "pos": "n", "level": "C1"}, {"word": "aspiration", "pos": "n", "level": "C1"}, {"word": "aspire", "pos": "v", "level": "C1"}, {"word": "assassination", "pos": "n", "level": "C1"}, {"word": "assault", "pos": "n", "level": "C1"}, {"word": "assemble", "pos": "v", "level": "C1"}, {"word": "assembly", "pos": "n", "level": "C1"}, {"word": "assert", "pos": "v", "level": "C1"}, {"word": "assertion", "pos": "n", "level": "C1"}, {"word": "asset", "pos": "n", "level": "B2"}, {"word": "assign", "pos": "v", "level": "B2"}, {"word": "assistance", "pos": "n", "level": "B2"}, {"word": "assumption", "pos": "n", "level": "B2"}, {"word": "assurance", "pos": "n", "level": "C1"}, {"word": "assure", "pos": "v", "level": "B2"}, {"word": "astonishing", "pos": "adj", "level": "B2"}, {"word": "asylum", "pos": "n", "level": "C1"}, {"word": "athletic", "pos": "adj", "level": "B2"}, {"word": "atrocity", "pos": "n", "level": "C1"}, {"word": "attachment", "pos": "n", "level": "B2"}, {"word": "attain", "pos": "v", "level": "C1"}, {"word": "attendance", "pos": "n", "level": "C1"}, {"word": "attribute", "pos": "v", "level": "C1"}, {"word": "auction", "pos": "n", "level": "C1"}, {"word": "audio", "pos": "adj", "level": "B2"}, {"word": "audit", "pos": "n", "level": "C1"}, {"word": "authentic", "pos": "adj", "level": "C1"}, {"word": "authorize", "pos": "v", "level": "C1"}, {"word": "auto", "pos": "n", "level": "C1"}, {"word": "autonomy", "pos": "n", "level": "C1"}, {"word": "autumn", "pos": "n", "level": "C1"}, {"word": "availability", "pos": "n", "level": "C1"}, {"word": "await", "pos": "v", "level": "C1"}, {"word": "awareness", "pos": "n", "level": "B2"}, {"word": "awkward", "pos": "adj", "level": "B2"}, {"word": "backdrop", "pos": "n", "level": "C1"}, {"word": "backing", "pos": "n", "level": "C1"}, {"word": "backup", "pos": "n", "level": "C1"}, {"word": "badge", "pos": "n", "level": "B2"}, {"word": "bail", "pos": "n", "level": "C1"}, {"word": "balanced", "pos": "adj", "level": "B2"}, {"word": "ballet", "pos": "n", "level": "B2"}, {"word": "balloon", "pos": "n", "level": "B2"}, {"word": "ballot", "pos": "n", "level": "C1"}, {"word": "bankruptcy", "pos": "n", "level": "C1"}, {"word": "banner", "pos": "n", "level": "C1"}, {"word": "bare", "pos": "adj", "level": "C1"}, {"word": "barely", "pos": "adv", "level": "B2"}, {"word": "bargain", "pos": "n", "level": "B2"}, {"word": "barrel", "pos": "n", "level": "C1"}, {"word": "basement", "pos": "n", "level": "B2"}, {"word": "basket", "pos": "n", "level": "B2"}, {"word": "bass", "pos": "n", "level": "C1"}, {"word": "bat", "pos": "n", "level": "C1"}, {"word": "battlefield", "pos": "n", "level": "C1"}, {"word": "bay", "pos": "n", "level": "C1"}, {"word": "beam", "pos": "n", "level": "C1"}, {"word": "beast", "pos": "n", "level": "C1"}, {"word": "behalf", "pos": "n", "level": "C1"}, {"word": "behavioral", "pos": "adj", "level": "C1"}, {"word": "beloved", "pos": "adj", "level": "C1"}, {"word": "bench", "pos": "n", "level": "C1"}, {"word": "benchmark", "pos": "n", "level": "C1"}, {"word": "beneath", "pos": "prep", "level": "C1"}, {"word": "beneficial", "pos": "adj", "level": "B2"}, {"word": "beneficiary", "pos": "n", "level": "C1"}, {"word": "beside", "pos": "prep", "level": "B2"}, {"word": "besides", "pos": "prep", "level": "B2"}, {"word": "betray", "pos": "v", "level": "C1"}, {"word": "beverage", "pos": "n", "level": "C1"}, {"word": "bias", "pos": "n", "level": "B2"}, {"word": "bid", "pos": "n", "level": "B2"}, {"word": "bind", "pos": "v", "level": "C1"}, {"word": "biography", "pos": "n", "level": "C1"}, {"word": "biological", "pos": "adj", "level": "B2"}, {"word": "bishop", "pos": "n", "level": "C1"}, {"word": "bizarre", "pos": "adj", "level": "C1"}, {"word": "blade", "pos": "n", "level": "C1"}, {"word": "blanket", "pos": "n", "level": "B2"}, {"word": "blast", "pos": "n", "level": "C1"}, {"word": "bleed", "pos": "v", "level": "C1"}, {"word": "blend", "pos": "v", "level": "C1"}, {"word": "bless", "pos": "v", "level": "C1"}, {"word": "blessing", "pos": "n", "level": "C1"}, {"word": "blow", "pos": "n", "level": "B2"}, {"word": "boast", "pos": "v", "level": "C1"}, {"word": "bold", "pos": "adj", "level": "B2"}, {"word": "bombing", "pos": "n", "level": "B2"}, {"word": "bonus", "pos": "n", "level": "C1"}, {"word": "booking", "pos": "n", "level": "C1"}, {"word": "boom", "pos": "n", "level": "C1"}, {"word": "boost", "pos": "v", "level": "B2"}, {"word": "bounce", "pos": "v", "level": "C1"}, {"word": "bound", "pos": "adj", "level": "B2"}, {"word": "boundary", "pos": "n", "level": "C1"}, {"word": "bow", "pos": "v", "level": "C1"}, {"word": "breach", "pos": "n", "level": "C1"}, {"word": "breakdown", "pos": "n", "level": "C1"}, {"word": "breakthrough", "pos": "n", "level": "C1"}, {"word": "breed", "pos": "v", "level": "C1"}, {"word": "brick", "pos": "n", "level": "B2"}, {"word": "briefly", "pos": "adv", "level": "B2"}, {"word": "broadband", "pos": "n", "level": "C1"}, {"word": "broadcaster", "pos": "n", "level": "B2"}, {"word": "broadly", "pos": "adv", "level": "B2"}, {"word": "browser", "pos": "n", "level": "C1"}, {"word": "brutal", "pos": "adj", "level": "C1"}, {"word": "buck", "pos": "n", "level": "B2"}, {"word": "buddy", "pos": "n", "level": "C1"}, {"word": "buffer", "pos": "n", "level": "C1"}, {"word": "bug", "pos": "n", "level": "B2"}, {"word": "bulk", "pos": "n", "level": "C1"}, {"word": "burden", "pos": "n", "level": "C1"}, {"word": "bureaucracy", "pos": "n", "level": "C1"}, {"word": "burial", "pos": "n", "level": "C1"}, {"word": "burst", "pos": "v", "level": "C1"}, {"word": "cabin", "pos": "n", "level": "B2"}, {"word": "cabinet", "pos": "n", "level": "C1"}, {"word": "calculation", "pos": "n", "level": "C1"}, {"word": "canal", "pos": "n", "level": "B2"}, {"word": "candle", "pos": "n", "level": "B2"}, {"word": "canvas", "pos": "n", "level": "C1"}, {"word": "capability", "pos": "n", "level": "C1"}, {"word": "capitalism", "pos": "n", "level": "C1"}, {"word": "capitalist", "pos": "adj", "level": "C1"}, {"word": "carbon", "pos": "n", "level": "B2"}, {"word": "cargo", "pos": "n", "level": "C1"}, {"word": "carriage", "pos": "n", "level": "C1"}, {"word": "carve", "pos": "v", "level": "C1"}, {"word": "casino", "pos": "n", "level": "C1"}, {"word": "castle", "pos": "n", "level": "B2"}, {"word": "casual", "pos": "adj", "level": "B2"}, {"word": "casualty", "pos": "n", "level": "C1"}, {"word": "catalog", "pos": "n", "level": "C1"}, {"word": "cater", "pos": "v", "level": "C1"}, {"word": "cattle", "pos": "n", "level": "C1"}, {"word": "caution", "pos": "n", "level": "C1"}, {"word": "cautious", "pos": "adj", "level": "C1"}, {"word": "cave", "pos": "n", "level": "B2"}, {"word": "cease", "pos": "v", "level": "C1"}, {"word": "cemetery", "pos": "n", "level": "C1"}, {"word": "certainty", "pos": "n", "level": "B2"}, {"word": "certificate", "pos": "n", "level": "B2"}, {"word": "challenging", "pos": "adj", "level": "B2"}, {"word": "chamber", "pos": "n", "level": "C1"}, {"word": "championship", "pos": "n", "level": "B2"}, {"word": "chaos", "pos": "n", "level": "C1"}, {"word": "characterize", "pos": "v", "level": "C1"}, {"word": "charm", "pos": "n", "level": "C1"}, {"word": "charming", "pos": "adj", "level": "B2"}, {"word": "charter", "pos": "n", "level": "C1"}, {"word": "chase", "pos": "v", "level": "B2"}, {"word": "cheek", "pos": "n", "level": "B2"}, {"word": "cheer", "pos": "v", "level": "B2"}, {"word": "choir", "pos": "n", "level": "C1"}, {"word": "chop", "pos": "v", "level": "B2"}, {"word": "chronic", "pos": "adj", "level": "C1"}, {"word": "chunk", "pos": "n", "level": "C1"}, {"word": "circuit", "pos": "n", "level": "B2"}, {"word": "circulate", "pos": "v", "level": "C1"}, {"word": "circulation", "pos": "n", "level": "C1"}, {"word": "citizenship", "pos": "n", "level": "C1"}, {"word": "civic", "pos": "adj", "level": "C1"}, {"word": "civilian", "pos": "n", "level": "C1"}, {"word": "civilization", "pos": "n", "level": "B2"}, {"word": "clarify", "pos": "v", "level": "B2"}, {"word": "clarity", "pos": "n", "level": "C1"}, {"word": "clash", "pos": "n", "level": "C1"}, {"word": "classification", "pos": "n", "level": "C1"}, {"word": "classify", "pos": "v", "level": "B2"}, {"word": "cliff", "pos": "n", "level": "B2"}, {"word": "cling", "pos": "v", "level": "C1"}, {"word": "clinic", "pos": "n", "level": "B2"}, {"word": "clinical", "pos": "adj", "level": "C1"}, {"word": "clip", "pos": "n", "level": "B2"}, {"word": "closure", "pos": "n", "level": "C1"}, {"word": "cluster", "pos": "n", "level": "C1"}, {"word": "coalition", "pos": "n", "level": "C1"}, {"word": "coastal", "pos": "adj", "level": "C1"}, {"word": "cocktail", "pos": "n", "level": "C1"}, {"word": "cognitive", "pos": "adj", "level": "C1"}, {"word": "coincide", "pos": "v", "level": "C1"}, {"word": "coincidence", "pos": "n", "level": "B2"}, {"word": "collaborate", "pos": "v", "level": "C1"}, {"word": "collaboration", "pos": "n", "level": "C1"}, {"word": "collective", "pos": "adj", "level": "C1"}, {"word": "collector", "pos": "n", "level": "B2"}, {"word": "collision", "pos": "n", "level": "C1"}, {"word": "colonial", "pos": "adj", "level": "C1"}, {"word": "colony", "pos": "n", "level": "B2"}, {"word": "colorful", "pos": "adj", "level": "B2"}, {"word": "columnist", "pos": "n", "level": "C1"}, {"word": "combat", "pos": "n", "level": "C1"}, {"word": "comic", "pos": "adj", "level": "B2"}, {"word": "commander", "pos": "n", "level": "B2"}, {"word": "commence", "pos": "v", "level": "C1"}, {"word": "commentary", "pos": "n", "level": "C1"}, {"word": "commentator", "pos": "n", "level": "C1"}, {"word": "commerce", "pos": "n", "level": "C1"}, {"word": "commissioner", "pos": "n", "level": "C1"}, {"word": "commodity", "pos": "n", "level": "C1"}, {"word": "communist", "pos": "adj", "level": "C1"}, {"word": "companion", "pos": "n", "level": "C1"}, {"word": "comparable", "pos": "adj", "level": "C1"}, {"word": "comparative", "pos": "adj", "level": "B2"}, {"word": "compassion", "pos": "n", "level": "C1"}, {"word": "compel", "pos": "v", "level": "C1"}, {"word": "compelling", "pos": "adj", "level": "C1"}, {"word": "compensate", "pos": "v", "level": "C1"}, {"word": "compensation", "pos": "n", "level": "C1"}, {"word": "competence", "pos": "n", "level": "C1"}, {"word": "competent", "pos": "adj", "level": "C1"}, {"word": "compile", "pos": "v", "level": "C1"}, {"word": "complement", "pos": "v", "level": "C1"}, {"word": "completion", "pos": "n", "level": "B2"}, {"word": "complexity", "pos": "n", "level": "C1"}, {"word": "compliance", "pos": "n", "level": "C1"}, {"word": "complication", "pos": "n", "level": "C1"}, {"word": "comply", "pos": "v", "level": "C1"}, {"word": "compose", "pos": "v", "level": "B2"}, {"word": "composer", "pos": "n", "level": "B2"}, {"word": "composition", "pos": "n", "level": "C1"}, {"word": "compound", "pos": "n", "level": "B2"}, {"word": "comprehensive", "pos": "adj", "level": "B2"}, {"word": "comprise", "pos": "v", "level": "B2"}, {"word": "compromise", "pos": "n", "level": "C1"}, {"word": "compulsory", "pos": "adj", "level": "B2"}, {"word": "compute", "pos": "v", "level": "C1"}, {"word": "conceal", "pos": "v", "level": "C1"}, {"word": "concede", "pos": "v", "level": "C1"}, {"word": "conceive", "pos": "v", "level": "C1"}, {"word": "conception", "pos": "n", "level": "C1"}, {"word": "concession", "pos": "n", "level": "C1"}, {"word": "concrete", "pos": "adj", "level": "B2"}, {"word": "condemn", "pos": "v", "level": "C1"}, {"word": "confer", "pos": "v", "level": "C1"}, {"word": "confess", "pos": "v", "level": "B2"}, {"word": "confession", "pos": "n", "level": "C1"}, {"word": "configuration", "pos": "n", "level": "C1"}, {"word": "confine", "pos": "v", "level": "C1"}, {"word": "confirmation", "pos": "n", "level": "C1"}, {"word": "confront", "pos": "v", "level": "C1"}, {"word": "confrontation", "pos": "n", "level": "C1"}, {"word": "confusion", "pos": "n", "level": "B2"}, {"word": "congratulate", "pos": "v", "level": "C1"}, {"word": "congregation", "pos": "n", "level": "C1"}, {"word": "congressional", "pos": "adj", "level": "C1"}, {"word": "conquer", "pos": "v", "level": "C1"}, {"word": "conscience", "pos": "n", "level": "C1"}, {"word": "consciousness", "pos": "n", "level": "C1"}, {"word": "consecutive", "pos": "adj", "level": "C1"}, {"word": "consensus", "pos": "n", "level": "C1"}, {"word": "consent", "pos": "n", "level": "C1"}, {"word": "consequently", "pos": "adv", "level": "B2"}, {"word": "conservation", "pos": "n", "level": "B2"}, {"word": "conserve", "pos": "v", "level": "C1"}, {"word": "considerable", "pos": "adj", "level": "B2"}, {"word": "considerably", "pos": "adv", "level": "B2"}, {"word": "consistency", "pos": "n", "level": "C1"}, {"word": "consistently", "pos": "adv", "level": "B2"}, {"word": "consolidate", "pos": "v", "level": "C1"}, {"word": "conspiracy", "pos": "n", "level": "B2"}, {"word": "constitute", "pos": "v", "level": "C1"}, {"word": "constitution", "pos": "n", "level": "C1"}, {"word": "constitutional", "pos": "adj", "level": "C1"}, {"word": "constraint", "pos": "n", "level": "C1"}, {"word": "consult", "pos": "v", "level": "B2"}, {"word": "consultant", "pos": "n", "level": "B2"}, {"word": "consultation", "pos": "n", "level": "C1"}, {"word": "consumption", "pos": "n", "level": "B2"}, {"word": "contemplate", "pos": "v", "level": "C1"}, {"word": "contempt", "pos": "n", "level": "C1"}, {"word": "contend", "pos": "v", "level": "C1"}, {"word": "contender", "pos": "n", "level": "C1"}, {"word": "content", "pos": "adj", "level": "C1"}, {"word": "contention", "pos": "n", "level": "C1"}, {"word": "continually", "pos": "adv", "level": "C1"}, {"word": "contractor", "pos": "n", "level": "C1"}, {"word": "contradiction", "pos": "n", "level": "C1"}, {"word": "contrary", "pos": "adj", "level": "C1"}, {"word": "contributor", "pos": "n", "level": "C1"}, {"word": "controversial", "pos": "adj", "level": "B2"}, {"word": "controversy", "pos": "n", "level": "B2"}, {"word": "convenience", "pos": "n", "level": "B2"}, {"word": "convention", "pos": "n", "level": "B2"}, {"word": "conventional", "pos": "adj", "level": "B2"}, {"word": "conversion", "pos": "n", "level": "C1"}, {"word": "convey", "pos": "v", "level": "B2"}, {"word": "convict", "pos": "v", "level": "C1"}, {"word": "conviction", "pos": "n", "level": "C1"}, {"word": "convincing", "pos": "adj", "level": "B2"}, {"word": "cooperate", "pos": "v", "level": "C1"}, {"word": "cooperative", "pos": "adj", "level": "C1"}, {"word": "coordinate", "pos": "v", "level": "C1"}, {"word": "coordination", "pos": "n", "level": "C1"}, {"word": "coordinator", "pos": "n", "level": "C1"}, {"word": "cop", "pos": "n", "level": "B2"}, {"word": "cope", "pos": "v", "level": "B2"}, {"word": "copper", "pos": "n", "level": "C1"}, {"word": "copyright", "pos": "n", "level": "C1"}, {"word": "corporation", "pos": "n", "level": "B2"}, {"word": "correction", "pos": "n", "level": "C1"}, {"word": "correlate", "pos": "v", "level": "C1"}, {"word": "correlation", "pos": "n", "level": "C1"}, {"word": "correspond", "pos": "v", "level": "C1"}, {"word": "correspondence", "pos": "n", "level": "C1"}, {"word": "correspondent", "pos": "n", "level": "C1"}, {"word": "corresponding", "pos": "adj", "level": "C1"}, {"word": "corridor", "pos": "n", "level": "B2"}, {"word": "corrupt", "pos": "adj", "level": "C1"}, {"word": "corruption", "pos": "n", "level": "C1"}, {"word": "costly", "pos": "adj", "level": "C1"}, {"word": "councilor", "pos": "n", "level": "C1"}, {"word": "counseling", "pos": "n", "level": "C1"}, {"word": "counselor", "pos": "n", "level": "C1"}, {"word": "counter", "pos": "n", "level": "B2"}, {"word": "counter", "pos": "v", "level": "C1"}, {"word": "counterpart", "pos": "n", "level": "C1"}, {"word": "countless", "pos": "adj", "level": "C1"}, {"word": "coup", "pos": "n", "level": "C1"}, {"word": "courtesy", "pos": "n", "level": "C1"}, {"word": "coverage", "pos": "n", "level": "B2"}, {"word": "cowboy", "pos": "n", "level": "B2"}, {"word": "crack", "pos": "v", "level": "B2"}, {"word": "craft", "pos": "n", "level": "C1"}, {"word": "crawl", "pos": "v", "level": "C1"}, {"word": "creativity", "pos": "n", "level": "B2"}, {"word": "creator", "pos": "n", "level": "C1"}, {"word": "credibility", "pos": "n", "level": "C1"}, {"word": "credible", "pos": "adj", "level": "C1"}, {"word": "creep", "pos": "v", "level": "C1"}, {"word": "critically", "pos": "adv", "level": "B2"}, {"word": "critique", "pos": "n", "level": "C1"}, {"word": "crown", "pos": "n", "level": "C1"}, {"word": "crude", "pos": "adj", "level": "C1"}, {"word": "cruise", "pos": "n", "level": "B2"}, {"word": "crush", "pos": "v", "level": "C1"}, {"word": "crystal", "pos": "n", "level": "C1"}, {"word": "cue", "pos": "n", "level": "B2"}, {"word": "cult", "pos": "n", "level": "C1"}, {"word": "cultivate", "pos": "v", "level": "C1"}, {"word": "curiosity", "pos": "n", "level": "C1"}, {"word": "curious", "pos": "adj", "level": "B2"}, {"word": "curriculum", "pos": "n", "level": "B2"}, {"word": "custody", "pos": "n", "level": "C1"}, {"word": "cute", "pos": "adj", "level": "B2"}, {"word": "cutting", "pos": "n", "level": "C1"}, {"word": "cynical", "pos": "adj", "level": "C1"}, {"word": "dairy", "pos": "n", "level": "B2"}, {"word": "dam", "pos": "n", "level": "C1"}, {"word": "damaging", "pos": "adj", "level": "C1"}, {"word": "dare", "pos": "v", "level": "B2"}, {"word": "darkness", "pos": "n", "level": "B2"}, {"word": "database", "pos": "n", "level": "B2"}, {"word": "dawn", "pos": "n", "level": "C1"}, {"word": "deadline", "pos": "n", "level": "B2"}, {"word": "deadly", "pos": "adj", "level": "B2"}, {"word": "dealer", "pos": "n", "level": "B2"}, {"word": "debris", "pos": "n", "level": "C1"}, {"word": "debut", "pos": "n", "level": "C1"}, {"word": "decision-making", "pos": "n", "level": "C1"}, {"word": "decisive", "pos": "adj", "level": "C1"}, {"word": "deck", "pos": "n", "level": "B2"}, {"word": "declaration", "pos": "n", "level": "C1"}, {"word": "dedicated", "pos": "adj", "level": "C1"}, {"word": "dedication", "pos": "n", "level": "C1"}, {"word": "deed", "pos": "n", "level": "C1"}, {"word": "deem", "pos": "v", "level": "C1"}, {"word": "default", "pos": "n", "level": "C1"}, {"word": "defect", "pos": "n", "level": "C1"}, {"word": "defender", "pos": "n", "level": "B2"}, {"word": "defensive", "pos": "adj", "level": "C1"}, {"word": "deficiency", "pos": "n", "level": "C1"}, {"word": "deficit", "pos": "n", "level": "C1"}, {"word": "defy", "pos": "v", "level": "C1"}, {"word": "delegate", "pos": "n", "level": "C1"}, {"word": "delegation", "pos": "n", "level": "C1"}, {"word": "delete", "pos": "v", "level": "B2"}, {"word": "delicate", "pos": "adj", "level": "C1"}, {"word": "delighted", "pos": "adj", "level": "B2"}, {"word": "democracy", "pos": "n", "level": "B2"}, {"word": "democratic", "pos": "adj", "level": "B2"}, {"word": "demon", "pos": "n", "level": "C1"}, {"word": "demonstration", "pos": "n", "level": "B2"}, {"word": "denial", "pos": "n", "level": "C1"}, {"word": "denounce", "pos": "v", "level": "C1"}, {"word": "dense", "pos": "adj", "level": "C1"}, {"word": "density", "pos": "n", "level": "C1"}, {"word": "depart", "pos": "v", "level": "B2"}, {"word": "dependence", "pos": "n", "level": "C1"}, {"word": "dependent", "pos": "adj", "level": "B2"}, {"word": "depict", "pos": "v", "level": "C1"}, {"word": "deploy", "pos": "v", "level": "C1"}, {"word": "deployment", "pos": "n", "level": "C1"}, {"word": "deposit", "pos": "n", "level": "B2"}, {"word": "depression", "pos": "n", "level": "B2"}, {"word": "deprive", "pos": "v", "level": "C1"}, {"word": "deputy", "pos": "n", "level": "C1"}, {"word": "derive", "pos": "v", "level": "B2"}, {"word": "descend", "pos": "v", "level": "C1"}, {"word": "descent", "pos": "n", "level": "C1"}, {"word": "designate", "pos": "v", "level": "C1"}, {"word": "desirable", "pos": "adj", "level": "C1"}, {"word": "desktop", "pos": "n", "level": "C1"}, {"word": "desperately", "pos": "adv", "level": "B2"}, {"word": "destruction", "pos": "n", "level": "B2"}, {"word": "destructive", "pos": "adj", "level": "C1"}, {"word": "detain", "pos": "v", "level": "C1"}, {"word": "detection", "pos": "n", "level": "C1"}, {"word": "detention", "pos": "n", "level": "C1"}, {"word": "deteriorate", "pos": "v", "level": "C1"}, {"word": "determination", "pos": "n", "level": "B2"}, {"word": "devastate", "pos": "v", "level": "C1"}, {"word": "devil", "pos": "n", "level": "C1"}, {"word": "devise", "pos": "v", "level": "C1"}, {"word": "devote", "pos": "v", "level": "B2"}, {"word": "diagnose", "pos": "v", "level": "C1"}, {"word": "diagnosis", "pos": "n", "level": "C1"}, {"word": "dictate", "pos": "v", "level": "C1"}, {"word": "dictator", "pos": "n", "level": "C1"}, {"word": "differ", "pos": "v", "level": "B2"}, {"word": "differentiate", "pos": "v", "level": "C1"}, {"word": "dignity", "pos": "n", "level": "C1"}, {"word": "dilemma", "pos": "n", "level": "C1"}, {"word": "dime", "pos": "n", "level": "B2"}, {"word": "dimension", "pos": "n", "level": "C1"}, {"word": "diminish", "pos": "v", "level": "C1"}, {"word": "dip", "pos": "v", "level": "C1"}, {"word": "diplomat", "pos": "n", "level": "C1"}, {"word": "diplomatic", "pos": "n", "level": "C1"}, {"word": "directory", "pos": "n", "level": "C1"}, {"word": "disability", "pos": "n", "level": "B2"}, {"word": "disabled", "pos": "adj", "level": "B2"}, {"word": "disagreement", "pos": "n", "level": "B2"}, {"word": "disappoint", "pos": "v", "level": "B2"}, {"word": "disappointment", "pos": "n", "level": "B2"}, {"word": "disastrous", "pos": "adj", "level": "C1"}, {"word": "discard", "pos": "v", "level": "C1"}, {"word": "discharge", "pos": "v", "level": "C1"}, {"word": "disclose", "pos": "v", "level": "C1"}, {"word": "disclosure", "pos": "n", "level": "C1"}, {"word": "discourage", "pos": "v", "level": "B2"}, {"word": "discourse", "pos": "n", "level": "C1"}, {"word": "discretion", "pos": "n", "level": "C1"}, {"word": "discrimination", "pos": "n", "level": "C1"}, {"word": "dismissal", "pos": "n", "level": "C1"}, {"word": "disorder", "pos": "n", "level": "B2"}, {"word": "displace", "pos": "v", "level": "C1"}, {"word": "disposal", "pos": "n", "level": "C1"}, {"word": "dispose", "pos": "v", "level": "C1"}, {"word": "dispute", "pos": "n", "level": "C1"}, {"word": "disrupt", "pos": "v", "level": "C1"}, {"word": "disruption", "pos": "n", "level": "C1"}, {"word": "dissolve", "pos": "v", "level": "C1"}, {"word": "distant", "pos": "adj", "level": "B2"}, {"word": "distinct", "pos": "adj", "level": "B2"}, {"word": "distinction", "pos": "n", "level": "C1"}, {"word": "distinctive", "pos": "adj", "level": "C1"}, {"word": "distinguish", "pos": "v", "level": "B2"}, {"word": "distort", "pos": "v", "level": "C1"}, {"word": "distract", "pos": "v", "level": "B2"}, {"word": "distress", "pos": "n", "level": "C1"}, {"word": "disturb", "pos": "v", "level": "B2"}, {"word": "disturbing", "pos": "adj", "level": "C1"}, {"word": "dive", "pos": "v", "level": "B2"}, {"word": "diverse", "pos": "adj", "level": "B2"}, {"word": "diversity", "pos": "n", "level": "B2"}, {"word": "divert", "pos": "v", "level": "C1"}, {"word": "divine", "pos": "adj", "level": "C1"}, {"word": "divorce", "pos": "n", "level": "B2"}, {"word": "doctrine", "pos": "n", "level": "C1"}, {"word": "documentation", "pos": "n", "level": "C1"}, {"word": "domain", "pos": "n", "level": "C1"}, {"word": "dominance", "pos": "n", "level": "C1"}, {"word": "dominant", "pos": "adj", "level": "B2"}, {"word": "donation", "pos": "n", "level": "B2"}, {"word": "donor", "pos": "n", "level": "C1"}, {"word": "dose", "pos": "n", "level": "C1"}, {"word": "dot", "pos": "n", "level": "B2"}, {"word": "drain", "pos": "v", "level": "C1"}, {"word": "dramatically", "pos": "adv", "level": "B2"}, {"word": "drift", "pos": "v", "level": "C1"}, {"word": "driving", "pos": "adj", "level": "C1"}, {"word": "drought", "pos": "n", "level": "B2"}, {"word": "drown", "pos": "v", "level": "C1"}, {"word": "dual", "pos": "adj", "level": "C1"}, {"word": "dub", "pos": "v", "level": "C1"}, {"word": "dull", "pos": "adj", "level": "B2"}, {"word": "dumb", "pos": "adj", "level": "C1"}, {"word": "dump", "pos": "v", "level": "B2"}, {"word": "duo", "pos": "n", "level": "C1"}, {"word": "duration", "pos": "n", "level": "B2"}, {"word": "dynamic", "pos": "adj", "level": "C1"}, {"word": "eager", "pos": "adj", "level": "B2"}, {"word": "earnings", "pos": "n", "level": "C1"}, {"word": "ease", "pos": "n", "level": "C1"}, {"word": "echo", "pos": "v", "level": "C1"}, {"word": "ecological", "pos": "adj", "level": "C1"}, {"word": "economics", "pos": "n", "level": "B2"}, {"word": "economist", "pos": "n", "level": "B2"}, {"word": "editorial", "pos": "adj", "level": "B2"}, {"word": "educator", "pos": "n", "level": "C1"}, {"word": "effectiveness", "pos": "n", "level": "C1"}, {"word": "efficiency", "pos": "n", "level": "C1"}, {"word": "efficiently", "pos": "adv", "level": "B2"}, {"word": "ego", "pos": "n", "level": "C1"}, {"word": "elaborate", "pos": "adj", "level": "C1"}, {"word": "elbow", "pos": "n", "level": "B2"}, {"word": "electoral", "pos": "adj", "level": "C1"}, {"word": "electronics", "pos": "n", "level": "B2"}, {"word": "elegant", "pos": "adj", "level": "B2"}, {"word": "elementary", "pos": "adj", "level": "B2"}, {"word": "elevate", "pos": "v", "level": "C1"}, {"word": "eligible", "pos": "adj", "level": "C1"}, {"word": "eliminate", "pos": "v", "level": "B2"}, {"word": "elite", "pos": "n", "level": "C1"}, {"word": "embark", "pos": "v", "level": "C1"}, {"word": "embarrassment", "pos": "n", "level": "C1"}, {"word": "embassy", "pos": "n", "level": "C1"}, {"word": "embed", "pos": "v", "level": "C1"}, {"word": "embody", "pos": "v", "level": "C1"}, {"word": "embrace", "pos": "v", "level": "B2"}, {"word": "emergence", "pos": "n", "level": "C1"}, {"word": "emission", "pos": "n", "level": "B2"}, {"word": "emotionally", "pos": "adv", "level": "B2"}, {"word": "empire", "pos": "n", "level": "B2"}, {"word": "empirical", "pos": "adj", "level": "C1"}, {"word": "empower", "pos": "v", "level": "C1"}, {"word": "enact", "pos": "v", "level": "C1"}, {"word": "encompass", "pos": "v", "level": "C1"}, {"word": "encouragement", "pos": "n", "level": "C1"}, {"word": "encouraging", "pos": "adj", "level": "C1"}, {"word": "endeavor", "pos": "n", "level": "C1"}, {"word": "endless", "pos": "adj", "level": "C1"}, {"word": "endorse", "pos": "v", "level": "C1"}, {"word": "endorsement", "pos": "n", "level": "C1"}, {"word": "endure", "pos": "v", "level": "C1"}, {"word": "enforce", "pos": "v", "level": "C1"}, {"word": "enforcement", "pos": "n", "level": "C1"}, {"word": "engagement", "pos": "n", "level": "C1"}, {"word": "engaging", "pos": "adj", "level": "C1"}, {"word": "enjoyable", "pos": "adj", "level": "B2"}, {"word": "enrich", "pos": "v", "level": "C1"}, {"word": "enroll", "pos": "v", "level": "C1"}, {"word": "ensue", "pos": "v", "level": "C1"}, {"word": "enterprise", "pos": "n", "level": "C1"}, {"word": "entertaining", "pos": "adj", "level": "B2"}, {"word": "enthusiast", "pos": "n", "level": "C1"}, {"word": "entitle", "pos": "v", "level": "C1"}, {"word": "entity", "pos": "n", "level": "C1"}, {"word": "entrepreneur", "pos": "n", "level": "B2"}, {"word": "envelope", "pos": "n", "level": "B2"}, {"word": "epidemic", "pos": "n", "level": "C1"}, {"word": "equality", "pos": "n", "level": "C1"}, {"word": "equation", "pos": "n", "level": "C1"}, {"word": "equip", "pos": "v", "level": "B2"}, {"word": "equivalent", "pos": "n", "level": "B2"}, {"word": "era", "pos": "n", "level": "B2"}, {"word": "erect", "pos": "v", "level": "C1"}, {"word": "erupt", "pos": "v", "level": "B2"}, {"word": "escalate", "pos": "v", "level": "C1"}, {"word": "essence", "pos": "n", "level": "C1"}, {"word": "essentially", "pos": "adv", "level": "B2"}, {"word": "establishment", "pos": "n", "level": "C1"}, {"word": "eternal", "pos": "adj", "level": "C1"}, {"word": "ethic", "pos": "n", "level": "B2"}, {"word": "ethnic", "pos": "adj", "level": "B2"}, {"word": "evacuate", "pos": "v", "level": "C1"}, {"word": "evaluation", "pos": "n", "level": "B2"}, {"word": "evident", "pos": "adj", "level": "B2"}, {"word": "evoke", "pos": "v", "level": "C1"}, {"word": "evolution", "pos": "n", "level": "B2"}, {"word": "evolutionary", "pos": "adj", "level": "C1"}, {"word": "evolve", "pos": "v", "level": "B2"}, {"word": "exaggerate", "pos": "v", "level": "C1"}, {"word": "exceed", "pos": "v", "level": "B2"}, {"word": "excellence", "pos": "n", "level": "C1"}, {"word": "exception", "pos": "n", "level": "B2"}, {"word": "exceptional", "pos": "adj", "level": "C1"}, {"word": "excess", "pos": "n", "level": "C1"}, {"word": "excessive", "pos": "adj", "level": "B2"}, {"word": "exclude", "pos": "v", "level": "B2"}, {"word": "exclusion", "pos": "n", "level": "C1"}, {"word": "exclusive", "pos": "adj", "level": "C1"}, {"word": "exclusively", "pos": "adv", "level": "C1"}, {"word": "execute", "pos": "v", "level": "C1"}, {"word": "execution", "pos": "n", "level": "C1"}, {"word": "exert", "pos": "v", "level": "C1"}, {"word": "exile", "pos": "n", "level": "C1"}, {"word": "exotic", "pos": "adj", "level": "B2"}, {"word": "expansion", "pos": "n", "level": "B2"}, {"word": "expedition", "pos": "n", "level": "B2"}, {"word": "expenditure", "pos": "n", "level": "C1"}, {"word": "experimental", "pos": "adj", "level": "C1"}, {"word": "expertise", "pos": "n", "level": "B2"}, {"word": "expire", "pos": "v", "level": "C1"}, {"word": "explicit", "pos": "adj", "level": "C1"}, {"word": "explicitly", "pos": "adv", "level": "C1"}, {"word": "exploit", "pos": "v", "level": "B2"}, {"word": "exploitation", "pos": "n", "level": "C1"}, {"word": "explosive", "pos": "adj", "level": "C1"}, {"word": "exposure", "pos": "n", "level": "B2"}, {"word": "extension", "pos": "n", "level": "B2"}, {"word": "extensive", "pos": "adj", "level": "B2"}, {"word": "extensively", "pos": "adv", "level": "B2"}, {"word": "extract", "pos": "n", "level": "C1"}, {"word": "extremist", "pos": "n", "level": "C1"}, {"word": "fabric", "pos": "n", "level": "B2"}, {"word": "fabulous", "pos": "adj", "level": "B2"}, {"word": "facilitate", "pos": "v", "level": "C1"}, {"word": "faction", "pos": "n", "level": "C1"}, {"word": "faculty", "pos": "n", "level": "B2"}, {"word": "fade", "pos": "v", "level": "C1"}, {"word": "failed", "pos": "adj", "level": "B2"}, {"word": "fairness", "pos": "n", "level": "C1"}, {"word": "fake", "pos": "adj", "level": "B2"}, {"word": "fame", "pos": "n", "level": "B2"}, {"word": "fantasy", "pos": "n", "level": "B2"}, {"word": "fare", "pos": "n", "level": "B2"}, {"word": "fatal", "pos": "adj", "level": "C1"}, {"word": "fate", "pos": "n", "level": "C1"}, {"word": "favorable", "pos": "adj", "level": "C1"}, {"word": "feat", "pos": "n", "level": "C1"}, {"word": "felony", "pos": "n", "level": "C1"}, {"word": "feminist", "pos": "adj", "level": "C1"}, {"word": "fiber", "pos": "n", "level": "C1"}, {"word": "fierce", "pos": "adj", "level": "C1"}, {"word": "filmmaker", "pos": "n", "level": "C1"}, {"word": "filter", "pos": "n", "level": "C1"}, {"word": "fine", "pos": "n", "level": "C1"}, {"word": "firearm", "pos": "n", "level": "C1"}, {"word": "firefighter", "pos": "n", "level": "B2"}, {"word": "firework", "pos": "n", "level": "B2"}, {"word": "firm", "pos": "adj", "level": "B2"}, {"word": "firmly", "pos": "adv", "level": "B2"}, {"word": "fiscal", "pos": "adj", "level": "C1"}, {"word": "fit", "pos": "n", "level": "C1"}, {"word": "flavor", "pos": "n", "level": "B2"}, {"word": "flaw", "pos": "n", "level": "C1"}, {"word": "flawed", "pos": "adj", "level": "C1"}, {"word": "flee", "pos": "v", "level": "C1"}, {"word": "fleet", "pos": "n", "level": "C1"}, {"word": "flesh", "pos": "n", "level": "C1"}, {"word": "flexibility", "pos": "n", "level": "C1"}, {"word": "flourish", "pos": "v", "level": "C1"}, {"word": "fluid", "pos": "n", "level": "C1"}, {"word": "fond", "pos": "adj", "level": "B2"}, {"word": "fool", "pos": "n", "level": "B2"}, {"word": "footage", "pos": "n", "level": "C1"}, {"word": "forbid", "pos": "v", "level": "B2"}, {"word": "forecast", "pos": "n", "level": "B2"}, {"word": "foreigner", "pos": "n", "level": "C1"}, {"word": "forge", "pos": "v", "level": "C1"}, {"word": "format", "pos": "n", "level": "B2"}, {"word": "formation", "pos": "n", "level": "B2"}, {"word": "formerly", "pos": "adv", "level": "B2"}, {"word": "formula", "pos": "n", "level": "C1"}, {"word": "formulate", "pos": "v", "level": "C1"}, {"word": "forth", "pos": "adv", "level": "C1"}, {"word": "forthcoming", "pos": "adj", "level": "C1"}, {"word": "fortunate", "pos": "adj", "level": "B2"}, {"word": "forum", "pos": "n", "level": "B2"}, {"word": "fossil", "pos": "n", "level": "B2"}, {"word": "foster", "pos": "v", "level": "C1"}, {"word": "foundation", "pos": "n", "level": "B2"}, {"word": "founder", "pos": "n", "level": "B2"}, {"word": "fraction", "pos": "n", "level": "B2"}, {"word": "fragile", "pos": "adj", "level": "C1"}, {"word": "fragment", "pos": "n", "level": "B2"}, {"word": "framework", "pos": "n", "level": "B2"}, {"word": "franchise", "pos": "n", "level": "C1"}, {"word": "frankly", "pos": "adv", "level": "C1"}, {"word": "fraud", "pos": "n", "level": "B2"}, {"word": "freely", "pos": "adv", "level": "B2"}, {"word": "frequent", "pos": "adj", "level": "B2"}, {"word": "freshman", "pos": "n", "level": "C1"}, {"word": "frustrated", "pos": "adj", "level": "C1"}, {"word": "frustrating", "pos": "adj", "level": "C1"}, {"word": "frustration", "pos": "n", "level": "C1"}, {"word": "fulfill", "pos": "v", "level": "B2"}, {"word": "full-time", "pos": "adj./adv", "level": "B2"}, {"word": "functional", "pos": "adj", "level": "C1"}, {"word": "fundamentally", "pos": "adv", "level": "B2"}, {"word": "fundraising", "pos": "n", "level": "C1"}, {"word": "funeral", "pos": "n", "level": "C1"}, {"word": "furious", "pos": "adj", "level": "B2"}, {"word": "gallon", "pos": "n", "level": "B2"}, {"word": "gambling", "pos": "n", "level": "C1"}, {"word": "gaming", "pos": "n", "level": "B2"}, {"word": "gathering", "pos": "n", "level": "C1"}, {"word": "gay", "pos": "adj", "level": "B2"}, {"word": "gaze", "pos": "n", "level": "C1"}, {"word": "gear", "pos": "n", "level": "C1"}, {"word": "gender", "pos": "n", "level": "B2"}, {"word": "gene", "pos": "n", "level": "B2"}, {"word": "generic", "pos": "adj", "level": "C1"}, {"word": "genetic", "pos": "adj", "level": "B2"}, {"word": "genius", "pos": "n", "level": "B2"}, {"word": "genocide", "pos": "n", "level": "C1"}, {"word": "genuine", "pos": "adj", "level": "B2"}, {"word": "genuinely", "pos": "adv", "level": "B2"}, {"word": "gesture", "pos": "n", "level": "B2"}, {"word": "gig", "pos": "n", "level": "C1"}, {"word": "glance", "pos": "n", "level": "C1"}, {"word": "glimpse", "pos": "n", "level": "C1"}, {"word": "globalization", "pos": "n", "level": "B2"}, {"word": "globe", "pos": "n", "level": "B2"}, {"word": "glorious", "pos": "adj", "level": "C1"}, {"word": "glory", "pos": "n", "level": "C1"}, {"word": "golden", "pos": "adj", "level": "B2"}, {"word": "goodness", "pos": "n", "level": "B2"}, {"word": "gorgeous", "pos": "adj", "level": "B2"}, {"word": "governance", "pos": "n", "level": "C1"}, {"word": "grace", "pos": "n", "level": "C1"}, {"word": "graphic", "pos": "adj", "level": "B2"}, {"word": "graphics", "pos": "n", "level": "B2"}, {"word": "grasp", "pos": "v", "level": "C1"}, {"word": "grave", "pos": "n", "level": "C1"}, {"word": "grave", "pos": "adj", "level": "C1"}, {"word": "gravity", "pos": "n", "level": "C1"}, {"word": "greatly", "pos": "adv", "level": "B2"}, {"word": "greenhouse", "pos": "n", "level": "B2"}, {"word": "grid", "pos": "n", "level": "C1"}, {"word": "grief", "pos": "n", "level": "C1"}, {"word": "grin", "pos": "v", "level": "C1"}, {"word": "grind", "pos": "v", "level": "C1"}, {"word": "grip", "pos": "n", "level": "C1"}, {"word": "gross", "pos": "adj", "level": "C1"}, {"word": "guerrilla", "pos": "n", "level": "C1"}, {"word": "guidance", "pos": "n", "level": "C1"}, {"word": "guideline", "pos": "n", "level": "B2"}, {"word": "guilt", "pos": "n", "level": "C1"}, {"word": "gut", "pos": "n", "level": "C1"}, {"word": "habitat", "pos": "n", "level": "B2"}, {"word": "hail", "pos": "v", "level": "C1"}, {"word": "halfway", "pos": "adv", "level": "C1"}, {"word": "halt", "pos": "v", "level": "C1"}, {"word": "handful", "pos": "n", "level": "C1"}, {"word": "handling", "pos": "n", "level": "C1"}, {"word": "handy", "pos": "adj", "level": "C1"}, {"word": "harassment", "pos": "n", "level": "C1"}, {"word": "harbor", "pos": "n", "level": "B2"}, {"word": "hardware", "pos": "n", "level": "C1"}, {"word": "harmony", "pos": "n", "level": "C1"}, {"word": "harsh", "pos": "adj", "level": "C1"}, {"word": "harvest", "pos": "n", "level": "C1"}, {"word": "hatred", "pos": "n", "level": "C1"}, {"word": "haunt", "pos": "v", "level": "C1"}, {"word": "hazard", "pos": "n", "level": "C1"}, {"word": "headquarters", "pos": "n", "level": "B2"}, {"word": "heal", "pos": "v", "level": "B2"}, {"word": "healthcare", "pos": "n", "level": "B2"}, {"word": "heighten", "pos": "v", "level": "C1"}, {"word": "helmet", "pos": "n", "level": "B2"}, {"word": "hence", "pos": "adv", "level": "B2"}, {"word": "herb", "pos": "n", "level": "B2"}, {"word": "heritage", "pos": "n", "level": "C1"}, {"word": "hidden", "pos": "adj", "level": "B2"}, {"word": "hierarchy", "pos": "n", "level": "C1"}, {"word": "high-profile", "pos": "adj", "level": "C1"}, {"word": "hilarious", "pos": "adj", "level": "B2"}, {"word": "hint", "pos": "n", "level": "C1"}, {"word": "hip", "pos": "n", "level": "B2"}, {"word": "historian", "pos": "n", "level": "B2"}, {"word": "homeland", "pos": "n", "level": "C1"}, {"word": "homeless", "pos": "adj", "level": "B2"}, {"word": "honesty", "pos": "n", "level": "B2"}, {"word": "honey", "pos": "n", "level": "B2"}, {"word": "hook", "pos": "n", "level": "B2"}, {"word": "hopeful", "pos": "adj", "level": "C1"}, {"word": "hopefully", "pos": "adv", "level": "B2"}, {"word": "horizon", "pos": "n", "level": "C1"}, {"word": "horn", "pos": "n", "level": "C1"}, {"word": "hostage", "pos": "n", "level": "C1"}, {"word": "hostile", "pos": "adj", "level": "C1"}, {"word": "hostility", "pos": "n", "level": "C1"}, {"word": "humanitarian", "pos": "adj", "level": "C1"}, {"word": "humanity", "pos": "n", "level": "C1"}, {"word": "humble", "pos": "adj", "level": "C1"}, {"word": "hunger", "pos": "n", "level": "B2"}, {"word": "hydrogen", "pos": "n", "level": "C1"}, {"word": "hypothesis", "pos": "n", "level": "B2"}, {"word": "icon", "pos": "n", "level": "B2"}, {"word": "ID", "pos": "n", "level": "B2"}, {"word": "identical", "pos": "adj", "level": "B2"}, {"word": "identification", "pos": "n", "level": "C1"}, {"word": "ideological", "pos": "adj", "level": "C1"}, {"word": "ideology", "pos": "n", "level": "C1"}, {"word": "idiot", "pos": "n", "level": "C1"}, {"word": "ignorance", "pos": "n", "level": "C1"}, {"word": "illusion", "pos": "n", "level": "B2"}, {"word": "imagery", "pos": "n", "level": "C1"}, {"word": "immense", "pos": "adj", "level": "C1"}, {"word": "immigration", "pos": "n", "level": "B2"}, {"word": "imminent", "pos": "adj", "level": "C1"}, {"word": "immune", "pos": "adj", "level": "B2"}, {"word": "implement", "pos": "v", "level": "B2"}, {"word": "implementation", "pos": "n", "level": "C1"}, {"word": "implication", "pos": "n", "level": "B2"}, {"word": "imprison", "pos": "v", "level": "C1"}, {"word": "inability", "pos": "n", "level": "C1"}, {"word": "inadequate", "pos": "adj", "level": "C1"}, {"word": "inappropriate", "pos": "adj", "level": "C1"}, {"word": "incarcerate", "pos": "v", "level": "C1"}, {"word": "incarceration", "pos": "n", "level": "C1"}, {"word": "incentive", "pos": "n", "level": "B2"}, {"word": "incidence", "pos": "n", "level": "C1"}, {"word": "inclined", "pos": "adj", "level": "C1"}, {"word": "inclusion", "pos": "n", "level": "C1"}, {"word": "incorporate", "pos": "v", "level": "B2"}, {"word": "incorrect", "pos": "adj", "level": "B2"}, {"word": "incur", "pos": "v", "level": "C1"}, {"word": "independence", "pos": "n", "level": "B2"}, {"word": "index", "pos": "n", "level": "B2"}, {"word": "indication", "pos": "n", "level": "B2"}, {"word": "indicator", "pos": "n", "level": "C1"}, {"word": "indictment", "pos": "n", "level": "C1"}, {"word": "indigenous", "pos": "adj", "level": "C1"}, {"word": "induce", "pos": "v", "level": "C1"}, {"word": "indulge", "pos": "v", "level": "C1"}, {"word": "inequality", "pos": "n", "level": "C1"}, {"word": "inevitable", "pos": "adj", "level": "B2"}, {"word": "inevitably", "pos": "adv", "level": "B2"}, {"word": "infamous", "pos": "adj", "level": "C1"}, {"word": "infant", "pos": "n", "level": "C1"}, {"word": "infect", "pos": "v", "level": "C1"}, {"word": "infer", "pos": "v", "level": "B2"}, {"word": "inflation", "pos": "n", "level": "B2"}, {"word": "inflict", "pos": "v", "level": "C1"}, {"word": "influential", "pos": "adj", "level": "C1"}, {"word": "info", "pos": "n", "level": "B2"}, {"word": "infrastructure", "pos": "n", "level": "B2"}, {"word": "inhabitant", "pos": "n", "level": "B2"}, {"word": "inherent", "pos": "adj", "level": "C1"}, {"word": "inherit", "pos": "v", "level": "B2"}, {"word": "inhibit", "pos": "v", "level": "C1"}, {"word": "initiate", "pos": "v", "level": "C1"}, {"word": "inject", "pos": "v", "level": "C1"}, {"word": "injection", "pos": "n", "level": "C1"}, {"word": "injustice", "pos": "n", "level": "C1"}, {"word": "ink", "pos": "n", "level": "B2"}, {"word": "inmate", "pos": "n", "level": "C1"}, {"word": "innovation", "pos": "n", "level": "B2"}, {"word": "innovative", "pos": "adj", "level": "B2"}, {"word": "input", "pos": "n", "level": "B2"}, {"word": "inquire", "pos": "v", "level": "C1"}, {"word": "insert", "pos": "v", "level": "B2"}, {"word": "insertion", "pos": "n", "level": "C1"}, {"word": "insider", "pos": "n", "level": "C1"}, {"word": "inspect", "pos": "v", "level": "C1"}, {"word": "inspection", "pos": "n", "level": "C1"}, {"word": "inspector", "pos": "n", "level": "B2"}, {"word": "inspiration", "pos": "n", "level": "C1"}, {"word": "installation", "pos": "n", "level": "B2"}, {"word": "instant", "pos": "adj", "level": "B2"}, {"word": "instantly", "pos": "adv", "level": "B2"}, {"word": "instinct", "pos": "n", "level": "C1"}, {"word": "institutional", "pos": "adj", "level": "C1"}, {"word": "instruct", "pos": "v", "level": "C1"}, {"word": "instrumental", "pos": "adj", "level": "C1"}, {"word": "insufficient", "pos": "adj", "level": "C1"}, {"word": "insult", "pos": "n", "level": "C1"}, {"word": "intact", "pos": "adj", "level": "C1"}, {"word": "intake", "pos": "n", "level": "C1"}, {"word": "integral", "pos": "adj", "level": "C1"}, {"word": "integrate", "pos": "v", "level": "B2"}, {"word": "integrated", "pos": "adj", "level": "C1"}, {"word": "integration", "pos": "n", "level": "C1"}, {"word": "integrity", "pos": "n", "level": "C1"}, {"word": "intellectual", "pos": "adj", "level": "C1"}, {"word": "intensify", "pos": "v", "level": "C1"}, {"word": "intensity", "pos": "n", "level": "C1"}, {"word": "intensive", "pos": "adj", "level": "C1"}, {"word": "intent", "pos": "n", "level": "C1"}, {"word": "interact", "pos": "v", "level": "B2"}, {"word": "interaction", "pos": "n", "level": "B2"}, {"word": "interactive", "pos": "adj", "level": "C1"}, {"word": "interface", "pos": "n", "level": "C1"}, {"word": "interfere", "pos": "v", "level": "C1"}, {"word": "interference", "pos": "n", "level": "C1"}, {"word": "interim", "pos": "adj", "level": "C1"}, {"word": "interior", "pos": "adj", "level": "C1"}, {"word": "intermediate", "pos": "adj", "level": "C1"}, {"word": "interpretation", "pos": "n", "level": "B2"}, {"word": "intersection", "pos": "n", "level": "C1"}, {"word": "interval", "pos": "n", "level": "B2"}, {"word": "intervene", "pos": "v", "level": "C1"}, {"word": "intervention", "pos": "n", "level": "C1"}, {"word": "intimate", "pos": "adj", "level": "C1"}, {"word": "intriguing", "pos": "adj", "level": "C1"}, {"word": "invade", "pos": "v", "level": "B2"}, {"word": "invasion", "pos": "n", "level": "B2"}, {"word": "inventory", "pos": "n", "level": "C1"}, {"word": "investigator", "pos": "n", "level": "C1"}, {"word": "investor", "pos": "n", "level": "B2"}, {"word": "invisible", "pos": "adj", "level": "C1"}, {"word": "invoke", "pos": "v", "level": "C1"}, {"word": "involvement", "pos": "n", "level": "C1"}, {"word": "ironic", "pos": "adj", "level": "C1"}, {"word": "ironically", "pos": "adv", "level": "C1"}, {"word": "irony", "pos": "n", "level": "C1"}, {"word": "irrelevant", "pos": "adj", "level": "C1"}, {"word": "isolate", "pos": "v", "level": "B2"}, {"word": "isolated", "pos": "adj", "level": "B2"}, {"word": "isolation", "pos": "n", "level": "C1"}, {"word": "jail", "pos": "n", "level": "B2"}, {"word": "jet", "pos": "n", "level": "B2"}, {"word": "joint", "pos": "adj", "level": "B2"}, {"word": "journalism", "pos": "n", "level": "B2"}, {"word": "judicial", "pos": "adj", "level": "C1"}, {"word": "jurisdiction", "pos": "n", "level": "C1"}, {"word": "jury", "pos": "n", "level": "B2"}, {"word": "just", "pos": "adj", "level": "C1"}, {"word": "justification", "pos": "n", "level": "C1"}, {"word": "keen", "pos": "adj", "level": "C1"}, {"word": "kidnap", "pos": "v", "level": "C1"}, {"word": "kidney", "pos": "n", "level": "C1"}, {"word": "kindergarten", "pos": "n", "level": "B2"}, {"word": "kingdom", "pos": "n", "level": "C1"}, {"word": "kit", "pos": "n", "level": "B2"}, {"word": "ladder", "pos": "n", "level": "B2"}, {"word": "landing", "pos": "n", "level": "B2"}, {"word": "landlord", "pos": "n", "level": "C1"}, {"word": "landmark", "pos": "n", "level": "C1"}, {"word": "lane", "pos": "n", "level": "B2"}, {"word": "lap", "pos": "n", "level": "C1"}, {"word": "large-scale", "pos": "adj", "level": "C1"}, {"word": "laser", "pos": "n", "level": "C1"}, {"word": "lately", "pos": "adv", "level": "B2"}, {"word": "latter", "pos": "adj", "level": "C1"}, {"word": "lawmaker", "pos": "n", "level": "C1"}, {"word": "lawn", "pos": "n", "level": "C1"}, {"word": "lawsuit", "pos": "n", "level": "C1"}, {"word": "layout", "pos": "n", "level": "C1"}, {"word": "leak", "pos": "v", "level": "C1"}, {"word": "leap", "pos": "v", "level": "C1"}, {"word": "legacy", "pos": "n", "level": "C1"}, {"word": "legend", "pos": "n", "level": "B2"}, {"word": "legendary", "pos": "adj", "level": "C1"}, {"word": "legislation", "pos": "n", "level": "C1"}, {"word": "legislative", "pos": "adj", "level": "C1"}, {"word": "legislature", "pos": "n", "level": "C1"}, {"word": "legitimate", "pos": "adj", "level": "C1"}, {"word": "lengthy", "pos": "adj", "level": "C1"}, {"word": "lens", "pos": "n", "level": "B2"}, {"word": "lesbian", "pos": "adj", "level": "C1"}, {"word": "lesser", "pos": "adj", "level": "C1"}, {"word": "lethal", "pos": "adj", "level": "C1"}, {"word": "liable", "pos": "adj", "level": "C1"}, {"word": "liberal", "pos": "adj", "level": "C1"}, {"word": "liberation", "pos": "n", "level": "C1"}, {"word": "liberty", "pos": "n", "level": "C1"}, {"word": "lifelong", "pos": "adj", "level": "C1"}, {"word": "lifetime", "pos": "n", "level": "B2"}, {"word": "lighting", "pos": "n", "level": "B2"}, {"word": "likelihood", "pos": "n", "level": "C1"}, {"word": "likewise", "pos": "adv", "level": "B2"}, {"word": "limb", "pos": "n", "level": "C1"}, {"word": "limitation", "pos": "n", "level": "B2"}, {"word": "linear", "pos": "adj", "level": "C1"}, {"word": "lineup", "pos": "n", "level": "C1"}, {"word": "linger", "pos": "v", "level": "C1"}, {"word": "listing", "pos": "n", "level": "C1"}, {"word": "liter", "pos": "n", "level": "C1"}, {"word": "literacy", "pos": "n", "level": "C1"}, {"word": "literally", "pos": "adv", "level": "B2"}, {"word": "literary", "pos": "adj", "level": "B2"}, {"word": "litter", "pos": "n", "level": "B2"}, {"word": "liver", "pos": "n", "level": "C1"}, {"word": "lobby", "pos": "n", "level": "C1"}, {"word": "log", "pos": "n", "level": "C1"}, {"word": "logic", "pos": "n", "level": "C1"}, {"word": "logo", "pos": "n", "level": "B2"}, {"word": "long-standing", "pos": "adj", "level": "C1"}, {"word": "longtime", "pos": "adj", "level": "C1"}, {"word": "loom", "pos": "v", "level": "C1"}, {"word": "loop", "pos": "n", "level": "C1"}, {"word": "lottery", "pos": "n", "level": "B2"}, {"word": "loyal", "pos": "adj", "level": "B2"}, {"word": "loyalty", "pos": "n", "level": "C1"}, {"word": "lyric", "pos": "n", "level": "B2"}, {"word": "machinery", "pos": "n", "level": "C1"}, {"word": "magical", "pos": "adj", "level": "C1"}, {"word": "magnetic", "pos": "adj", "level": "C1"}, {"word": "magnificent", "pos": "adj", "level": "B2"}, {"word": "magnitude", "pos": "n", "level": "C1"}, {"word": "mainland", "pos": "n", "level": "C1"}, {"word": "mainstream", "pos": "n", "level": "C1"}, {"word": "maintenance", "pos": "n", "level": "C1"}, {"word": "makeup", "pos": "n", "level": "B2"}, {"word": "making", "pos": "n", "level": "B2"}, {"word": "mandate", "pos": "n", "level": "C1"}, {"word": "mandatory", "pos": "adj", "level": "C1"}, {"word": "manifest", "pos": "v", "level": "C1"}, {"word": "manipulate", "pos": "v", "level": "C1"}, {"word": "manipulation", "pos": "n", "level": "C1"}, {"word": "manufacture", "pos": "v", "level": "B2"}, {"word": "manufacturing", "pos": "n", "level": "B2"}, {"word": "manuscript", "pos": "n", "level": "C1"}, {"word": "marathon", "pos": "n", "level": "B2"}, {"word": "march", "pos": "n", "level": "C1"}, {"word": "margin", "pos": "n", "level": "B2"}, {"word": "marginal", "pos": "adj", "level": "C1"}, {"word": "marine", "pos": "adj", "level": "C1"}, {"word": "marker", "pos": "n", "level": "B2"}, {"word": "marketplace", "pos": "n", "level": "C1"}, {"word": "martial", "pos": "adj", "level": "B2"}, {"word": "mask", "pos": "n", "level": "C1"}, {"word": "massacre", "pos": "n", "level": "C1"}, {"word": "mate", "pos": "n", "level": "B2"}, {"word": "mathematical", "pos": "adj", "level": "C1"}, {"word": "mature", "pos": "adj", "level": "C1"}, {"word": "maximize", "pos": "v", "level": "C1"}, {"word": "meaningful", "pos": "adj", "level": "C1"}, {"word": "meantime", "pos": "n", "level": "C1"}, {"word": "mechanic", "pos": "n", "level": "B2"}, {"word": "mechanical", "pos": "adj", "level": "B2"}, {"word": "mechanism", "pos": "n", "level": "B2"}, {"word": "medal", "pos": "n", "level": "B2"}, {"word": "medication", "pos": "n", "level": "B2"}, {"word": "medieval", "pos": "adj", "level": "C1"}, {"word": "meditation", "pos": "n", "level": "C1"}, {"word": "melody", "pos": "n", "level": "C1"}, {"word": "membership", "pos": "n", "level": "B2"}, {"word": "memo", "pos": "n", "level": "C1"}, {"word": "memoir", "pos": "n", "level": "C1"}, {"word": "memorable", "pos": "adj", "level": "B2"}, {"word": "memorial", "pos": "n", "level": "C1"}, {"word": "mentor", "pos": "n", "level": "C1"}, {"word": "merchant", "pos": "n", "level": "C1"}, {"word": "mercy", "pos": "n", "level": "C1"}, {"word": "mere", "pos": "adj", "level": "C1"}, {"word": "merely", "pos": "adv", "level": "C1"}, {"word": "merge", "pos": "v", "level": "C1"}, {"word": "merger", "pos": "n", "level": "C1"}, {"word": "merit", "pos": "n", "level": "C1"}, {"word": "metaphor", "pos": "n", "level": "B2"}, {"word": "methodology", "pos": "n", "level": "C1"}, {"word": "midst", "pos": "n", "level": "C1"}, {"word": "migration", "pos": "n", "level": "C1"}, {"word": "militant", "pos": "n", "level": "C1"}, {"word": "militia", "pos": "n", "level": "C1"}, {"word": "mill", "pos": "n", "level": "C1"}, {"word": "miner", "pos": "n", "level": "B2"}, {"word": "minimal", "pos": "adj", "level": "C1"}, {"word": "minimize", "pos": "v", "level": "C1"}, {"word": "mining", "pos": "n", "level": "C1"}, {"word": "ministry", "pos": "n", "level": "C1"}, {"word": "minute", "pos": "adj", "level": "C1"}, {"word": "miracle", "pos": "n", "level": "C1"}, {"word": "miserable", "pos": "adj", "level": "B2"}, {"word": "misery", "pos": "n", "level": "C1"}, {"word": "misleading", "pos": "adj", "level": "C1"}, {"word": "missile", "pos": "n", "level": "C1"}, {"word": "mob", "pos": "n", "level": "C1"}, {"word": "mobile", "pos": "adj", "level": "C1"}, {"word": "mobility", "pos": "n", "level": "C1"}, {"word": "mobilize", "pos": "v", "level": "C1"}, {"word": "mode", "pos": "n", "level": "B2"}, {"word": "moderate", "pos": "adj", "level": "C1"}, {"word": "modest", "pos": "adj", "level": "B2"}, {"word": "modification", "pos": "n", "level": "C1"}, {"word": "module", "pos": "n", "level": "C1"}, {"word": "momentum", "pos": "n", "level": "C1"}, {"word": "monk", "pos": "n", "level": "C1"}, {"word": "monopoly", "pos": "n", "level": "C1"}, {"word": "monster", "pos": "n", "level": "B2"}, {"word": "monthly", "pos": "adj", "level": "B2"}, {"word": "monument", "pos": "n", "level": "B2"}, {"word": "morality", "pos": "n", "level": "C1"}, {"word": "moreover", "pos": "adv", "level": "B2"}, {"word": "mortgage", "pos": "n", "level": "B2"}, {"word": "mosque", "pos": "n", "level": "B2"}, {"word": "mosquito", "pos": "n", "level": "B2"}, {"word": "motion", "pos": "n", "level": "B2"}, {"word": "motivate", "pos": "v", "level": "B2"}, {"word": "motivation", "pos": "n", "level": "B2"}, {"word": "motive", "pos": "n", "level": "C1"}, {"word": "moving", "pos": "adj", "level": "B2"}, {"word": "municipal", "pos": "adj", "level": "C1"}, {"word": "mutual", "pos": "adj", "level": "C1"}, {"word": "myth", "pos": "n", "level": "B2"}, {"word": "naked", "pos": "adj", "level": "B2"}, {"word": "namely", "pos": "adv", "level": "C1"}, {"word": "nasty", "pos": "adj", "level": "B2"}, {"word": "nationwide", "pos": "adj", "level": "C1"}, {"word": "naval", "pos": "adj", "level": "C1"}, {"word": "navigation", "pos": "n", "level": "B2"}, {"word": "nearby", "pos": "adj", "level": "B2"}, {"word": "necessity", "pos": "n", "level": "B2"}, {"word": "neglect", "pos": "v", "level": "C1"}, {"word": "negotiate", "pos": "v", "level": "B2"}, {"word": "negotiation", "pos": "n", "level": "B2"}, {"word": "neighboring", "pos": "adj", "level": "C1"}, {"word": "nest", "pos": "n", "level": "C1"}, {"word": "net", "pos": "adj", "level": "C1"}, {"word": "neutral", "pos": "adj", "level": "B2"}, {"word": "newly", "pos": "adv", "level": "B2"}, {"word": "newsletter", "pos": "n", "level": "C1"}, {"word": "niche", "pos": "n", "level": "C1"}, {"word": "nickel", "pos": "n", "level": "B2"}, {"word": "noble", "pos": "adj", "level": "C1"}, {"word": "nod", "pos": "v", "level": "C1"}, {"word": "nominate", "pos": "v", "level": "C1"}, {"word": "nomination", "pos": "n", "level": "C1"}, {"word": "nominee", "pos": "n", "level": "C1"}, {"word": "nonetheless", "pos": "adv", "level": "C1"}, {"word": "nonprofit", "pos": "adj", "level": "C1"}, {"word": "nonsense", "pos": "n", "level": "C1"}, {"word": "noon", "pos": "n", "level": "C1"}, {"word": "norm", "pos": "n", "level": "B2"}, {"word": "notable", "pos": "adj", "level": "C1"}, {"word": "notably", "pos": "adv", "level": "C1"}, {"word": "notebook", "pos": "n", "level": "B2"}, {"word": "notify", "pos": "v", "level": "C1"}, {"word": "notorious", "pos": "adj", "level": "C1"}, {"word": "novel", "pos": "adj", "level": "C1"}, {"word": "novelist", "pos": "n", "level": "B2"}, {"word": "nowadays", "pos": "adv", "level": "B2"}, {"word": "nursery", "pos": "n", "level": "C1"}, {"word": "nursing", "pos": "adj", "level": "B2"}, {"word": "nutrition", "pos": "n", "level": "B2"}, {"word": "obesity", "pos": "n", "level": "B2"}, {"word": "objection", "pos": "n", "level": "C1"}, {"word": "oblige", "pos": "v", "level": "C1"}, {"word": "observer", "pos": "n", "level": "B2"}, {"word": "obsess", "pos": "v", "level": "C1"}, {"word": "obsession", "pos": "n", "level": "C1"}, {"word": "obstacle", "pos": "n", "level": "B2"}, {"word": "occasional", "pos": "adj", "level": "C1"}, {"word": "occupation", "pos": "n", "level": "B2"}, {"word": "occupy", "pos": "v", "level": "B2"}, {"word": "occurrence", "pos": "n", "level": "C1"}, {"word": "odds", "pos": "n", "level": "C1"}, {"word": "offender", "pos": "n", "level": "B2"}, {"word": "offering", "pos": "n", "level": "C1"}, {"word": "offspring", "pos": "n", "level": "C1"}, {"word": "ongoing", "pos": "adj", "level": "B2"}, {"word": "openly", "pos": "adv", "level": "B2"}, {"word": "opera", "pos": "n", "level": "B2"}, {"word": "operational", "pos": "adj", "level": "C1"}, {"word": "operator", "pos": "n", "level": "B2"}, {"word": "opt", "pos": "v", "level": "C1"}, {"word": "optical", "pos": "adj", "level": "C1"}, {"word": "optimism", "pos": "n", "level": "C1"}, {"word": "optimistic", "pos": "adj", "level": "B2"}, {"word": "oral", "pos": "adj", "level": "C1"}, {"word": "orchestra", "pos": "n", "level": "B2"}, {"word": "organic", "pos": "adj", "level": "B2"}, {"word": "organizational", "pos": "adj", "level": "C1"}, {"word": "orientation", "pos": "n", "level": "C1"}, {"word": "originate", "pos": "v", "level": "C1"}, {"word": "outbreak", "pos": "n", "level": "C1"}, {"word": "outfit", "pos": "n", "level": "B2"}, {"word": "outing", "pos": "n", "level": "C1"}, {"word": "outlet", "pos": "n", "level": "C1"}, {"word": "outlook", "pos": "n", "level": "C1"}, {"word": "output", "pos": "n", "level": "B2"}, {"word": "outrage", "pos": "n", "level": "C1"}, {"word": "outsider", "pos": "n", "level": "C1"}, {"word": "outstanding", "pos": "adj", "level": "B2"}, {"word": "overcome", "pos": "v", "level": "B2"}, {"word": "overlook", "pos": "v", "level": "C1"}, {"word": "overly", "pos": "adv", "level": "C1"}, {"word": "overnight", "pos": "adv", "level": "B2"}, {"word": "oversee", "pos": "v", "level": "C1"}, {"word": "overturn", "pos": "v", "level": "C1"}, {"word": "overwhelm", "pos": "v", "level": "C1"}, {"word": "overwhelming", "pos": "adj", "level": "C1"}, {"word": "ownership", "pos": "n", "level": "B2"}, {"word": "oxygen", "pos": "n", "level": "B2"}, {"word": "packet", "pos": "n", "level": "B2"}, {"word": "pad", "pos": "n", "level": "C1"}, {"word": "palm", "pos": "n", "level": "B2"}, {"word": "panic", "pos": "n", "level": "B2"}, {"word": "parade", "pos": "n", "level": "B2"}, {"word": "parallel", "pos": "adj", "level": "B2"}, {"word": "parameter", "pos": "n", "level": "C1"}, {"word": "parental", "pos": "adj", "level": "C1"}, {"word": "parliament", "pos": "n", "level": "C1"}, {"word": "partial", "pos": "adj", "level": "C1"}, {"word": "partially", "pos": "adv", "level": "C1"}, {"word": "participation", "pos": "n", "level": "B2"}, {"word": "partnership", "pos": "n", "level": "B2"}, {"word": "part-time", "pos": "adj./adv", "level": "B2"}, {"word": "passing", "pos": "n", "level": "C1"}, {"word": "passionate", "pos": "adj", "level": "B2"}, {"word": "passive", "pos": "adj", "level": "C1"}, {"word": "password", "pos": "n", "level": "B2"}, {"word": "pastor", "pos": "n", "level": "C1"}, {"word": "patch", "pos": "n", "level": "B2"}, {"word": "patent", "pos": "n", "level": "C1"}, {"word": "pathway", "pos": "n", "level": "C1"}, {"word": "patience", "pos": "n", "level": "B2"}, {"word": "patrol", "pos": "n", "level": "C1"}, {"word": "patron", "pos": "n", "level": "C1"}, {"word": "pause", "pos": "v", "level": "B2"}, {"word": "peak", "pos": "n", "level": "C1"}, {"word": "peasant", "pos": "n", "level": "C1"}, {"word": "peculiar", "pos": "adj", "level": "C1"}, {"word": "peer", "pos": "n", "level": "B2"}, {"word": "penalty", "pos": "n", "level": "B2"}, {"word": "pension", "pos": "n", "level": "C1"}, {"word": "perceive", "pos": "v", "level": "B2"}, {"word": "perception", "pos": "n", "level": "B2"}, {"word": "permanently", "pos": "adv", "level": "B2"}, {"word": "persist", "pos": "v", "level": "C1"}, {"word": "persistent", "pos": "adj", "level": "C1"}, {"word": "personnel", "pos": "n", "level": "C1"}, {"word": "petition", "pos": "n", "level": "C1"}, {"word": "pharmacy", "pos": "n", "level": "B2"}, {"word": "philosopher", "pos": "n", "level": "C1"}, {"word": "philosophical", "pos": "adj", "level": "C1"}, {"word": "physician", "pos": "n", "level": "B2"}, {"word": "pill", "pos": "n", "level": "B2"}, {"word": "pioneer", "pos": "n", "level": "C1"}, {"word": "pipeline", "pos": "n", "level": "C1"}, {"word": "pirate", "pos": "n", "level": "C1"}, {"word": "pit", "pos": "n", "level": "C1"}, {"word": "pity", "pos": "n", "level": "B2"}, {"word": "placement", "pos": "n", "level": "B2"}, {"word": "plea", "pos": "n", "level": "C1"}, {"word": "plead", "pos": "v", "level": "C1"}, {"word": "pledge", "pos": "v", "level": "C1"}, {"word": "plug", "pos": "v", "level": "C1"}, {"word": "plunge", "pos": "v", "level": "C1"}, {"word": "pole", "pos": "n", "level": "C1"}, {"word": "poll", "pos": "n", "level": "C1"}, {"word": "pond", "pos": "n", "level": "C1"}, {"word": "pop", "pos": "v", "level": "C1"}, {"word": "portfolio", "pos": "n", "level": "C1"}, {"word": "portion", "pos": "n", "level": "B2"}, {"word": "portray", "pos": "v", "level": "C1"}, {"word": "postpone", "pos": "v", "level": "C1"}, {"word": "postwar", "pos": "adj", "level": "C1"}, {"word": "potentially", "pos": "adv", "level": "B2"}, {"word": "practitioner", "pos": "n", "level": "C1"}, {"word": "preach", "pos": "v", "level": "C1"}, {"word": "precede", "pos": "v", "level": "B2"}, {"word": "precedent", "pos": "n", "level": "C1"}, {"word": "precious", "pos": "adj", "level": "B2"}, {"word": "precise", "pos": "adj", "level": "B2"}, {"word": "precisely", "pos": "adv", "level": "B2"}, {"word": "precision", "pos": "n", "level": "C1"}, {"word": "predator", "pos": "n", "level": "C1"}, {"word": "predecessor", "pos": "n", "level": "C1"}, {"word": "predictable", "pos": "adj", "level": "B2"}, {"word": "predominantly", "pos": "adv", "level": "C1"}, {"word": "preference", "pos": "n", "level": "B2"}, {"word": "pregnancy", "pos": "n", "level": "C1"}, {"word": "prejudice", "pos": "n", "level": "C1"}, {"word": "preliminary", "pos": "adj", "level": "C1"}, {"word": "premier", "pos": "n", "level": "C1"}, {"word": "premise", "pos": "n", "level": "C1"}, {"word": "premium", "pos": "n", "level": "C1"}, {"word": "prescribe", "pos": "v", "level": "C1"}, {"word": "prescription", "pos": "n", "level": "C1"}, {"word": "presently", "pos": "adv", "level": "C1"}, {"word": "preservation", "pos": "n", "level": "C1"}, {"word": "preside", "pos": "v", "level": "C1"}, {"word": "presidency", "pos": "n", "level": "C1"}, {"word": "presidential", "pos": "adj", "level": "B2"}, {"word": "prestigious", "pos": "adj", "level": "C1"}, {"word": "presumably", "pos": "adv", "level": "C1"}, {"word": "presume", "pos": "v", "level": "C1"}, {"word": "prevail", "pos": "v", "level": "C1"}, {"word": "prevalence", "pos": "n", "level": "C1"}, {"word": "prevention", "pos": "n", "level": "C1"}, {"word": "prey", "pos": "n", "level": "C1"}, {"word": "pride", "pos": "n", "level": "B2"}, {"word": "primarily", "pos": "adv", "level": "B2"}, {"word": "principal", "pos": "adj", "level": "C1"}, {"word": "prior", "pos": "adj", "level": "B2"}, {"word": "privatization", "pos": "n", "level": "C1"}, {"word": "privilege", "pos": "n", "level": "C1"}, {"word": "probability", "pos": "n", "level": "B2"}, {"word": "probable", "pos": "adj", "level": "B2"}, {"word": "probe", "pos": "n", "level": "C1"}, {"word": "problematic", "pos": "adj", "level": "C1"}, {"word": "proceed", "pos": "v", "level": "B2"}, {"word": "proceeding", "pos": "n", "level": "C1"}, {"word": "proceeds", "pos": "n", "level": "C1"}, {"word": "processing", "pos": "n", "level": "C1"}, {"word": "processor", "pos": "n", "level": "C1"}, {"word": "proclaim", "pos": "v", "level": "C1"}, {"word": "productive", "pos": "adj", "level": "C1"}, {"word": "productivity", "pos": "n", "level": "C1"}, {"word": "profitable", "pos": "adj", "level": "C1"}, {"word": "profound", "pos": "adj", "level": "C1"}, {"word": "programming", "pos": "n", "level": "B2"}, {"word": "progressive", "pos": "adj", "level": "B2"}, {"word": "prohibit", "pos": "v", "level": "B2"}, {"word": "projection", "pos": "n", "level": "C1"}, {"word": "prominent", "pos": "adj", "level": "C1"}, {"word": "promising", "pos": "adj", "level": "B2"}, {"word": "promotion", "pos": "n", "level": "B2"}, {"word": "prompt", "pos": "v", "level": "B2"}, {"word": "pronounced", "pos": "adj", "level": "C1"}, {"word": "propaganda", "pos": "n", "level": "C1"}, {"word": "proportion", "pos": "n", "level": "B2"}, {"word": "proposition", "pos": "n", "level": "C1"}, {"word": "prosecute", "pos": "v", "level": "C1"}, {"word": "prosecution", "pos": "n", "level": "C1"}, {"word": "prosecutor", "pos": "n", "level": "C1"}, {"word": "prospective", "pos": "adj", "level": "C1"}, {"word": "prosperity", "pos": "n", "level": "C1"}, {"word": "protective", "pos": "adj", "level": "C1"}, {"word": "protein", "pos": "n", "level": "B2"}, {"word": "protester", "pos": "n", "level": "B2"}, {"word": "protocol", "pos": "n", "level": "C1"}, {"word": "province", "pos": "n", "level": "C1"}, {"word": "provincial", "pos": "adj", "level": "C1"}, {"word": "provision", "pos": "n", "level": "C1"}, {"word": "provoke", "pos": "v", "level": "C1"}, {"word": "psychiatric", "pos": "adj", "level": "C1"}, {"word": "psychological", "pos": "adj", "level": "B2"}, {"word": "publicity", "pos": "n", "level": "B2"}, {"word": "publishing", "pos": "n", "level": "B2"}, {"word": "pulse", "pos": "n", "level": "C1"}, {"word": "pump", "pos": "v", "level": "C1"}, {"word": "punch", "pos": "n", "level": "C1"}, {"word": "punk", "pos": "n", "level": "B2"}, {"word": "purely", "pos": "adv", "level": "B2"}, {"word": "pursuit", "pos": "n", "level": "B2"}, {"word": "puzzle", "pos": "n", "level": "B2"}, {"word": "query", "pos": "n", "level": "C1"}, {"word": "quest", "pos": "n", "level": "C1"}, {"word": "questionnaire", "pos": "n", "level": "B2"}, {"word": "quota", "pos": "n", "level": "C1"}, {"word": "racial", "pos": "adj", "level": "B2"}, {"word": "racism", "pos": "n", "level": "B2"}, {"word": "racist", "pos": "adj", "level": "B2"}, {"word": "radar", "pos": "n", "level": "C1"}, {"word": "radiation", "pos": "n", "level": "B2"}, {"word": "radical", "pos": "adj", "level": "C1"}, {"word": "rage", "pos": "n", "level": "C1"}, {"word": "raid", "pos": "n", "level": "C1"}, {"word": "rail", "pos": "n", "level": "B2"}, {"word": "rally", "pos": "n", "level": "C1"}, {"word": "random", "pos": "adj", "level": "B2"}, {"word": "ranking", "pos": "n", "level": "C1"}, {"word": "rape", "pos": "n", "level": "C1"}, {"word": "rat", "pos": "n", "level": "B2"}, {"word": "rating", "pos": "n", "level": "B2"}, {"word": "ratio", "pos": "n", "level": "C1"}, {"word": "rational", "pos": "adj", "level": "C1"}, {"word": "ray", "pos": "n", "level": "C1"}, {"word": "readily", "pos": "adv", "level": "C1"}, {"word": "realization", "pos": "n", "level": "C1"}, {"word": "realm", "pos": "n", "level": "C1"}, {"word": "rear", "pos": "adj", "level": "C1"}, {"word": "reasonably", "pos": "adv", "level": "B2"}, {"word": "reasoning", "pos": "n", "level": "C1"}, {"word": "reassure", "pos": "v", "level": "C1"}, {"word": "rebel", "pos": "n", "level": "C1"}, {"word": "rebellion", "pos": "n", "level": "C1"}, {"word": "rebuild", "pos": "v", "level": "B2"}, {"word": "receiver", "pos": "n", "level": "B2"}, {"word": "recession", "pos": "n", "level": "B2"}, {"word": "recipient", "pos": "n", "level": "C1"}, {"word": "reckon", "pos": "v", "level": "B2"}, {"word": "recognition", "pos": "n", "level": "B2"}, {"word": "reconstruction", "pos": "n", "level": "C1"}, {"word": "recount", "pos": "v", "level": "C1"}, {"word": "recovery", "pos": "n", "level": "B2"}, {"word": "recruit", "pos": "v", "level": "B2"}, {"word": "recruitment", "pos": "n", "level": "C1"}, {"word": "referee", "pos": "n", "level": "B2"}, {"word": "referendum", "pos": "n", "level": "C1"}, {"word": "reflection", "pos": "n", "level": "C1"}, {"word": "reform", "pos": "n", "level": "C1"}, {"word": "refuge", "pos": "n", "level": "C1"}, {"word": "refugee", "pos": "n", "level": "B2"}, {"word": "refusal", "pos": "n", "level": "C1"}, {"word": "regain", "pos": "v", "level": "C1"}, {"word": "regardless", "pos": "adv", "level": "C1"}, {"word": "regime", "pos": "n", "level": "C1"}, {"word": "registration", "pos": "n", "level": "B2"}, {"word": "regulate", "pos": "v", "level": "B2"}, {"word": "regulator", "pos": "n", "level": "C1"}, {"word": "regulatory", "pos": "adj", "level": "C1"}, {"word": "rehabilitation", "pos": "n", "level": "C1"}, {"word": "reign", "pos": "n", "level": "C1"}, {"word": "reinforce", "pos": "v", "level": "B2"}, {"word": "rejection", "pos": "n", "level": "C1"}, {"word": "relevance", "pos": "n", "level": "C1"}, {"word": "reliability", "pos": "n", "level": "C1"}, {"word": "relieve", "pos": "v", "level": "B2"}, {"word": "relieved", "pos": "adj", "level": "B2"}, {"word": "reluctant", "pos": "adj", "level": "C1"}, {"word": "remainder", "pos": "n", "level": "C1"}, {"word": "remains", "pos": "n", "level": "C1"}, {"word": "remarkable", "pos": "adj", "level": "B2"}, {"word": "remarkably", "pos": "adv", "level": "B2"}, {"word": "remedy", "pos": "n", "level": "C1"}, {"word": "reminder", "pos": "n", "level": "C1"}, {"word": "removal", "pos": "n", "level": "C1"}, {"word": "render", "pos": "v", "level": "C1"}, {"word": "renew", "pos": "v", "level": "C1"}, {"word": "renowned", "pos": "adj", "level": "C1"}, {"word": "rental", "pos": "n", "level": "C1"}, {"word": "replacement", "pos": "n", "level": "C1"}, {"word": "reportedly", "pos": "adv", "level": "C1"}, {"word": "reporting", "pos": "n", "level": "B2"}, {"word": "representation", "pos": "n", "level": "C1"}, {"word": "reproduce", "pos": "v", "level": "C1"}, {"word": "reproduction", "pos": "n", "level": "C1"}, {"word": "republic", "pos": "n", "level": "C1"}, {"word": "resemble", "pos": "v", "level": "C1"}, {"word": "reside", "pos": "v", "level": "C1"}, {"word": "residence", "pos": "n", "level": "C1"}, {"word": "residential", "pos": "adj", "level": "C1"}, {"word": "residue", "pos": "n", "level": "C1"}, {"word": "resign", "pos": "v", "level": "B2"}, {"word": "resignation", "pos": "n", "level": "C1"}, {"word": "resistance", "pos": "n", "level": "C1"}, {"word": "resolution", "pos": "n", "level": "B2"}, {"word": "respective", "pos": "adj", "level": "C1"}, {"word": "respectively", "pos": "adv", "level": "C1"}, {"word": "restoration", "pos": "n", "level": "C1"}, {"word": "restore", "pos": "v", "level": "B2"}, {"word": "restraint", "pos": "n", "level": "C1"}, {"word": "restrict", "pos": "v", "level": "B2"}, {"word": "restriction", "pos": "n", "level": "B2"}, {"word": "resume", "pos": "v", "level": "C1"}, {"word": "résumé", "pos": "n", "level": "B2"}, {"word": "retail", "pos": "n", "level": "B2"}, {"word": "retirement", "pos": "n", "level": "B2"}, {"word": "retreat", "pos": "n", "level": "C1"}, {"word": "retrieve", "pos": "v", "level": "C1"}, {"word": "revelation", "pos": "n", "level": "C1"}, {"word": "revenge", "pos": "n", "level": "C1"}, {"word": "revenue", "pos": "n", "level": "B2"}, {"word": "reverse", "pos": "v", "level": "C1"}, {"word": "revision", "pos": "n", "level": "B2"}, {"word": "revival", "pos": "n", "level": "C1"}, {"word": "revive", "pos": "v", "level": "C1"}, {"word": "revolutionary", "pos": "adj", "level": "C1"}, {"word": "rhetoric", "pos": "n", "level": "C1"}, {"word": "ridiculous", "pos": "adj", "level": "B2"}, {"word": "rifle", "pos": "n", "level": "C1"}, {"word": "riot", "pos": "n", "level": "C1"}, {"word": "rip", "pos": "v", "level": "C1"}, {"word": "risky", "pos": "adj", "level": "B2"}, {"word": "ritual", "pos": "n", "level": "C1"}, {"word": "rival", "pos": "n", "level": "B2"}, {"word": "rob", "pos": "v", "level": "B2"}, {"word": "robbery", "pos": "n", "level": "B2"}, {"word": "robust", "pos": "adj", "level": "C1"}, {"word": "rock", "pos": "v", "level": "C1"}, {"word": "rocket", "pos": "n", "level": "B2"}, {"word": "rod", "pos": "n", "level": "C1"}, {"word": "romance", "pos": "n", "level": "B2"}, {"word": "rookie", "pos": "n", "level": "C1"}, {"word": "rose", "pos": "n", "level": "B2"}, {"word": "roster", "pos": "n", "level": "C1"}, {"word": "rotate", "pos": "v", "level": "C1"}, {"word": "rotation", "pos": "n", "level": "C1"}, {"word": "roughly", "pos": "adv", "level": "B2"}, {"word": "ruin", "pos": "v", "level": "B2"}, {"word": "ruling", "pos": "n", "level": "C1"}, {"word": "rumor", "pos": "n", "level": "C1"}, {"word": "sacred", "pos": "adj", "level": "C1"}, {"word": "sacrifice", "pos": "n", "level": "C1"}, {"word": "saint", "pos": "n", "level": "C1"}, {"word": "sake", "pos": "n", "level": "C1"}, {"word": "sanction", "pos": "n", "level": "C1"}, {"word": "satisfaction", "pos": "n", "level": "B2"}, {"word": "say", "pos": "n", "level": "C1"}, {"word": "scandal", "pos": "n", "level": "B2"}, {"word": "scare", "pos": "v", "level": "B2"}, {"word": "scattered", "pos": "adj", "level": "C1"}, {"word": "scenario", "pos": "n", "level": "B2"}, {"word": "scholar", "pos": "n", "level": "B2"}, {"word": "scholarship", "pos": "n", "level": "B2"}, {"word": "scope", "pos": "n", "level": "C1"}, {"word": "scratch", "pos": "v", "level": "B2"}, {"word": "screening", "pos": "n", "level": "B2"}, {"word": "screw", "pos": "v", "level": "C1"}, {"word": "scrutiny", "pos": "n", "level": "C1"}, {"word": "seal", "pos": "v", "level": "C1"}, {"word": "secondly", "pos": "adv", "level": "C1"}, {"word": "secular", "pos": "adj", "level": "C1"}, {"word": "seeker", "pos": "n", "level": "B2"}, {"word": "seemingly", "pos": "adv", "level": "C1"}, {"word": "segment", "pos": "n", "level": "C1"}, {"word": "seize", "pos": "v", "level": "C1"}, {"word": "seldom", "pos": "adv", "level": "C1"}, {"word": "selective", "pos": "adj", "level": "C1"}, {"word": "seminar", "pos": "n", "level": "B2"}, {"word": "sensation", "pos": "n", "level": "C1"}, {"word": "sensitivity", "pos": "n", "level": "C1"}, {"word": "sentiment", "pos": "n", "level": "C1"}, {"word": "separation", "pos": "n", "level": "C1"}, {"word": "serial", "pos": "adj", "level": "C1"}, {"word": "settlement", "pos": "n", "level": "C1"}, {"word": "settler", "pos": "n", "level": "B2"}, {"word": "setup", "pos": "n", "level": "C1"}, {"word": "severely", "pos": "adv", "level": "B2"}, {"word": "sexuality", "pos": "n", "level": "C1"}, {"word": "sexy", "pos": "adj", "level": "B2"}, {"word": "shaped", "pos": "adj", "level": "B2"}, {"word": "shareholder", "pos": "n", "level": "C1"}, {"word": "shatter", "pos": "v", "level": "C1"}, {"word": "shed", "pos": "v", "level": "C1"}, {"word": "sheer", "pos": "adj", "level": "C1"}, {"word": "shipping", "pos": "n", "level": "C1"}, {"word": "shocking", "pos": "adj", "level": "B2"}, {"word": "shoot", "pos": "n", "level": "C1"}, {"word": "shore", "pos": "n", "level": "B2"}, {"word": "shortage", "pos": "n", "level": "B2"}, {"word": "shortly", "pos": "adv", "level": "B2"}, {"word": "short-term", "pos": "adj", "level": "B2"}, {"word": "shrink", "pos": "v", "level": "C1"}, {"word": "shrug", "pos": "v", "level": "C1"}, {"word": "sibling", "pos": "n", "level": "B2"}, {"word": "sidewalk", "pos": "n", "level": "B2"}, {"word": "sigh", "pos": "v", "level": "C1"}, {"word": "signature", "pos": "n", "level": "B2"}, {"word": "significance", "pos": "n", "level": "B2"}, {"word": "simulate", "pos": "v", "level": "C1"}, {"word": "simulation", "pos": "n", "level": "C1"}, {"word": "simultaneously", "pos": "adv", "level": "C1"}, {"word": "sin", "pos": "n", "level": "C1"}, {"word": "situated", "pos": "adj", "level": "C1"}, {"word": "skeptical", "pos": "adj", "level": "C1"}, {"word": "sketch", "pos": "n", "level": "C1"}, {"word": "skilled", "pos": "adj", "level": "B2"}, {"word": "skip", "pos": "v", "level": "C1"}, {"word": "skull", "pos": "n", "level": "B2"}, {"word": "slam", "pos": "v", "level": "C1"}, {"word": "slap", "pos": "v", "level": "C1"}, {"word": "slash", "pos": "v", "level": "C1"}, {"word": "slavery", "pos": "n", "level": "C1"}, {"word": "slogan", "pos": "n", "level": "B2"}, {"word": "slot", "pos": "n", "level": "C1"}, {"word": "smash", "pos": "v", "level": "C1"}, {"word": "snap", "pos": "v", "level": "C1"}, {"word": "soak", "pos": "v", "level": "C1"}, {"word": "soar", "pos": "v", "level": "C1"}, {"word": "so-called", "pos": "adj", "level": "B2"}, {"word": "socialist", "pos": "adj", "level": "C1"}, {"word": "sole", "pos": "adj", "level": "C1"}, {"word": "solely", "pos": "adv", "level": "C1"}, {"word": "solidarity", "pos": "n", "level": "C1"}, {"word": "solo", "pos": "adj", "level": "C1"}, {"word": "somehow", "pos": "adv", "level": "B2"}, {"word": "sometime", "pos": "adv", "level": "B2"}, {"word": "sophisticated", "pos": "adj", "level": "B2"}, {"word": "sophomore", "pos": "n", "level": "C1"}, {"word": "sound", "pos": "adj", "level": "C1"}, {"word": "sovereignty", "pos": "n", "level": "C1"}, {"word": "spam", "pos": "n", "level": "C1"}, {"word": "span", "pos": "v", "level": "C1"}, {"word": "spare", "pos": "adj", "level": "C1"}, {"word": "spark", "pos": "v", "level": "C1"}, {"word": "specialize", "pos": "v", "level": "B1"}, {"word": "specialized", "pos": "adj", "level": "C1"}, {"word": "specification", "pos": "n", "level": "C1"}, {"word": "specify", "pos": "v", "level": "B2"}, {"word": "specimen", "pos": "n", "level": "C1"}, {"word": "spectacle", "pos": "n", "level": "C1"}, {"word": "spectacular", "pos": "adj", "level": "B2"}, {"word": "spectator", "pos": "n", "level": "B2"}, {"word": "spectrum", "pos": "n", "level": "C1"}, {"word": "speculate", "pos": "v", "level": "B2"}, {"word": "speculation", "pos": "n", "level": "B2"}, {"word": "spell", "pos": "n", "level": "C1"}, {"word": "sphere", "pos": "n", "level": "C1"}, {"word": "spice", "pos": "n", "level": "B2"}, {"word": "spill", "pos": "v", "level": "B2"}, {"word": "spin", "pos": "v", "level": "C1"}, {"word": "spine", "pos": "n", "level": "C1"}, {"word": "spite", "pos": "n", "level": "B2"}, {"word": "spoil", "pos": "v", "level": "B2"}, {"word": "spokesman", "pos": "n", "level": "B2"}, {"word": "spokesperson", "pos": "n", "level": "B2"}, {"word": "spokeswoman", "pos": "n", "level": "B2"}, {"word": "sponsorship", "pos": "n", "level": "B2"}, {"word": "spotlight", "pos": "n", "level": "C1"}, {"word": "spouse", "pos": "n", "level": "C1"}, {"word": "spy", "pos": "n", "level": "C1"}, {"word": "squad", "pos": "n", "level": "C1"}, {"word": "squeeze", "pos": "v", "level": "C1"}, {"word": "stab", "pos": "v", "level": "C1"}, {"word": "stability", "pos": "n", "level": "C1"}, {"word": "stabilize", "pos": "v", "level": "C1"}, {"word": "stake", "pos": "n", "level": "C1"}, {"word": "stall", "pos": "n", "level": "B2"}, {"word": "stance", "pos": "n", "level": "B2"}, {"word": "standing", "pos": "adj", "level": "C1"}, {"word": "stark", "pos": "adj", "level": "C1"}, {"word": "starve", "pos": "v", "level": "B2"}, {"word": "statistical", "pos": "adj", "level": "C1"}, {"word": "steadily", "pos": "adv", "level": "B2"}, {"word": "steam", "pos": "n", "level": "B2"}, {"word": "steer", "pos": "v", "level": "C1"}, {"word": "stem", "pos": "n", "level": "C1"}, {"word": "stereotype", "pos": "n", "level": "C1"}, {"word": "stimulate", "pos": "v", "level": "B2"}, {"word": "stimulus", "pos": "n", "level": "C1"}, {"word": "stir", "pos": "v", "level": "C1"}, {"word": "storage", "pos": "n", "level": "C1"}, {"word": "straightforward", "pos": "adj", "level": "C1"}, {"word": "strain", "pos": "n", "level": "C1"}, {"word": "strand", "pos": "n", "level": "C1"}, {"word": "strategic", "pos": "adj", "level": "C1"}, {"word": "strengthen", "pos": "v", "level": "B2"}, {"word": "strictly", "pos": "adv", "level": "B2"}, {"word": "striking", "pos": "adj", "level": "B2"}, {"word": "strip", "pos": "n", "level": "C1"}, {"word": "strip", "pos": "v", "level": "C1"}, {"word": "strive", "pos": "v", "level": "C1"}, {"word": "stroke", "pos": "n", "level": "B2"}, {"word": "structural", "pos": "adj", "level": "C1"}, {"word": "stumble", "pos": "v", "level": "C1"}, {"word": "stun", "pos": "v", "level": "C1"}, {"word": "stunning", "pos": "adj", "level": "B2"}, {"word": "submission", "pos": "n", "level": "C1"}, {"word": "subscriber", "pos": "n", "level": "C1"}, {"word": "subscription", "pos": "n", "level": "C1"}, {"word": "subsequent", "pos": "adj", "level": "B2"}, {"word": "subsequently", "pos": "adv", "level": "B2"}, {"word": "subsidy", "pos": "n", "level": "C1"}, {"word": "substantial", "pos": "adj", "level": "C1"}, {"word": "substantially", "pos": "adv", "level": "C1"}, {"word": "substitute", "pos": "n", "level": "C1"}, {"word": "substitution", "pos": "n", "level": "C1"}, {"word": "subtle", "pos": "adj", "level": "C1"}, {"word": "suburb", "pos": "n", "level": "B2"}, {"word": "suburban", "pos": "adj", "level": "C1"}, {"word": "succession", "pos": "n", "level": "C1"}, {"word": "successive", "pos": "adj", "level": "C1"}, {"word": "successor", "pos": "n", "level": "C1"}, {"word": "suck", "pos": "v", "level": "C1"}, {"word": "sue", "pos": "v", "level": "C1"}, {"word": "suffering", "pos": "n", "level": "B2"}, {"word": "sufficient", "pos": "adj", "level": "B2"}, {"word": "sufficiently", "pos": "adv", "level": "B2"}, {"word": "suicide", "pos": "n", "level": "C1"}, {"word": "suite", "pos": "n", "level": "C1"}, {"word": "summit", "pos": "n", "level": "C1"}, {"word": "super", "pos": "adj", "level": "B2"}, {"word": "superb", "pos": "adj", "level": "C1"}, {"word": "superintendent", "pos": "n", "level": "C1"}, {"word": "superior", "pos": "adj", "level": "C1"}, {"word": "supervise", "pos": "v", "level": "C1"}, {"word": "supervision", "pos": "n", "level": "C1"}, {"word": "supervisor", "pos": "n", "level": "C1"}, {"word": "supplement", "pos": "n", "level": "C1"}, {"word": "supportive", "pos": "adj", "level": "C1"}, {"word": "supposedly", "pos": "adv", "level": "C1"}, {"word": "suppress", "pos": "v", "level": "C1"}, {"word": "supreme", "pos": "adj", "level": "C1"}, {"word": "surge", "pos": "n", "level": "C1"}, {"word": "surgeon", "pos": "n", "level": "B2"}, {"word": "surgical", "pos": "adj", "level": "C1"}, {"word": "surplus", "pos": "n", "level": "C1"}, {"word": "surrender", "pos": "v", "level": "C1"}, {"word": "surveillance", "pos": "n", "level": "C1"}, {"word": "survival", "pos": "n", "level": "B2"}, {"word": "survivor", "pos": "n", "level": "B2"}, {"word": "suspend", "pos": "v", "level": "B2"}, {"word": "suspension", "pos": "n", "level": "C1"}, {"word": "suspicion", "pos": "n", "level": "C1"}, {"word": "suspicious", "pos": "adj", "level": "C1"}, {"word": "sustain", "pos": "v", "level": "C1"}, {"word": "sustainable", "pos": "adj", "level": "B2"}, {"word": "swallow", "pos": "v", "level": "B2"}, {"word": "swing", "pos": "v", "level": "C1"}, {"word": "sword", "pos": "n", "level": "C1"}, {"word": "symbolic", "pos": "adj", "level": "C1"}, {"word": "sympathetic", "pos": "adj", "level": "B2"}, {"word": "syndrome", "pos": "n", "level": "C1"}, {"word": "synthesis", "pos": "n", "level": "C1"}, {"word": "systematic", "pos": "adj", "level": "C1"}, {"word": "tackle", "pos": "v", "level": "C1"}, {"word": "tactic", "pos": "n", "level": "C1"}, {"word": "tactical", "pos": "adj", "level": "C1"}, {"word": "tag", "pos": "n", "level": "B2"}, {"word": "tap", "pos": "v", "level": "B2"}, {"word": "taxpayer", "pos": "n", "level": "C1"}, {"word": "technological", "pos": "adj", "level": "B2"}, {"word": "teen", "pos": "n", "level": "B2"}, {"word": "temple", "pos": "n", "level": "B2"}, {"word": "temporarily", "pos": "adv", "level": "B2"}, {"word": "tempt", "pos": "v", "level": "C1"}, {"word": "tenant", "pos": "n", "level": "C1"}, {"word": "tendency", "pos": "n", "level": "B2"}, {"word": "tender", "pos": "adj", "level": "C1"}, {"word": "tension", "pos": "n", "level": "B2"}, {"word": "tenure", "pos": "n", "level": "C1"}, {"word": "terminal", "pos": "n", "level": "C1"}, {"word": "terminate", "pos": "v", "level": "C1"}, {"word": "terms", "pos": "n", "level": "B2"}, {"word": "terrain", "pos": "n", "level": "C1"}, {"word": "terribly", "pos": "adv", "level": "B2"}, {"word": "terrific", "pos": "adj", "level": "C1"}, {"word": "terrify", "pos": "v", "level": "B2"}, {"word": "territory", "pos": "n", "level": "B2"}, {"word": "terror", "pos": "n", "level": "B2"}, {"word": "terrorism", "pos": "n", "level": "B2"}, {"word": "terrorist", "pos": "n", "level": "B2"}, {"word": "testify", "pos": "v", "level": "C1"}, {"word": "testimony", "pos": "n", "level": "C1"}, {"word": "testing", "pos": "n", "level": "B2"}, {"word": "textbook", "pos": "n", "level": "B2"}, {"word": "texture", "pos": "n", "level": "C1"}, {"word": "thankfully", "pos": "adv", "level": "C1"}, {"word": "theatrical", "pos": "adj", "level": "C1"}, {"word": "theft", "pos": "n", "level": "B2"}, {"word": "theology", "pos": "n", "level": "C1"}, {"word": "theoretical", "pos": "adj", "level": "C1"}, {"word": "therapist", "pos": "n", "level": "B2"}, {"word": "thereafter", "pos": "adv", "level": "C1"}, {"word": "thereby", "pos": "adv", "level": "C1"}, {"word": "thesis", "pos": "n", "level": "B2"}, {"word": "thorough", "pos": "adj", "level": "B2"}, {"word": "thoroughly", "pos": "adv", "level": "B2"}, {"word": "thoughtful", "pos": "adj", "level": "C1"}, {"word": "thought-provoking", "pos": "adj", "level": "C1"}, {"word": "thread", "pos": "n", "level": "C1"}, {"word": "threshold", "pos": "n", "level": "C1"}, {"word": "thrilled", "pos": "adj", "level": "C1"}, {"word": "thrive", "pos": "v", "level": "C1"}, {"word": "thumb", "pos": "n", "level": "B2"}, {"word": "tide", "pos": "n", "level": "C1"}, {"word": "tighten", "pos": "v", "level": "C1"}, {"word": "timber", "pos": "n", "level": "C1"}, {"word": "timely", "pos": "adj", "level": "C1"}, {"word": "timing", "pos": "n", "level": "B2"}, {"word": "tissue", "pos": "n", "level": "B2"}, {"word": "tobacco", "pos": "n", "level": "C1"}, {"word": "tolerance", "pos": "n", "level": "C1"}, {"word": "tolerate", "pos": "v", "level": "C1"}, {"word": "toll", "pos": "n", "level": "C1"}, {"word": "top", "pos": "v", "level": "C1"}, {"word": "torture", "pos": "n", "level": "C1"}, {"word": "toss", "pos": "v", "level": "C1"}, {"word": "total", "pos": "v", "level": "C1"}, {"word": "tournament", "pos": "n", "level": "B2"}, {"word": "toxic", "pos": "adj", "level": "C1"}, {"word": "trace", "pos": "v", "level": "B2"}, {"word": "trademark", "pos": "n", "level": "C1"}, {"word": "trading", "pos": "n", "level": "B2"}, {"word": "tragedy", "pos": "n", "level": "B2"}, {"word": "tragic", "pos": "adj", "level": "B2"}, {"word": "trail", "pos": "n", "level": "C1"}, {"word": "trailer", "pos": "n", "level": "C1"}, {"word": "trait", "pos": "n", "level": "B2"}, {"word": "transaction", "pos": "n", "level": "C1"}, {"word": "transcript", "pos": "n", "level": "C1"}, {"word": "transformation", "pos": "n", "level": "C1"}, {"word": "transit", "pos": "n", "level": "C1"}, {"word": "transmission", "pos": "n", "level": "C1"}, {"word": "transmit", "pos": "v", "level": "B2"}, {"word": "transparency", "pos": "n", "level": "C1"}, {"word": "transparent", "pos": "adj", "level": "C1"}, {"word": "trap", "pos": "v", "level": "B2"}, {"word": "trauma", "pos": "n", "level": "C1"}, {"word": "treasure", "pos": "n", "level": "B2"}, {"word": "treaty", "pos": "n", "level": "C1"}, {"word": "tremendous", "pos": "adj", "level": "C1"}, {"word": "tribal", "pos": "adj", "level": "C1"}, {"word": "tribe", "pos": "n", "level": "B2"}, {"word": "tribute", "pos": "n", "level": "C1"}, {"word": "trigger", "pos": "v", "level": "C1"}, {"word": "trillion", "pos": "number", "level": "B2"}, {"word": "trio", "pos": "n", "level": "C1"}, {"word": "triumph", "pos": "n", "level": "C1"}, {"word": "troop", "pos": "n", "level": "B2"}, {"word": "trophy", "pos": "n", "level": "C1"}, {"word": "troubled", "pos": "adj", "level": "C1"}, {"word": "trustee", "pos": "n", "level": "C1"}, {"word": "tsunami", "pos": "n", "level": "B2"}, {"word": "tuition", "pos": "n", "level": "C1"}, {"word": "tumor", "pos": "n", "level": "C1"}, {"word": "turnout", "pos": "n", "level": "C1"}, {"word": "turnover", "pos": "n", "level": "C1"}, {"word": "twist", "pos": "v", "level": "C1"}, {"word": "ultimate", "pos": "adj", "level": "B2"}, {"word": "unacceptable", "pos": "adj", "level": "B2"}, {"word": "uncertainty", "pos": "n", "level": "B2"}, {"word": "unconstitutional", "pos": "adj", "level": "C1"}, {"word": "undergo", "pos": "v", "level": "B2"}, {"word": "undergraduate", "pos": "n", "level": "C1"}, {"word": "underlying", "pos": "adj", "level": "C1"}, {"word": "undermine", "pos": "v", "level": "C1"}, {"word": "undertake", "pos": "v", "level": "B2"}, {"word": "undoubtedly", "pos": "adv", "level": "C1"}, {"word": "unfold", "pos": "v", "level": "B2"}, {"word": "unfortunate", "pos": "adj", "level": "B2"}, {"word": "unify", "pos": "v", "level": "C1"}, {"word": "unite", "pos": "v", "level": "B2"}, {"word": "unity", "pos": "n", "level": "B2"}, {"word": "universal", "pos": "adj", "level": "B2"}, {"word": "unprecedented", "pos": "adj", "level": "C1"}, {"word": "unveil", "pos": "v", "level": "C1"}, {"word": "upcoming", "pos": "adj", "level": "C1"}, {"word": "upgrade", "pos": "v", "level": "C1"}, {"word": "uphold", "pos": "v", "level": "C1"}, {"word": "urgent", "pos": "adj", "level": "B2"}, {"word": "usage", "pos": "n", "level": "B2"}, {"word": "useless", "pos": "adj", "level": "B2"}, {"word": "utility", "pos": "n", "level": "C1"}, {"word": "utilize", "pos": "v", "level": "C1"}, {"word": "utterly", "pos": "adv", "level": "C1"}, {"word": "vacuum", "pos": "n", "level": "C1"}, {"word": "vague", "pos": "adj", "level": "C1"}, {"word": "valid", "pos": "adj", "level": "B2"}, {"word": "validity", "pos": "n", "level": "C1"}, {"word": "vanish", "pos": "v", "level": "C1"}, {"word": "variable", "pos": "n", "level": "C1"}, {"word": "variation", "pos": "n", "level": "B2"}, {"word": "varied", "pos": "adj", "level": "C1"}, {"word": "vein", "pos": "n", "level": "C1"}, {"word": "venture", "pos": "n", "level": "C1"}, {"word": "verbal", "pos": "adj", "level": "C1"}, {"word": "verdict", "pos": "n", "level": "C1"}, {"word": "verify", "pos": "v", "level": "C1"}, {"word": "verse", "pos": "n", "level": "C1"}, {"word": "versus", "pos": "conj", "level": "C1"}, {"word": "vertical", "pos": "adj", "level": "B2"}, {"word": "vessel", "pos": "n", "level": "C1"}, {"word": "veteran", "pos": "n", "level": "C1"}, {"word": "viable", "pos": "adj", "level": "C1"}, {"word": "vibrant", "pos": "adj", "level": "C1"}, {"word": "vice", "pos": "n", "level": "C1"}, {"word": "vicious", "pos": "adj", "level": "C1"}, {"word": "viewpoint", "pos": "n", "level": "B2"}, {"word": "violate", "pos": "v", "level": "C1"}, {"word": "violation", "pos": "n", "level": "C1"}, {"word": "virtue", "pos": "n", "level": "C1"}, {"word": "visa", "pos": "n", "level": "B2"}, {"word": "visible", "pos": "adj", "level": "B2"}, {"word": "vocal", "pos": "adj", "level": "C1"}, {"word": "voluntary", "pos": "adj", "level": "B2"}, {"word": "voting", "pos": "n", "level": "B2"}, {"word": "vow", "pos": "v", "level": "C1"}, {"word": "vulnerability", "pos": "n", "level": "C1"}, {"word": "vulnerable", "pos": "adj", "level": "C1"}, {"word": "wander", "pos": "v", "level": "B2"}, {"word": "ward", "pos": "n", "level": "C1"}, {"word": "warehouse", "pos": "n", "level": "C1"}, {"word": "warfare", "pos": "n", "level": "C1"}, {"word": "warming", "pos": "n", "level": "B2"}, {"word": "warrant", "pos": "n", "level": "C1"}, {"word": "warrior", "pos": "n", "level": "C1"}, {"word": "weaken", "pos": "v", "level": "C1"}, {"word": "weave", "pos": "v", "level": "C1"}, {"word": "weed", "pos": "n", "level": "C1"}, {"word": "weekly", "pos": "adj", "level": "B2"}, {"word": "weird", "pos": "adj", "level": "B2"}, {"word": "welfare", "pos": "n", "level": "B2"}, {"word": "well", "pos": "n", "level": "C1"}, {"word": "well-being", "pos": "n", "level": "C1"}, {"word": "whatsoever", "pos": "adv", "level": "C1"}, {"word": "wheat", "pos": "n", "level": "B2"}, {"word": "whereby", "pos": "adv", "level": "C1"}, {"word": "whip", "pos": "v", "level": "C1"}, {"word": "whoever", "pos": "pron", "level": "B2"}, {"word": "wholly", "pos": "adv", "level": "C1"}, {"word": "widen", "pos": "v", "level": "C1"}, {"word": "widespread", "pos": "adj", "level": "B2"}, {"word": "widow", "pos": "n", "level": "C1"}, {"word": "width", "pos": "n", "level": "C1"}, {"word": "willingness", "pos": "n", "level": "C1"}, {"word": "wipe", "pos": "v", "level": "C1"}, {"word": "wisdom", "pos": "n", "level": "B2"}, {"word": "wit", "pos": "n", "level": "C1"}, {"word": "withdraw", "pos": "v", "level": "B2"}, {"word": "withdrawal", "pos": "n", "level": "C1"}, {"word": "wolf", "pos": "n", "level": "B2"}, {"word": "workforce", "pos": "n", "level": "B2"}, {"word": "workout", "pos": "n", "level": "C1"}, {"word": "workplace", "pos": "n", "level": "B2"}, {"word": "workshop", "pos": "n", "level": "B2"}, {"word": "worm", "pos": "n", "level": "B2"}, {"word": "worship", "pos": "n", "level": "C1"}, {"word": "worthwhile", "pos": "adj", "level": "C1"}, {"word": "worthy", "pos": "adj", "level": "C1"}, {"word": "wrist", "pos": "n", "level": "B2"}, {"word": "yell", "pos": "v", "level": "C1"}, {"word": "yield", "pos": "n", "level": "C1"}]</script>
+<script id="word-data" type="application/json">[
+  {"word": "abolish", "pos": "v", "level": "C1", "meaning": "To officially end a law, rule, or system.", "synonyms": "stop, end, cancel", "example": "The school wants to abolish homework on weekends."},
+  {"word": "absorb", "pos": "v", "level": "B2", "meaning": "To take in liquid, gas, or another substance.", "synonyms": "take in, soak up, drink in", "example": "Plants absorb water from the ground."},
+  {"word": "abstract", "pos": "adj", "level": "B2", "meaning": "Expressing an idea or feeling rather than a real object.", "synonyms": "general, idea-based, not real", "example": "\"Love\" is an abstract word, you cannot touch it."},
+  {"word": "absurd", "pos": "adj", "level": "C1", "meaning": "Extremely silly, unreasonable, or not logical.", "synonyms": "silly, foolish, crazy", "example": "It is absurd to go out in the heavy rain without a coat."},
+  {"word": "accelerate", "pos": "v", "level": "C1", "meaning": "To start moving faster or to make something happen sooner.", "synonyms": "speed up, go faster, quicken", "example": "You need to push the pedal to accelerate the car."},
+  {"word": "accessible", "pos": "adj", "level": "C1", "meaning": "Easy to find, enter, reach, or talk to.", "synonyms": "easy to reach, available, open", "example": "The school library is accessible to all students."},
+  {"word": "accommodate", "pos": "v", "level": "B2", "meaning": "To provide a place to stay, sit, or sleep for someone.", "synonyms": "hold, house, fit", "example": "This big hotel can accommodate more than two hundred guests."},
+  {"word": "accomplish", "pos": "v", "level": "B2", "meaning": "To finish doing something successfully.", "synonyms": "complete, achieve, finish", "example": "You can accomplish your goals if you work hard."},
+  {"word": "accumulate", "pos": "v", "level": "C1", "meaning": "To collect more and more of something over time.", "synonyms": "collect, gather, build up", "example": "Dust can accumulate quickly on these old shelves."},
+  {"word": "accuracy", "pos": "n", "level": "B2", "meaning": "The state of being correct, exact, or true.", "synonyms": "correctness, truth, exactness", "example": "The teacher checked the accuracy of my math answers."},
+  {"word": "advocate", "pos": "v", "level": "C1", "meaning": "To publicly support a plan, idea, or way of doing things.", "synonyms": "support, favor, help", "example": "Many doctors advocate eating fresh vegetables every day."},
+  {"word": "agenda", "pos": "n", "level": "B2", "meaning": "A list of things that people need to talk about in a meeting.", "synonyms": "plan, list, schedule", "example": "What is the next item on our meeting agenda?"},
+  {"word": "allege", "pos": "v", "level": "C1", "meaning": "To say that someone did something bad, without proof yet.", "synonyms": "claim, say, state", "example": "Some people allege that he stole the money."},
+  {"word": "alliance", "pos": "n", "level": "C1", "meaning": "A group of countries or people working together to help each other.", "synonyms": "group, union, team", "example": "The two companies formed an alliance to sell new products."},
+  {"word": "allocate", "pos": "v", "level": "C1", "meaning": "To give a share of money, time, or space for a special use.", "synonyms": "give, share out, assign", "example": "The principal will allocate some money to buy new books."},
+  {"word": "ambiguous", "pos": "adj", "level": "C1", "meaning": "Having more than one possible meaning, or not clear.", "synonyms": "unclear, confusing, vague", "example": "His answer was ambiguous, so we did not know what to do."},
+  {"word": "amend", "pos": "v", "level": "C1", "meaning": "To change a law, rule, or written statement slightly to make it better.", "synonyms": "change, correct, fix", "example": "We need to amend the rules of our club."},
+  {"word": "anticipate", "pos": "v", "level": "B2", "meaning": "To expect that something will happen and prepare for it.", "synonyms": "expect, look forward to, foresee", "example": "We anticipate that many people will come to the party."},
+  {"word": "bias", "pos": "n", "level": "B2", "meaning": "Supporting or opposing one person or group in an unfair way.", "synonyms": "unfairness, preference, prejudice", "example": "The judge showed bias toward his friend during the trial."},
+  {"word": "bizarre", "pos": "adj", "level": "C1", "meaning": "Very strange, unusual, or weird.", "synonyms": "weird, strange, odd", "example": "He wore a bizarre costume to the wedding."},
+  {"word": "boost", "pos": "v", "level": "B2", "meaning": "To make something increase, become better, or stronger.", "synonyms": "lift, raise, improve", "example": "Getting a good grade will boost your confidence."},
+  {"word": "coincide", "pos": "v", "level": "C1", "meaning": "To happen at the exact same time as something else.", "synonyms": "happen together, match, meet", "example": "My birthday and the school holiday coincide this year."},
+  {"word": "collaborate", "pos": "v", "level": "C1", "meaning": "To work together with someone to achieve something.", "synonyms": "work together, team up, cooperate", "example": "The students will collaborate on a science project."},
+  {"word": "compel", "pos": "v", "level": "C1", "meaning": "To force someone to do something.", "synonyms": "force, make, require", "example": "Heavy rain will compel us to stay at home today."},
+  {"word": "concede", "pos": "v", "level": "C1", "meaning": "To admit that something is true, even if you do not want to.", "synonyms": "admit, accept, give in", "example": "He had to concede that his friend was right."},
+  {"word": "contradict", "pos": "v", "level": "C1", "meaning": "To say that what someone else said is wrong or the opposite.", "synonyms": "disagree, deny, oppose", "example": "The two reports contradict each other, so we don't know the truth."},
+  {"word": "decline", "pos": "v", "level": "B2", "meaning": "To become smaller, fewer, or weaker; or to politely say \"no\".", "synonyms": "drop, go down, refuse", "example": "The price of apples will decline in summer."},
+  {"word": "depict", "pos": "v", "level": "C1", "meaning": "To show someone or something in a picture, painting, or story.", "synonyms": "show, draw, describe", "example": "The old painting tried to depict a royal family."},
+  {"word": "derive", "pos": "v", "level": "B2", "meaning": "To get something from a specific source.", "synonyms": "get, take from, obtain", "example": "Many English words derive from Latin."},
+  {"word": "devastate", "pos": "v", "level": "C1", "meaning": "To completely destroy a place or make someone very sad.", "synonyms": "ruin, destroy, upset", "example": "A big fire can devastate a beautiful green forest."},
+  {"word": "differentiate", "pos": "v", "level": "C1", "meaning": "To see or show the difference between two or more things.", "synonyms": "tell apart, separate, distinguish", "example": "It is hard to differentiate between the two baby birds."},
+  {"word": "diminish", "pos": "v", "level": "C1", "meaning": "To make something become smaller or less important.", "synonyms": "reduce, decrease, lessen", "example": "The medicine helped to diminish the pain in my head."},
+  {"word": "disclose", "pos": "v", "level": "C1", "meaning": "To share new or secret information with other people.", "synonyms": "tell, reveal, show", "example": "She refused to disclose the name of her secret friend."},
+  {"word": "distort", "pos": "v", "level": "C1", "meaning": "To change the shape or meaning of something so it is false.", "synonyms": "twist, change, bend", "example": "Do not distort the truth to make yourself look good."},
+  {"word": "diverse", "pos": "adj", "level": "B2", "meaning": "Including many different types of people or things.", "synonyms": "varied, different, mixed", "example": "The city has a very diverse population of people."},
+  {"word": "elaborate", "pos": "adj", "level": "C1", "meaning": "Having a lot of details and carefully planned.", "synonyms": "detailed, complex, fancy", "example": "They made an elaborate plan for the surprise party."},
+  {"word": "elegant", "pos": "adj", "level": "B2", "meaning": "Graceful, attractive, and beautiful in a simple way.", "synonyms": "beautiful, graceful, stylish", "example": "She wore an elegant black dress to the dinner."},
+  {"word": "eliminate", "pos": "v", "level": "B2", "meaning": "To completely remove or get rid of something.", "synonyms": "remove, delete, take away", "example": "You should eliminate sugary drinks from your meals."},
+  {"word": "embrace", "pos": "v", "level": "B2", "meaning": "To hold someone closely in your arms, or to accept a new idea gladly.", "synonyms": "hug, accept, welcome", "example": "They love to embrace new technologies in their class."},
+  {"word": "empirical", "pos": "adj", "level": "C1", "meaning": "Based on real experience or facts, not just ideas or theories.", "synonyms": "factual, real, proven", "example": "Scientists need empirical proof to show their ideas are right."},
+  {"word": "endeavor", "pos": "n", "level": "C1", "meaning": "An earnest effort or attempt to do something difficult.", "synonyms": "effort, try, attempt", "example": "Learning a new language is a great endeavor."},
+  {"word": "endorse", "pos": "v", "level": "C1", "meaning": "To publicly say that you support or agree with someone or something.", "synonyms": "support, approve, back", "example": "Famous athletes often endorse sports shoes on television."},
+  {"word": "enhance", "pos": "v", "level": "C1", "meaning": "To improve the quality, amount, or strength of something.", "synonyms": "improve, add to, build up", "example": "You can use fresh spices to enhance the taste of your food."},
+  {"word": "equivalent", "pos": "adj", "level": "B2", "meaning": "Equal in value, size, or meaning to something else.", "synonyms": "equal, same, like", "example": "A ten-dollar bill is equivalent to two five-dollar bills."},
+  {"word": "evaluate", "pos": "v", "level": "B2", "meaning": "To carefully judge the quality, cost, or value of something.", "synonyms": "judge, test, check", "example": "The teacher will evaluate our speaking skills today."},
+  {"word": "exaggerate", "pos": "v", "level": "C1", "meaning": "To describe something as larger, better, or worse than it really is.", "synonyms": "overstate, blow up, boast", "example": "He likes to exaggerate when he tells stories about fishing."},
+  {"word": "exploit", "pos": "v", "level": "B2", "meaning": "To use something or someone in an unfair or selfish way.", "synonyms": "use, abuse, take advantage of", "example": "Some bad bosses exploit their workers by paying too little."},
+  {"word": "facilitate", "pos": "v", "level": "C1", "meaning": "To make an action or a process easier or faster.", "synonyms": "help, ease, make easy", "example": "Clear road signs will facilitate driving in the city."},
+  {"word": "fluctuate", "pos": "v", "level": "C1", "meaning": "To change up and down frequently, rather than staying same.", "synonyms": "change, shift, wave", "example": "The temperature can fluctuate a lot during spring."},
+  {"word": "foster", "pos": "v", "level": "C1", "meaning": "To help something grow, develop, or improve over time.", "synonyms": "encourage, feed, support", "example": "The school hopes to foster a love for reading books."}
+]</script>
 <script type="module">
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
@@ -514,6 +819,14 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
 
 (function(){
   "use strict";
+
+  // Apply theme class immediately to prevent color flash
+  try {
+    var storedTheme = window.localStorage.getItem('lexicon-theme');
+    if (storedTheme === 'dark' || (!storedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.body.classList.add('dark');
+    }
+  } catch(e){}
 
   /* ---------------- block pinch / double-tap zoom ---------------- */
   document.addEventListener('gesturestart', function(e){ e.preventDefault(); });
@@ -535,10 +848,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   /* ---------------- auth state ---------------- */
   var currentUser = null; // set once Firebase confirms the session
 
-  /* ---------------- storage helpers ----------------
-     Dictionary lookups are just a browser-side API cache, so they stay in
-     localStorage (fine to lose per device). A user's actual progress is
-     the thing that must follow them anywhere, so that goes to Firestore. */
+  /* ---------------- storage helpers ---------------- */
   var memoryFallback = {};
   async function storeGet(key){
     try{
@@ -559,8 +869,22 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     streak: 0
   };
 
+  var userEnglishLevel = 'all';
+  var userWordsPerDay = 10;
+
   // SAFETY GUARD: Prevents blank local values from overwriting your database
   var isProgressLoaded = false;
+
+  function wordsLearnedTodayCount(){
+    var todayStr = new Date().toISOString().split('T')[0];
+    var count = 0;
+    for (var w in Progress.learned) {
+      if (Progress.learned[w] && Progress.learned[w].learnedAt === todayStr) {
+        count++;
+      }
+    }
+    return count;
+  }
 
   function applyProgressSnapshot(data){
     if(!data) return;
@@ -569,6 +893,8 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     Progress.index = parsed.index || 0;
     Progress.score = parsed.score || 0;
     Progress.streak = parsed.streak || 0;
+    userEnglishLevel = data.englishLevel || 'all';
+    userWordsPerDay = parseInt(data.wordsPerDay, 10) || 10;
   }
 
   function withTimeout(promise, ms){
@@ -628,76 +954,32 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     toastTimer = setTimeout(function(){ el.style.display = 'none'; }, 5000);
   }
 
-  /* ---------------- dictionary lookup (runs in the user's browser) ---------------- */
+  /* ---------------- dictionary lookup (runs offline / client-side) ---------------- */
   async function getWordInfo(entry){
     var cacheKey = 'dict:' + entry.word;
     var cached = await storeGet(cacheKey);
     if(cached){
-      try{ return JSON.parse(cached); }catch(e){}
+      try{
+        var parsed = JSON.parse(cached);
+        if(!parsed.synonyms && entry.synonyms){
+          parsed.synonyms = entry.synonyms;
+        }
+        return parsed;
+      }catch(e){}
     }
     var info = {
       word: entry.word, pos: entry.pos, level: entry.level,
-      meaning: null, example: null, audio: null, phonetic: null, arabic: null
+      meaning: entry.meaning || null, synonyms: entry.synonyms || null, example: entry.example || null, audio: null, phonetic: null, arabic: null
     };
 
-    function fetchWithTimeout(url, ms){
-      var controller = new AbortController();
-      var timeoutId = setTimeout(function(){ controller.abort(); }, ms);
-      return fetch(url, { signal: controller.signal }).finally(function(){ clearTimeout(timeoutId); });
+    // If meaning and example are already packaged directly in the JSON, we are done!
+    if(info.meaning && info.example){
+      await storeSet(cacheKey, JSON.stringify(info));
+      return info;
     }
 
-    var dictPromise = fetchWithTimeout(
-      'https://api.dictionaryapi.dev/api/v2/entries/en/' + encodeURIComponent(entry.word), 3500
-    ).catch(function(){ return null; });
-
-    var translatePromise = fetchWithTimeout(
-      'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(entry.word) + '&langpair=en|ar', 3500
-    ).catch(function(){ return null; });
-
-    var results = await Promise.all([dictPromise, translatePromise]);
-    var res = results[0], tRes = results[1];
-
-    try{
-      if(res && res.ok){
-        var data = await res.json();
-        var top = data[0];
-        if(top){
-          info.phonetic = top.phonetic || null;
-          if(Array.isArray(top.phonetics)){
-            var withAudio = top.phonetics.filter(function(p){ return p.audio; });
-            var uk = withAudio.find(function(p){ return /uk/i.test(p.audio); });
-            info.audio = (uk || withAudio[0] || {}).audio || null;
-            if(!info.phonetic){
-              var withText = top.phonetics.find(function(p){ return p.text; });
-              if(withText) info.phonetic = withText.text;
-            }
-          }
-          if(Array.isArray(top.meanings)){
-            outer:
-            for(var i=0;i<top.meanings.length;i++){
-              var defs = top.meanings[i].definitions || [];
-              for(var j=0;j<defs.length;j++){
-                if(!info.meaning) info.meaning = defs[j].definition;
-                if(defs[j].example){ info.example = defs[j].example; break outer; }
-              }
-            }
-          }
-        }
-      }
-    }catch(e){ /* dictionary response malformed — fall back below */ }
-
-    try{
-      if(tRes && tRes.ok){
-        var tData = await tRes.json();
-        var translated = tData && tData.responseData && tData.responseData.translatedText;
-        if(translated && translated.toLowerCase() !== entry.word.toLowerCase()){
-          info.arabic = translated;
-        }
-      }
-    }catch(e){ /* translation unavailable — arabic stays null and is simply not shown */ }
-
     if(!info.meaning){
-      info.meaning = "(" + entry.pos + ", CEFR " + entry.level + ") — definition unavailable right now. Listen closely and try to recall how it's used.";
+      info.meaning = "(" + entry.pos + ", CEFR " + entry.level + ") — Definition unavailable.";
     }
     if(!info.example){
       info.example = fallbackSentence(entry.word, entry.pos);
@@ -706,53 +988,53 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     return info;
   }
 
-  /* ---------------- fallback example sentences (used when the dictionary API has none) ---------------- */
+  /* ---------------- fallback example sentences ---------------- */
   var SENTENCE_TEMPLATES = {
     v: [
-      "Experts continue to __W__ the situation closely.",
-      "The committee decided to __W__ the proposal at once.",
-      "It took years for the team to __W__ such a complex problem.",
-      "She was the first to __W__ that something was wrong."
+      "I want to __W__ this game.",
+      "They like to __W__ together.",
+      "She learned how to __W__ today.",
+      "We can __W__ this tomorrow."
     ],
     n: [
-      "The __W__ quickly became the center of public attention.",
-      "Researchers published a new study on the __W__ last year.",
-      "Her explanation of the __W__ was clear and convincing.",
-      "The __W__ changed the way people thought about the issue."
+      "This is a very good __W__.",
+      "The __W__ is on the table.",
+      "I love my new __W__.",
+      "We saw a big __W__ yesterday."
     ],
     adj: [
-      "The situation seemed increasingly __W__ as the week went on.",
-      "Critics called the plan __W__ and unrealistic.",
-      "It was a __W__ decision that surprised everyone in the room.",
-      "The results were far more __W__ than anyone expected."
+      "That is a __W__ idea.",
+      "She has a __W__ smile.",
+      "The weather is very __W__ today.",
+      "I want to buy a __W__ car."
     ],
     adv: [
-      "She spoke __W__ about her plans for the future.",
-      "The team worked __W__ to meet the deadline.",
-      "He __W__ agreed to help with the project.",
-      "The news was received __W__ by everyone present."
+      "He speaks English __W__.",
+      "Please walk __W__.",
+      "She finished her work __W__.",
+      "They laughed __W__ together."
     ],
     prep: [
-      "The document was placed __W__ the others on the desk.",
-      "They stood __W__ the entrance, waiting for news.",
-      "The decision was made __W__ months of discussion."
+      "The key is __W__ the box.",
+      "They walked __W__ the house.",
+      "The book is __W__ the shelf."
     ],
     conj: [
-      "She stayed calm, __W__ the situation was tense.",
-      "He kept working, __W__ he was exhausted."
+      "I like it, __W__ it is too expensive.",
+      "We stayed inside __W__ it was raining."
     ],
     pron: [
-      "Nobody could explain __W__ had really happened.",
-      "It was __W__ who first noticed the mistake."
+      "This is __W__ I wanted.",
+      "That is the boy __W__ helped me."
     ],
     number: [
-      "The report cited a figure close to __W__.",
-      "Roughly __W__ people attended the event."
+      "I have __W__ apples.",
+      "There are __W__ people here."
     ],
     _default: [
-      "The word '__W__' came up several times during the discussion.",
-      "Try to picture a real situation where you'd use '__W__'.",
-      "News reports have used the word '__W__' frequently this year."
+      "The word '__W__' is easy to learn.",
+      "I like the word '__W__'.",
+      "Let's practice the word '__W__' now."
     ]
   };
   function fallbackSentence(word, pos){
@@ -804,16 +1086,12 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     speechSynthesis.speak(u);
   }
 
-  /* ---------------- reliable tap/click binding ----------------
-     Using only 'click' can occasionally fail to fire on mobile browsers
-     (ghost-click suppression, focus/blur reflow when the keyboard closes,
-     etc). Binding both touchend and click - while guarding against the
-     browser firing both for the same tap - makes buttons respond every time. */
+  /* ---------------- reliable tap/click binding ---------------- */
   function bindTap(el, handler){
     if(!el) return;
     var lastFired = 0;
     var startX = 0, startY = 0, moved = false;
-    var MOVE_TOLERANCE = 10; // px of finger movement still counted as a tap
+    var MOVE_TOLERANCE = 10; // px
 
     el.addEventListener('touchstart', function(ev){
       var t = ev.touches[0];
@@ -830,16 +1108,51 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     }, { passive:true });
 
     el.addEventListener('touchend', function(ev){
-      if(moved) return; // finger scrolled/swiped instead of tapping - ignore
+      if(moved) return;
       ev.preventDefault();
       lastFired = Date.now();
       handler(ev);
     }, { passive:false });
 
     el.addEventListener('click', function(ev){
-      if(Date.now() - lastFired < 500) return; // already handled via touchend
+      if(Date.now() - lastFired < 500) return;
       handler(ev);
     });
+  }
+
+  /* ---------------- theme toggling ---------------- */
+  function initThemeHandlers() {
+    var toggleBtn = $('themeToggle');
+    if(toggleBtn){
+      var isDark = document.body.classList.contains('dark');
+      syncThemeUI(isDark);
+
+      bindTap(toggleBtn, function(){
+        var nextIsDark = !document.body.classList.contains('dark');
+        if(nextIsDark){
+          document.body.classList.add('dark');
+        } else {
+          document.body.classList.remove('dark');
+        }
+        syncThemeUI(nextIsDark);
+        try{ window.localStorage.setItem('lexicon-theme', nextIsDark ? 'dark' : 'light'); }catch(e){}
+      });
+    }
+  }
+
+  function syncThemeUI(isDark){
+    var sun = $('themeIconSun');
+    var moon = $('themeIconMoon');
+    var text = $('themeText');
+    if(isDark){
+      if(sun) sun.style.display = 'none';
+      if(moon) moon.style.display = 'flex';
+      if(text) text.textContent = 'Dark';
+    } else {
+      if(sun) sun.style.display = 'flex';
+      if(moon) moon.style.display = 'none';
+      if(text) text.textContent = 'Light';
+    }
   }
 
   /* ---------------- dom refs ---------------- */
@@ -848,46 +1161,140 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   var stage = $('stage');
 
   /* ---------------- home rendering ---------------- */
-  function learnedCount(){ return Object.keys(Progress.learned).length; }
+  function learnedCount(){
+    var count = 0;
+    for (var w in Progress.learned) {
+      var exists = WORDS.some(function(item){ return item.word === w; });
+      if (exists) {
+        count++;
+      }
+    }
+    return count;
+  }
   function levelFromScore(score){ return Math.floor(score/100) + 1; }
 
-  /* most-recently-learned first — object key insertion order is preserved
-     for non-numeric string keys, which every word here is */
   function historyEntriesDesc(){
-    return Object.keys(Progress.learned).slice().reverse().map(function(w){
+    var list = [];
+    var keys = Object.keys(Progress.learned).slice().reverse();
+    for(var i=0; i<keys.length; i++){
+      var w = keys[i];
       var info = Progress.learned[w];
-      return { word: w, pos: info.pos, level: info.level, meaning: info.meaning };
-    });
+      var exists = WORDS.some(function(item){ return item.word === w; });
+      if(exists){
+        list.push({ word: w, pos: info.pos, level: info.level, meaning: info.meaning, synonyms: info.synonyms || null });
+      }
+    }
+    return list;
   }
 
   function renderHome(){
     var count = learnedCount();
     var pct = Math.round((count/TOTAL)*100);
     $('homeRingNum').textContent = pct + '%';
+    $('homeRingLabel').textContent = 'of Curated Pack (' + count + '/' + TOTAL + ')';
+    var oxfordPct = ((count / 5000) * 100).toFixed(2);
+    $('homeRingSub').textContent = oxfordPct + '% of Oxford 5000';
     $('homeRingFill').setAttribute('stroke-dasharray', CIRC);
     $('homeRingFill').setAttribute('stroke-dashoffset', CIRC - (CIRC*pct/100));
     $('statLearned').textContent = count;
     $('statStreak').textContent = Progress.streak;
     $('statScore').textContent = Progress.score;
     $('cardProgressFill').style.width = pct + '%';
-    $('levelText').textContent = 'Level ' + levelFromScore(Progress.score);
+    $('levelText').textContent = (userEnglishLevel === 'all' ? 'All Levels' : userEnglishLevel + ' Level') + ' (Lvl ' + levelFromScore(Progress.score) + ')';
 
-    var recent = historyEntriesDesc().slice(0, 10);
+    // Update Daily Goal Meter
+    var todayCount = wordsLearnedTodayCount();
+    var dailyPct = Math.min(100, Math.round((todayCount / userWordsPerDay) * 100));
+    var dailyGoalPctEl = $('dailyGoalPct');
+    if (dailyGoalPctEl) dailyGoalPctEl.textContent = dailyPct + '%';
+    
+    var dailyRingFillEl = $('dailyRingFill');
+    if (dailyRingFillEl) {
+      var dashoffset = 188.5 - (188.5 * dailyPct / 100);
+      dailyRingFillEl.setAttribute('stroke-dashoffset', dashoffset);
+    }
+    
+    var dailyGoalProgressTextEl = $('dailyGoalProgressText');
+    if (dailyGoalProgressTextEl) {
+      if (todayCount >= userWordsPerDay) {
+        dailyGoalProgressTextEl.innerHTML = dailyPct + '% <span style="color:var(--success); font-weight:700;">Completed! 🎉</span>';
+      } else {
+        dailyGoalProgressTextEl.textContent = dailyPct + '% Completed';
+      }
+    }
+    
+    var dailyGoalWordsCountEl = $('dailyGoalWordsCount');
+    if (dailyGoalWordsCountEl) {
+      dailyGoalWordsCountEl.textContent = todayCount + ' of ' + userWordsPerDay + ' words today';
+    }
+
+    // Update Entire 5000 Words Meter
+    var oxfordPctValue = ((count / 5000) * 100);
+    var oxfordPctText = oxfordPctValue.toFixed(2) + '%';
+    
+    var oxfordPctTextInnerEl = $('oxfordPctTextInner');
+    if (oxfordPctTextInnerEl) {
+      oxfordPctTextInnerEl.textContent = oxfordPctValue.toFixed(1) + '%';
+    }
+    
+    var oxfordRingFillEl = $('oxfordRingFill');
+    if (oxfordRingFillEl) {
+      var visiblePct = oxfordPctValue;
+      if (oxfordPctValue > 0 && oxfordPctValue < 1) {
+        visiblePct = 1.5; // force a small visible indicator slice
+      }
+      var oxfordDashoffset = 188.5 - (188.5 * Math.min(100, visiblePct) / 100);
+      oxfordRingFillEl.setAttribute('stroke-dashoffset', oxfordDashoffset);
+    }
+    
+    var oxfordProgressTextEl = $('oxfordProgressText');
+    if (oxfordProgressTextEl) {
+      oxfordProgressTextEl.textContent = oxfordPctText + ' Learned';
+    }
+    
+    var oxfordWordsCountEl = $('oxfordWordsCount');
+    if (oxfordWordsCountEl) {
+      oxfordWordsCountEl.textContent = count + ' of 5000 words';
+    }
+
+    var cardTitleEl = document.querySelector('#cardOxford .card-title');
+    var cardDescEl = document.querySelector('#cardOxford .card-desc');
+    if (cardTitleEl && cardDescEl) {
+      if (userEnglishLevel === 'B2') {
+        cardTitleEl.textContent = 'B2 Core Words';
+        cardDescEl.textContent = 'Upper-Intermediate American Oxford 5000 words explained with simple meanings, synonyms, and helpful examples.';
+      } else if (userEnglishLevel === 'C1') {
+        cardTitleEl.textContent = 'C1 Advanced Words';
+        cardDescEl.textContent = 'Advanced/C1 American Oxford 5000 words explained with simple meanings, synonyms, and helpful examples.';
+      } else {
+        cardTitleEl.textContent = 'Advanced Core Words';
+        cardDescEl.textContent = 'High-level B2 & C1 American Oxford 5000 words explained with simple meanings, synonyms, and helpful examples.';
+      }
+    }
+
+    var goalProgressEl = $('dailyGoalProgress');
+    if (goalProgressEl) {
+      if (todayCount >= userWordsPerDay) {
+        goalProgressEl.innerHTML = todayCount + '/' + userWordsPerDay + ' <span style="color:var(--success); font-weight:bold;">Completed! 🎉</span>';
+      } else {
+        goalProgressEl.textContent = todayCount + '/' + userWordsPerDay;
+      }
+    }
+
+    var footerNoteEl = document.querySelector('#view-home .footer-note');
+    if (footerNoteEl) {
+      var levelDesc = userEnglishLevel === 'all' ? 'B2–C1' : userEnglishLevel;
+      footerNoteEl.textContent = TOTAL + ' words · ' + levelDesc + ' · American Oxford 5000 wordlist with simplified definitions & synonyms';
+    }
+
     var recentLabel = $('recentLabel'), recentList = $('recentList'), historyCta = $('historyCta');
-    if(recent.length){
-      recentLabel.style.display = '';
-      historyCta.style.display = '';
-      recentList.innerHTML = recent.map(function(e){
-        return '<div class="recent-row">' +
-          '<div class="recent-word">' + escapeHtml(e.word) + '</div>' +
-          '<div class="recent-tags"><span class="tag tag-pos">' + escapeHtml(e.pos||'') + '</span></div>' +
-          '<div class="recent-meaning">' + escapeHtml(e.meaning||'') + '</div>' +
-        '</div>';
-      }).join('');
-    } else {
-      recentLabel.style.display = 'none';
-      historyCta.style.display = 'none';
+    if(recentLabel) recentLabel.style.display = 'none';
+    if(recentList) {
+      recentList.style.display = 'none';
       recentList.innerHTML = '';
+    }
+    if(historyCta){
+      historyCta.style.display = count > 0 ? '' : 'none';
     }
   }
 
@@ -914,7 +1321,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   function scheduleReminder(loop){
     clearReminderTimer();
     reminderLoop = loop;
-    var delay = loop ? 20000 : 4000; // home: every 20s; study: a single one-off nudge
+    var delay = loop ? 20000 : 4000;
     reminderTimeout = setTimeout(showReminder, delay);
   }
   async function showReminder(){
@@ -939,10 +1346,6 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     el.classList.remove('show');
     if(reminderLoop) scheduleReminder(true);
   }
-  /* Press-and-hold the banner to pause its auto-dismiss timer while you're
-     reading it; lift your finger (or mouse) and it dismisses. A swipe in
-     either direction dismisses it right away too. Pointer events cover
-     touch, mouse and pen with one code path. */
   function initReminderSwipe(){
     var el = $('reminder');
     if(!el) return;
@@ -955,14 +1358,14 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     });
     el.addEventListener('pointermove', function(e){
       if(startY === null) return;
-      if(Math.abs(e.clientY - startY) > 24){ // swiped far enough — dismiss
+      if(Math.abs(e.clientY - startY) > 24){
         holding = false;
         startY = null;
         dismissReminder();
       }
     });
     function release(){
-      if(holding) dismissReminder(); // finger/mouse lifted while holding — dismiss
+      if(holding) dismissReminder();
       holding = false;
       startY = null;
     }
@@ -972,7 +1375,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
 
   /* ---------------- word history & practice ---------------- */
   var DAILY_REVIEW_COUNT = 10;
-  var historyShowAll = false; // false = just the 10 most recent words; true = the full list
+  var historyShowAll = false;
 
   function renderHistoryList(){
     var entries = historyEntriesDesc();
@@ -1036,8 +1439,6 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     showView('study');
     updateStudyHeader();
     renderLoading();
-    // getWordInfo hits the local dictionary cache from when this word was
-    // first studied, so this is fast and doesn't need a fresh network call.
     var info = await getWordInfo(session.word);
     session.info = info;
     renderListenPhase();
@@ -1229,6 +1630,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       '<div class="meaning-block">' +
         '<div class="meaning-label">Meaning</div>' +
         '<div class="meaning-text">' + info.meaning + '</div>' +
+        (info.synonyms ? '<div style="margin-top:12px;"><div class="synonyms-text"><span class="synonyms-label">Simple Synonyms:</span> ' + escapeHtml(info.synonyms) + '</div></div>' : '') +
         '<div class="example-text">"' + highlightWord(info.example, e.word) + '"</div>' +
       '</div>' +
       '<div class="action-row">' +
@@ -1273,7 +1675,6 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     if(re.test(escaped)){
       return escaped.replace(re, '<span class="cloze-blank">' + '\u2007'.repeat(Math.max(4,word.length)) + '</span>');
     }
-    // word wasn't found verbatim (e.g. different inflection) — still show the sentence, unblanked, as context
     return escaped;
   }
 
@@ -1340,14 +1741,24 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       Progress.score += hintUsed ? 5 : 10;
       Progress.streak += 1;
       Progress.learned[session.word.word] = {
-        pos: session.word.pos, level: session.word.level, meaning: session.info.meaning
+        pos: session.word.pos,
+        level: session.word.level,
+        meaning: session.info.meaning,
+        synonyms: session.info.synonyms || null,
+        learnedAt: new Date().toISOString().split('T')[0]
       };
       Progress.index++;
       session.sessionLearned++;
       saveProgress().catch(function(e){ console.error('Failed to save progress', e); });
       updateStudyHeader();
+
+      var todayCount = wordsLearnedTodayCount();
+      var hitGoalJustNow = (todayCount === userWordsPerDay);
+
       setTimeout(function(){
-        if(session.sessionLearned > 0 && session.sessionLearned % 10 === 0){
+        if(hitGoalJustNow){
+          renderDailyGoalCheckpoint();
+        } else if(session.sessionLearned > 0 && session.sessionLearned % 10 === 0){
           renderCheckpoint();
         } else {
           loadNextWord();
@@ -1390,11 +1801,30 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     bindTap($('btnHome2'), function(){ showView('home'); });
   }
 
+  function renderDailyGoalCheckpoint(){
+    session.phase = 'checkpoint';
+    stage.innerHTML =
+      '<div class="checkpoint-icon" style="background:var(--success-soft); color:var(--success); border-color:rgba(27,94,32,0.2);"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" stroke="currentColor" stroke-width="2"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
+      '<div class="checkpoint-title">Daily Goal Achieved! 🎉</div>' +
+      '<div class="checkpoint-sub">Fantastic! You have learned your daily target of ' + userWordsPerDay + ' words today. You can keep studying to get ahead, or rest for today.</div>' +
+      '<div class="checkpoint-stats">' +
+        '<div class="cstat"><b>' + learnedCount() + '</b><span>Total learned</span></div>' +
+        '<div class="cstat"><b>' + Progress.score + '</b><span>Score</span></div>' +
+        '<div class="cstat"><b>Lvl ' + levelFromScore(Progress.score) + '</b><span>Level</span></div>' +
+      '</div>' +
+      '<div class="checkpoint-actions">' +
+        '<button class="btn-solid" id="btnContinue">Keep Studying</button>' +
+        '<button class="btn-ghost" id="btnHome2">Back home</button>' +
+      '</div>';
+    bindTap($('btnContinue'), function(){ loadNextWord(); });
+    bindTap($('btnHome2'), function(){ showView('home'); });
+  }
+
   function renderAllComplete(){
     stage.innerHTML =
       '<div class="checkpoint-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2 4 6v6c0 5 3.4 8.5 8 10 4.6-1.5 8-5 8-10V6l-8-4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></div>' +
-      '<div class="checkpoint-title">You\'ve learned all 2,000 words</div>' +
-      '<div class="checkpoint-sub">That\'s the full Oxford 5000 (American English) additional word list. Incredible work.</div>' +
+      '<div class="checkpoint-title">You\'ve learned all 50 words</div>' +
+      '<div class="checkpoint-sub">That\'s the full curated list of simple essential words. Incredible work.</div>' +
       '<div class="checkpoint-actions"><button class="btn-solid" id="btnHome3">Back home</button></div>';
     bindTap($('btnHome3'), function(){ showView('home'); });
   }
@@ -1429,12 +1859,24 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     }catch(e){
       console.error('Failed to load progress', e);
       showGateError(e);
-      return; // keep the gate up with the error instead of entering the app on bad/missing data
+      return;
     }
+
+    // Filter WORDS based on user's englishLevel
+    var originalWords = JSON.parse(document.getElementById('word-data').textContent);
+    if (userEnglishLevel === 'B2') {
+      WORDS = originalWords.filter(function(w){ return w.level === 'B2'; });
+    } else if (userEnglishLevel === 'C1') {
+      WORDS = originalWords.filter(function(w){ return w.level === 'C1'; });
+    } else {
+      WORDS = originalWords;
+    }
+    TOTAL = WORDS.length;
 
     renderHome();
     showView('home');
     initReminderSwipe();
+    initThemeHandlers();
 
     bindTap($('cardOxford'), startStudy);
     bindTap($('btnExit'), function(){
@@ -1452,11 +1894,17 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     var userText = $('userText');
     var userPill = $('userPill');
     if(userText) userText.textContent = currentUser.displayName || currentUser.email.split('@')[0];
-    if(userPill) userPill.addEventListener('click', async function(){
-      if(!confirm('Log out?')) return;
-      await signOut(auth);
-      window.location.href = 'login.html';
-    });
+    if(userPill) {
+      bindTap(userPill, async function(){
+        if(!confirm('Are you sure you want to log out?')) return;
+        try {
+          await signOut(auth);
+          window.location.href = 'index.html';
+        } catch(e) {
+          console.error('Logout error:', e);
+        }
+      });
+    }
 
     var gate = $('authGate');
     var appRoot = $('appRoot');
@@ -1468,7 +1916,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     document.addEventListener('DOMContentLoaded', function(){
       onAuthStateChanged(auth, function(user){
         if(!user){
-          window.location.href = 'login.html';
+          window.location.href = 'index.html';
           return;
         }
         currentUser = user;

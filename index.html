@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Sign up — Lexicon</title>
+<title>Log in — Lexicon</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -80,13 +80,12 @@ a{color:inherit;}
   display:block;font-family:var(--font-mono);font-size:10px;color:var(--ink-faint);
   text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px;
 }
-.field input, .field select{
+.field input{
   width:100%;background:var(--bg-1);border:1px solid var(--border);color:var(--ink);
   border-radius:6px;padding:12px 14px;font-size:16px;outline:none;
   transition:border-color .2s ease, box-shadow .2s ease;
 }
-.field input:focus, .field select:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft);}
-.field-hint{font-size:11px;color:var(--ink-faint);margin-top:6px;font-family:var(--font-mono);}
+.field input:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft);}
 
 .submit-btn{
   width:100%;background:var(--accent);color:var(--accent-ink);border:1px solid var(--accent);
@@ -108,6 +107,13 @@ a{color:inherit;}
 .foot{text-align:center;margin-top:24px;font-size:13px;color:var(--ink-dim);}
 .foot a{color:var(--ink);font-weight:700;text-decoration:underline;text-underline-offset:4px;}
 .foot a:hover{opacity:0.8;}
+
+.forgot{text-align:right;margin:-10px 0 20px;}
+.forgot button{
+  background:none;border:none;color:var(--ink-faint);font-size:12px;padding:0;
+  text-decoration:underline;text-underline-offset:3px;font-family:var(--font-mono);cursor:pointer;
+}
+.forgot button:hover{color:var(--ink-dim);}
 
 @media (max-width: 480px) {
   body {
@@ -144,139 +150,94 @@ a{color:inherit;}
   </div>
 
   <div class="card">
-    <div class="card-title">Create your account</div>
-    <p class="card-sub">Your progress, score, and streak will follow you to any device.</p>
+    <div class="card-title">Welcome back</div>
+    <p class="card-sub">Log in to pick up your vocabulary right where you left it.</p>
 
-    <form id="signupForm">
-      <div class="field">
-        <label for="username">Username</label>
-        <input type="text" id="username" autocomplete="nickname" minlength="2" maxlength="30" required />
-      </div>
+    <form id="loginForm">
       <div class="field">
         <label for="email">Email</label>
         <input type="email" id="email" autocomplete="email" required />
       </div>
       <div class="field">
         <label for="password">Password</label>
-        <input type="password" id="password" autocomplete="new-password" minlength="6" required />
-        <div class="field-hint">At least 6 characters.</div>
+        <input type="password" id="password" autocomplete="current-password" required />
       </div>
-      <div class="field">
-        <label for="confirm">Confirm password</label>
-        <input type="password" id="confirm" autocomplete="new-password" minlength="6" required />
+      <div class="forgot">
+        <button type="button" id="forgotBtn">Forgot password?</button>
       </div>
-      <div class="field">
-        <label for="englishLevel">English level</label>
-        <select id="englishLevel" required>
-          <option value="all" selected>All Levels (B2 & C1)</option>
-          <option value="B2">B2 — Upper Intermediate</option>
-          <option value="C1">C1 — Advanced</option>
-        </select>
-        <div class="field-hint">Your customized vocabulary pack will target this CEFR level.</div>
-      </div>
-      <div class="field">
-        <label for="wordsPerDay">Daily words goal</label>
-        <select id="wordsPerDay" required>
-          <option value="5">5 words per day (Casual)</option>
-          <option value="10" selected>10 words per day (Regular)</option>
-          <option value="15">15 words per day (Serious)</option>
-          <option value="20">20 words per day (Insane)</option>
-        </select>
-        <div class="field-hint">The target number of new words to learn every day.</div>
-      </div>
-      <button type="submit" class="submit-btn" id="submitBtn">Sign up</button>
+      <button type="submit" class="submit-btn" id="submitBtn">Log in</button>
       <div class="msg" id="msg"></div>
     </form>
 
-    <div class="foot">Already have an account? <a href="index.html">Log in</a></div>
+    <div class="foot">Don't have an account? <a href="signup.html">Sign up</a></div>
   </div>
 </div>
 
 <script type="module">
-  import { auth, db } from './firebase-config.js';
+  import { auth } from './firebase-config.js';
   import {
-    createUserWithEmailAndPassword,
-    updateProfile,
+    signInWithEmailAndPassword,
     onAuthStateChanged,
-    signOut
+    sendPasswordResetEmail
   } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
-  import {
-    ref, set, serverTimestamp
-  } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
-  // Already logged in (on page load)? Skip straight to the app.
-  // Ignored while a signup is actively in progress, since creating the
-  // account also signs the user in for a moment before we sign them out.
-  let signupInProgress = false;
+  // Already logged in? Skip straight to the app.
   onAuthStateChanged(auth, (user) => {
-    if (user && !signupInProgress) window.location.href = 'app.html';
+    if (user) window.location.href = 'app.html';
   });
 
-  const form = document.getElementById('signupForm');
+  const form = document.getElementById('loginForm');
   const msg = document.getElementById('msg');
   const submitBtn = document.getElementById('submitBtn');
+  const emailInput = document.getElementById('email');
 
   function showMsg(text, type){
     msg.textContent = text;
     msg.className = 'msg show ' + type;
   }
 
+  // Coming from a successful signup? Greet them.
+  if (new URLSearchParams(window.location.search).get('signedUp') === '1') {
+    showMsg('Account created — log in below to start learning.', 'ok');
+  }
+
   function friendlyError(code){
     switch(code){
-      case 'auth/email-already-in-use': return 'An account with this email already exists.';
       case 'auth/invalid-email': return 'That email address doesn\'t look right.';
-      case 'auth/weak-password': return 'Password should be at least 6 characters.';
+      case 'auth/user-not-found':
+      case 'auth/invalid-credential':
+      case 'auth/wrong-password': return 'Incorrect email or password.';
+      case 'auth/too-many-requests': return 'Too many attempts. Please wait a moment and try again.';
       default: return 'Something went wrong. Please try again.';
     }
   }
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-
-    const username = document.getElementById('username').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-    const confirm = document.getElementById('confirm').value;
-    const englishLevel = document.getElementById('englishLevel').value;
-    const wordsPerDay = parseInt(document.getElementById('wordsPerDay').value, 10) || 10;
-
-    msg.className = 'msg';
-
-    if (password !== confirm) {
-      showMsg('Passwords don\'t match.', 'err');
-      return;
-    }
-
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Creating account…';
-    signupInProgress = true;
-
+    submitBtn.textContent = 'Logging in…';
+    msg.className = 'msg';
     try {
-      const cred = await createUserWithEmailAndPassword(auth, email, password);
-      await updateProfile(cred.user, { displayName: username });
-
-      // Create the user's profile + fresh progress record in the Realtime Database.
-      await set(ref(db, 'users/' + cred.user.uid), {
-        username: username,
-        email: email,
-        englishLevel: englishLevel,
-        wordsPerDay: wordsPerDay,
-        createdAt: serverTimestamp(),
-        progress: { learned: {}, index: 0, score: 0, streak: 0 }
-      });
-
-      // Account created — sign back out so the person logs in explicitly.
-      await signOut(auth);
-
-      showMsg('Account created! Redirecting you to log in…', 'ok');
-      setTimeout(() => {
-        window.location.href = 'index.html?signedUp=1';
-      }, 900);
+      await signInWithEmailAndPassword(auth, emailInput.value.trim(), document.getElementById('password').value);
+      window.location.href = 'app.html';
     } catch (err) {
-      signupInProgress = false;
       showMsg(friendlyError(err.code), 'err');
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Sign up';
+      submitBtn.textContent = 'Log in';
+    }
+  });
+
+  document.getElementById('forgotBtn').addEventListener('click', async () => {
+    const email = emailInput.value.trim();
+    if (!email) {
+      showMsg('Enter your email above first, then tap "Forgot password?" again.', 'err');
+      return;
+    }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      showMsg('Password reset email sent — check your inbox.', 'ok');
+    } catch (err) {
+      showMsg(friendlyError(err.code), 'err');
     }
   });
 </script>
