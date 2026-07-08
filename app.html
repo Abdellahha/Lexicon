@@ -116,6 +116,8 @@ a{color:inherit;}
 }
 .practice-btn:hover{background:var(--accent-line);}
 .history-empty{color:var(--ink-faint);font-size:14px;padding:30px 0;text-align:center;}
+.history-toggle-wrap{margin:16px 0 4px;}
+.history-toggle-wrap .btn-ghost{width:100%;justify-content:center;padding:14px;}
 
 /* ---------- match game ---------- */
 .match-wrap{padding-top:8px;}
@@ -481,8 +483,11 @@ a{color:inherit;}
       </button>
       <button class="btn-solid" id="btnStartMatch">Match meanings</button>
     </div>
-    <div class="section-label">Your words (<span id="historyCount">0</span>)</div>
+    <div class="section-label" id="historySectionLabel">Today's words (<span id="historyCount">0</span>)</div>
     <div class="history-list" id="historyList"></div>
+    <div class="history-toggle-wrap" id="historyToggleWrap" style="display:none;">
+      <button class="btn-ghost" type="button" id="btnShowAllWords">Show all learned words</button>
+    </div>
   </div>
 
   <!-- MATCH VIEW -->
@@ -966,15 +971,42 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   }
 
   /* ---------------- word history & practice ---------------- */
+  var DAILY_REVIEW_COUNT = 10;
+  var historyShowAll = false; // false = just the 10 most recent words; true = the full list
+
   function renderHistoryList(){
     var entries = historyEntriesDesc();
-    $('historyCount').textContent = entries.length;
     var list = $('historyList');
+    var toggleWrap = $('historyToggleWrap');
+    var toggleBtn = $('btnShowAllWords');
+    var label = $('historySectionLabel');
+
     if(!entries.length){
+      $('historyCount').textContent = 0;
+      if(label) label.firstChild.textContent = 'Today\'s words (';
       list.innerHTML = '<div class="history-empty">You haven\'t learned any words yet — start a study session to build your history.</div>';
+      if(toggleWrap) toggleWrap.style.display = 'none';
       return;
     }
-    list.innerHTML = entries.map(function(e, i){
+
+    var showingAll = historyShowAll || entries.length <= DAILY_REVIEW_COUNT;
+    var visible = showingAll ? entries : entries.slice(0, DAILY_REVIEW_COUNT);
+
+    $('historyCount').textContent = visible.length;
+    if(label) label.firstChild.textContent = showingAll ? 'All your words (' : 'Today\'s words (';
+
+    if(toggleWrap && toggleBtn){
+      if(entries.length > DAILY_REVIEW_COUNT){
+        toggleWrap.style.display = '';
+        toggleBtn.textContent = showingAll
+          ? 'Show just today\'s 10 words'
+          : 'Show all learned words (' + entries.length + ')';
+      } else {
+        toggleWrap.style.display = 'none';
+      }
+    }
+
+    list.innerHTML = visible.map(function(e, i){
       return '<div class="history-row">' +
         '<div class="history-main">' +
           '<div class="history-word-row">' +
@@ -990,7 +1022,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     Array.prototype.forEach.call(list.querySelectorAll('.practice-btn'), function(btn){
       bindTap(btn, function(){
         var idx = parseInt(btn.getAttribute('data-idx'), 10);
-        practiceWord(entries[idx]);
+        practiceWord(visible[idx]);
       });
     });
   }
@@ -1411,8 +1443,9 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       showView('home');
     });
 
-    bindTap($('btnOpenHistory'), function(){ showView('history'); renderHistoryList(); });
+    bindTap($('btnOpenHistory'), function(){ historyShowAll = false; showView('history'); renderHistoryList(); });
     bindTap($('btnHistoryBack'), function(){ showView('home'); });
+    bindTap($('btnShowAllWords'), function(){ historyShowAll = !historyShowAll; renderHistoryList(); });
     bindTap($('btnStartMatch'), function(){ showView('match'); renderMatchGame(); });
     bindTap($('btnMatchBack'), function(){ showView('history'); renderHistoryList(); });
 
