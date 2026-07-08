@@ -1496,23 +1496,32 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   /* ---------------- match-the-meaning game ---------------- */
   var matchState = null;
 
-  function renderMatchGame(){
-    var pool = historyEntriesDesc();
-    if(pool.length < 2){
+  function renderMatchGame(customPool){
+    var pool = customPool || historyEntriesDesc();
+    if(!customPool && pool.length < 2){
       $('matchScore').textContent = '0';
       $('matchTotal').textContent = '0';
       $('matchWrap').innerHTML = '<div class="history-empty">Learn at least 2 words to unlock this game.</div>';
       return;
     }
-    var size = Math.min(6, pool.length);
-    var shuffled = pool.slice().sort(function(){ return Math.random()-0.5; });
-    var picked = shuffled.slice(0, size);
+    
+    var size = customPool ? pool.length : Math.min(6, pool.length);
+    var picked = customPool ? pool : pool.slice().sort(function(){ return Math.random()-0.5; }).slice(0, size);
 
     var words = picked.map(function(e,i){ return { id:i, word:e.word }; });
     var meanings = picked.map(function(e,i){ return { id:i, meaning:e.meaning }; });
+    
+    var shuffledWords = words.slice().sort(function(){ return Math.random()-0.5; });
     var shuffledMeanings = meanings.slice().sort(function(){ return Math.random()-0.5; });
 
-    matchState = { matchedCount:0, total:size, selectedWordId:null, selectedMeaningId:null };
+    matchState = { 
+      matchedCount: 0, 
+      total: size, 
+      selectedWordId: null, 
+      selectedMeaningId: null,
+      incorrectWords: {}, 
+      pickedEntries: picked 
+    };
 
     $('matchScore').textContent = '0';
     $('matchTotal').textContent = size;
@@ -1520,7 +1529,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     $('matchWrap').innerHTML =
       '<div class="match-grid">' +
         '<div class="match-col" id="matchWordsCol">' +
-          words.map(function(w){ return '<button type="button" class="match-item word-item" data-id="'+w.id+'">' + escapeHtml(w.word) + '</button>'; }).join('') +
+          shuffledWords.map(function(w){ return '<button type="button" class="match-item word-item" data-id="'+w.id+'">' + escapeHtml(w.word) + '</button>'; }).join('') +
         '</div>' +
         '<div class="match-col" id="matchMeaningsCol">' +
           shuffledMeanings.map(function(m){ return '<button type="button" class="match-item meaning-item" data-id="'+m.id+'">' + escapeHtml(m.meaning) + '</button>'; }).join('') +
@@ -1577,10 +1586,11 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       matchState.selectedWordId = null;
       matchState.selectedMeaningId = null;
       if(matchState.matchedCount >= matchState.total){
-        setTimeout(showMatchComplete, 500);
+        setTimeout(handleMatchRoundEnd, 500);
       }
     } else {
       wordBtn.classList.add('wrong'); meaningBtn.classList.add('wrong');
+      matchState.incorrectWords[wordId] = true;
       setTimeout(function(){
         wordBtn.classList.remove('selected','wrong');
         meaningBtn.classList.remove('selected','wrong');
@@ -1590,17 +1600,104 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     }
   }
 
-  function showMatchComplete(){
+  function getNextLevel(currentLevel) {
+    var levelsOrder = ['A1', 'A2', 'B1', 'B2', 'C1'];
+    var idx = levelsOrder.indexOf(currentLevel);
+    if (idx !== -1 && idx < levelsOrder.length - 1) {
+      return levelsOrder[idx + 1];
+    }
+    return null;
+  }
+
+  async function handleMatchRoundEnd(){
+    var picked = matchState.pickedEntries;
+    var nextSubPool = [];
+    var passedWordsCount = 0;
+
+    picked.forEach(function(item, idx){
+      if(matchState.incorrectWords[idx]){
+        nextSubPool.push(item);
+      } else {
+        // Remove from history
+        delete Progress.learned[item.word];
+        passedWordsCount++;
+      }
+    });
+
+    if(passedWordsCount > 0){
+      await saveProgress();
+    }
+
+    if(nextSubPool.length > 0){
+      $('matchWrap').innerHTML =
+        '<div class="match-complete">' +
+          '<div class="checkpoint-icon" style="background:rgba(211,47,47,0.1); color:#EF5350; border-color:rgba(211,47,47,0.2);">' +
+            '<svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+          '</div>' +
+          '<div class="checkpoint-title">Let\'s Try Again</div>' +
+          '<div class="checkpoint-sub">You had ' + nextSubPool.length + ' word(s) with incorrect match attempts. Let\'s practice them alone now!</div>' +
+          '<div class="checkpoint-actions" style="justify-content:center;margin-top:18px;">' +
+            '<button class="btn-solid" id="btnMatchRetrySub">Continue Practice</button>' +
+          '</div>' +
+        '</div>';
+      
+      bindTap($('btnMatchRetrySub'), function(){
+        renderMatchGame(nextSubPool);
+      });
+      return;
+    }
+
+    // All words are successfully passed! Check for Level Up!
+    var canLevelUp = false;
+    var nextLvl = null;
+    if (userEnglishLevel && userEnglishLevel !== 'all' && Progress.index >= TOTAL) {
+      nextLvl = getNextLevel(userEnglishLevel);
+      if (nextLvl) {
+        canLevelUp = true;
+      }
+    }
+
+    if (canLevelUp) {
+      try {
+        userEnglishLevel = nextLvl;
+        Progress.index = 0;
+        await update(ref(db, 'users/' + currentUser.uid), { englishLevel: nextLvl, progress: Progress });
+        
+        $('matchWrap').innerHTML =
+          '<div class="match-complete">' +
+            '<div class="checkpoint-icon" style="background:rgba(76,175,80,0.1); color:#4CAF50;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2 4 6v6c0 5 3.4 8.5 8 10 4.6-1.5 8-5 8-10V6l-8-4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></div>' +
+            '<div class="checkpoint-title" style="font-size:24px; margin-bottom:8px;">LEVEL UP! 🎉</div>' +
+            '<div class="checkpoint-sub">Incredible! You completed all words for level <b>' + (nextLvl === 'A2' ? 'A1' : nextLvl === 'B1' ? 'A2' : nextLvl === 'B2' ? 'B1' : 'B2') + '</b> and passed the matching practice.<br>You are promoted to <b>Level ' + nextLvl + '</b>!</div>' +
+            '<div class="checkpoint-actions" style="justify-content:center;margin-top:24px;">' +
+              '<button class="btn-solid" id="btnGoHomeLevel">Start Level ' + nextLvl + '</button>' +
+            '</div>' +
+          '</div>';
+        
+        bindTap($('btnGoHomeLevel'), function(){
+          var originalWords = JSON.parse(document.getElementById('word-data').textContent);
+          WORDS = originalWords.filter(function(w){ return w.level === userEnglishLevel; });
+          TOTAL = WORDS.length;
+          
+          renderHome();
+          showView('home');
+        });
+        return;
+      } catch (e) {
+        console.error('Failed to save level up', e);
+      }
+    }
+
     $('matchWrap').innerHTML =
       '<div class="match-complete">' +
         '<div class="checkpoint-icon" style="margin:0 auto 18px;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
         '<div class="checkpoint-title">All matched!</div>' +
+        '<div class="checkpoint-sub">Excellent! You\'ve successfully matched all words without errors and cleared them from history.</div>' +
         '<div class="checkpoint-actions" style="justify-content:center;margin-top:18px;">' +
           '<button class="btn-solid" id="btnMatchAgain">Play again</button>' +
           '<button class="btn-ghost" id="btnMatchDone">Back to history</button>' +
         '</div>' +
       '</div>';
-    bindTap($('btnMatchAgain'), renderMatchGame);
+    bindTap($('btnMatchAgain'), function() { renderMatchGame(); });
     bindTap($('btnMatchDone'), function(){ showView('history'); renderHistoryList(); });
   }
 
