@@ -87,6 +87,17 @@ a{color:inherit;}
 }
 .field input:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft);}
 
+/* Autofill styling to prevent light yellow background in Chrome/Safari */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: var(--ink) !important;
+  transition: background-color 5000s ease-in-out 0s;
+  box-shadow: inset 0 0 20px 20px var(--bg-1) !important;
+}
+
 .submit-btn{
   width:100%;background:var(--accent);color:var(--accent-ink);border:1px solid var(--accent);
   padding:13px;border-radius:6px;font-weight:600;font-size:14px;margin-top:6px;
@@ -155,8 +166,8 @@ a{color:inherit;}
 
     <form id="loginForm">
       <div class="field">
-        <label for="email">Email</label>
-        <input type="email" id="email" autocomplete="email" required />
+        <label for="email">Email or Username</label>
+        <input type="text" id="email" autocomplete="username" required />
       </div>
       <div class="field">
         <label for="password">Password</label>
@@ -174,12 +185,15 @@ a{color:inherit;}
 </div>
 
 <script type="module">
-  import { auth } from './firebase-config.js';
+  import { auth, db } from './firebase-config.js';
   import {
     signInWithEmailAndPassword,
     onAuthStateChanged,
     sendPasswordResetEmail
   } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+  import {
+    ref, query, orderByChild, equalTo, get
+  } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
   // Already logged in? Skip straight to the app.
   onAuthStateChanged(auth, (user) => {
@@ -206,7 +220,7 @@ a{color:inherit;}
       case 'auth/invalid-email': return 'That email address doesn\'t look right.';
       case 'auth/user-not-found':
       case 'auth/invalid-credential':
-      case 'auth/wrong-password': return 'Incorrect email or password.';
+      case 'auth/wrong-password': return 'Incorrect email, username, or password.';
       case 'auth/too-many-requests': return 'Too many attempts. Please wait a moment and try again.';
       default: return 'Something went wrong. Please try again.';
     }
@@ -217,8 +231,37 @@ a{color:inherit;}
     submitBtn.disabled = true;
     submitBtn.textContent = 'Logging in…';
     msg.className = 'msg';
+
+    let loginIdentifier = emailInput.value.trim();
+    const password = document.getElementById('password').value;
+
     try {
-      await signInWithEmailAndPassword(auth, emailInput.value.trim(), document.getElementById('password').value);
+      let email = loginIdentifier;
+      // If the identifier doesn't look like an email (doesn't contain '@'), look up the username.
+      if (!loginIdentifier.includes('@')) {
+        const usersRef = ref(db, 'users');
+        const usernameQuery = query(usersRef, orderByChild('username'), equalTo(loginIdentifier));
+        const snapshot = await get(usernameQuery);
+        
+        if (!snapshot.exists()) {
+          throw { code: 'auth/invalid-credential' };
+        }
+        
+        let foundEmail = null;
+        snapshot.forEach((child) => {
+          const val = child.val();
+          if (val && val.email) {
+            foundEmail = val.email;
+          }
+        });
+        
+        if (!foundEmail) {
+          throw { code: 'auth/invalid-credential' };
+        }
+        email = foundEmail;
+      }
+
+      await signInWithEmailAndPassword(auth, email, password);
       window.location.href = 'app.html';
     } catch (err) {
       showMsg(friendlyError(err.code), 'err');
@@ -228,12 +271,39 @@ a{color:inherit;}
   });
 
   document.getElementById('forgotBtn').addEventListener('click', async () => {
-    const email = emailInput.value.trim();
-    if (!email) {
-      showMsg('Enter your email above first, then tap "Forgot password?" again.', 'err');
+    const loginIdentifier = emailInput.value.trim();
+    if (!loginIdentifier) {
+      showMsg('Enter your email or username above first, then tap "Forgot password?" again.', 'err');
       return;
     }
+    
     try {
+      let email = loginIdentifier;
+      if (!loginIdentifier.includes('@')) {
+        const usersRef = ref(db, 'users');
+        const usernameQuery = query(usersRef, orderByChild('username'), equalTo(loginIdentifier));
+        const snapshot = await get(usernameQuery);
+        
+        if (!snapshot.exists()) {
+          showMsg('No account found with that username.', 'err');
+          return;
+        }
+        
+        let foundEmail = null;
+        snapshot.forEach((child) => {
+          const val = child.val();
+          if (val && val.email) {
+            foundEmail = val.email;
+          }
+        });
+        
+        if (!foundEmail) {
+          showMsg('No email address associated with that username.', 'err');
+          return;
+        }
+        email = foundEmail;
+      }
+
       await sendPasswordResetEmail(auth, email);
       showMsg('Password reset email sent — check your inbox.', 'ok');
     } catch (err) {
