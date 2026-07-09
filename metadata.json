@@ -1,6 +1,6 @@
 {
   "name": "Lexicon Vocabulary Learning",
-  "description": "A beautifully designed, client-side application for learning everyday essential English vocabulary words with definitions, examples, audio pronunciations, and memory exercises.",
+  "description": "A beautifully designed, client-side application for learning everyday essential English vocabulary and grammar rules in context with simplified meanings, synonyms, examples, audio pronunciations, and memory exercises.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
