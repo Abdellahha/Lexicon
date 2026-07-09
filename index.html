@@ -217,6 +217,7 @@ input:-webkit-autofill:active {
 
   function friendlyError(code){
     switch(code){
+      case 'db/permission-denied-username': return 'Username login is currently unavailable. Please log in using your registered email address instead.';
       case 'auth/invalid-email': return 'That email address doesn\'t look right.';
       case 'auth/user-not-found':
       case 'auth/invalid-credential':
@@ -239,11 +240,17 @@ input:-webkit-autofill:active {
       let email = loginIdentifier;
       // If the identifier doesn't look like an email (doesn't contain '@'), look up the username.
       if (!loginIdentifier.includes('@')) {
-        const usersRef = ref(db, 'users');
-        const usernameQuery = query(usersRef, orderByChild('username'), equalTo(loginIdentifier));
-        const snapshot = await get(usernameQuery);
+        let snapshot;
+        try {
+          const usersRef = ref(db, 'users');
+          const usernameQuery = query(usersRef, orderByChild('username'), equalTo(loginIdentifier));
+          snapshot = await get(usernameQuery);
+        } catch (dbErr) {
+          console.error("Username database query failed:", dbErr);
+          throw { code: 'db/permission-denied-username', originalError: dbErr };
+        }
         
-        if (!snapshot.exists()) {
+        if (!snapshot || !snapshot.exists()) {
           throw { code: 'auth/invalid-credential' };
         }
         
@@ -280,11 +287,17 @@ input:-webkit-autofill:active {
     try {
       let email = loginIdentifier;
       if (!loginIdentifier.includes('@')) {
-        const usersRef = ref(db, 'users');
-        const usernameQuery = query(usersRef, orderByChild('username'), equalTo(loginIdentifier));
-        const snapshot = await get(usernameQuery);
+        let snapshot;
+        try {
+          const usersRef = ref(db, 'users');
+          const usernameQuery = query(usersRef, orderByChild('username'), equalTo(loginIdentifier));
+          snapshot = await get(usernameQuery);
+        } catch (dbErr) {
+          console.error("Username database query failed:", dbErr);
+          throw { code: 'db/permission-denied-username', originalError: dbErr };
+        }
         
-        if (!snapshot.exists()) {
+        if (!snapshot || !snapshot.exists()) {
           showMsg('No account found with that username.', 'err');
           return;
         }

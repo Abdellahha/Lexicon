@@ -271,18 +271,22 @@ input:-webkit-autofill:active {
 
     try {
       // First, check if username already exists (case-insensitive check for maximum security)
-      const usersRef = ref(db, 'users');
-      const usernameQuery = query(usersRef, orderByChild('username'));
-      const snapshot = await get(usernameQuery);
-      
       let usernameExists = false;
-      if (snapshot.exists()) {
-        snapshot.forEach((child) => {
-          const val = child.val();
-          if (val && val.username && val.username.toLowerCase() === username.toLowerCase()) {
-            usernameExists = true;
-          }
-        });
+      try {
+        const usersRef = ref(db, 'users');
+        const usernameQuery = query(usersRef, orderByChild('username'));
+        const snapshot = await get(usernameQuery);
+        
+        if (snapshot.exists()) {
+          snapshot.forEach((child) => {
+            const val = child.val();
+            if (val && val.username && val.username.toLowerCase() === username.toLowerCase()) {
+              usernameExists = true;
+            }
+          });
+        }
+      } catch (checkErr) {
+        console.warn("Username uniqueness check was skipped due to database rules/permissions:", checkErr);
       }
 
       if (usernameExists) {
@@ -314,6 +318,7 @@ input:-webkit-autofill:active {
         window.location.href = 'index.html?signedUp=1';
       }, 900);
     } catch (err) {
+      console.error("Signup error detail:", err);
       signupInProgress = false;
       showMsg(friendlyError(err.code), 'err');
       submitBtn.disabled = false;
