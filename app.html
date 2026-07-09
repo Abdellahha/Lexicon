@@ -143,7 +143,17 @@ a{color:inherit;}
 .match-item.word-item{font-family:var(--font-display);font-style:italic;font-weight:700;font-size:17px;}
 .match-item:hover{border-color:var(--ink);}
 .match-item.selected{border-color:var(--ink);background:var(--bg-1);font-weight:600;}
-.match-item.matched{border-color:var(--success);background:var(--success-soft);color:var(--success);cursor:default;}
+.match-item.matched{
+  border-color:var(--success);
+  background:var(--success-soft);
+  color:var(--success);
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transform:scale(0.95);
+  transition:opacity .5s ease .3s, visibility .5s ease .3s, transform .5s ease .3s, border-color .15s ease, background .15s ease;
+  cursor:default;
+}
 .match-item.wrong{animation:shake .4s ease;border-color:var(--error);background:var(--error-soft);}
 .match-complete{text-align:center;padding:40px 0;}
 
@@ -739,7 +749,7 @@ body {
         </span>
         <span id="themeText" style="font-size: 11px; font-weight: 600;">Light</span>
       </button>
-      <div class="level-pill" id="levelPill">
+      <div class="level-pill" id="levelPill" style="cursor:pointer;" title="Change Preferences (Level & Daily Goal)">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 2 4 6v6c0 5 3.4 8.5 8 10 4.6-1.5 8-5 8-10V6l-8-4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
         <span id="levelText">Level 1</span>
       </div>
@@ -803,7 +813,7 @@ body {
             <div class="ring-stat-mini"><b id="statScore">0</b><span>Score</span></div>
           </div>
           <div style="font-family: var(--font-mono); font-size: 10px; color: var(--ink-dim); background: var(--bg-1); padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border);">
-            Curated Pack: <span id="homeRingNum" style="font-weight: 700; color: var(--ink);">0%</span> <span id="homeRingLabel" style="display:none;"></span>
+            Vocabulary Pack: <span id="homeRingNum" style="font-weight: 700; color: var(--ink);">0%</span> <span id="homeRingLabel" style="display:none;"></span>
           </div>
         </div>
 
@@ -818,8 +828,8 @@ body {
     <div class="cards">
       <div class="card active-card" id="cardOxford">
         <div class="card-index">01 · Vocabulary</div>
-        <div class="card-title">Advanced Core Words</div>
-        <div class="card-desc">High-level American Oxford 5000 words explained with simple meanings, synonyms, and helpful examples.</div>
+        <div class="card-title">Learn New Vocabulary</div>
+        <div class="card-desc">Essential English vocabulary explained with simple meanings, synonyms, and helpful examples.</div>
         <div class="card-foot">
           <div class="card-progress-bar"><div class="card-progress-fill" id="cardProgressFill" style="width:0%"></div></div>
           <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -957,6 +967,51 @@ body {
     </div>
   </div>
 
+  <!-- Settings Modal Overlay -->
+  <div id="settingsModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 20px;">
+    <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; max-width: 440px; width: 100%; box-shadow: var(--shadow); overflow: hidden;">
+      <div style="padding: 24px 24px 18px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--ink); margin: 0;">Preferences</h3>
+        <button id="closeSettingsBtn" style="background: none; border: none; color: var(--ink-dim); cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;" aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div style="padding: 24px; display: flex; flex-direction: column; gap: 20px;">
+        <!-- English Level Selection -->
+        <div>
+          <label style="font-family: var(--font-mono); font-size: 10px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; display: block; margin-bottom: 8px;">English Level</label>
+          <select id="settingsLevel" style="width: 100%; background: var(--bg-1); color: var(--ink); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; font-size: 14px; outline: none;">
+            <option value="A1" style="background: var(--bg-card); color: var(--ink);">A1 · Beginner</option>
+            <option value="A2" style="background: var(--bg-card); color: var(--ink);">A2 · Elementary</option>
+            <option value="B1" style="background: var(--bg-card); color: var(--ink);">B1 · Intermediate</option>
+            <option value="B2" style="background: var(--bg-card); color: var(--ink);">B2 · Upper Intermediate</option>
+            <option value="C1" style="background: var(--bg-card); color: var(--ink);">C1 · Advanced</option>
+            <option value="all" style="background: var(--bg-card); color: var(--ink);">All Levels · Mix</option>
+          </select>
+          <span style="font-size: 11px; color: var(--ink-dim); margin-top: 6px; display: block; line-height: 1.4;">Adapts the vocabulary pack lists to match this specific difficulty tier.</span>
+        </div>
+        
+        <!-- Daily Word Target Selection -->
+        <div>
+          <label style="font-family: var(--font-mono); font-size: 10px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; display: block; margin-bottom: 8px;">Daily Study Target</label>
+          <select id="settingsWordsPerDay" style="width: 100%; background: var(--bg-1); color: var(--ink); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; font-size: 14px; outline: none;">
+            <option value="5" style="background: var(--bg-card); color: var(--ink);">5 words per day · Casual</option>
+            <option value="10" style="background: var(--bg-card); color: var(--ink);">10 words per day · Moderate</option>
+            <option value="15" style="background: var(--bg-card); color: var(--ink);">15 words per day · Standard</option>
+            <option value="20" style="background: var(--bg-card); color: var(--ink);">20 words per day · Intensive</option>
+            <option value="25" style="background: var(--bg-card); color: var(--ink);">25 words per day · Hardcore</option>
+            <option value="30" style="background: var(--bg-card); color: var(--ink);">30 words per day · Insane</option>
+          </select>
+          <span style="font-size: 11px; color: var(--ink-dim); margin-top: 6px; display: block; line-height: 1.4;">Sets the number of words to learn in each session before hitting your milestone.</span>
+        </div>
+      </div>
+      <div style="padding: 16px 24px 24px 24px; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border); background: var(--bg-1);">
+        <button id="cancelSettingsBtn" style="background: none; border: 1px solid var(--border); color: var(--ink); border-radius: 6px; padding: 8px 16px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s;">Cancel</button>
+        <button id="saveSettingsBtn" style="background: var(--ink); color: var(--bg); border: none; border-radius: 6px; padding: 8px 18px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script id="word-data" type="application/json">[
@@ -1010,7 +1065,6 @@ body {
   {"word": "facilitate", "pos": "v", "level": "C1", "meaning": "To make an action or a process easier or faster.", "synonyms": "help, ease, make easy", "example": "Clear road signs will facilitate driving in the city."},
   {"word": "fluctuate", "pos": "v", "level": "C1", "meaning": "To change up and down frequently, rather than staying same.", "synonyms": "change, shift, wave", "example": "The temperature can fluctuate a lot during spring."},
   {"word": "foster", "pos": "v", "level": "C1", "meaning": "To help something grow, develop, or improve over time.", "synonyms": "encourage, feed, support", "example": "The school hopes to foster a love for reading books."},
-
   {"word": "always", "pos": "adv", "level": "A1", "meaning": "At all times; every time.", "synonyms": "forever, constantly, continually", "example": "She always drinks water in the morning."},
   {"word": "arrive", "pos": "v", "level": "A1", "meaning": "To reach a place at the end of a journey.", "synonyms": "reach, come, show up", "example": "The train will arrive at five o'clock."},
   {"word": "beautiful", "pos": "adj", "level": "A1", "meaning": "Very attractive or pleasing to look at.", "synonyms": "pretty, lovely, nice", "example": "This is a beautiful flower."},
@@ -1026,7 +1080,21 @@ body {
   {"word": "together", "pos": "adv", "level": "A1", "meaning": "With each other or near each other.", "synonyms": "joined, united, close", "example": "They walk to school together."},
   {"word": "understand", "pos": "v", "level": "A1", "meaning": "To know the meaning of something.", "synonyms": "know, grasp, see", "example": "Do you understand this question?"},
   {"word": "welcome", "pos": "v", "level": "A1", "meaning": "To greet someone in a friendly way.", "synonyms": "greet, receive, accept", "example": "We welcome you to our home."},
-
+  {"word": "family", "pos": "n", "level": "A1", "meaning": "A group of people who are related to each other.", "synonyms": "relatives, kin", "example": "I love spending time with my family."},
+  {"word": "people", "pos": "n", "level": "A1", "meaning": "More than one person.", "synonyms": "humans, folk", "example": "There are many people in the park."},
+  {"word": "school", "pos": "n", "level": "A1", "meaning": "A place where children go to learn.", "synonyms": "academy, class", "example": "We walk to school every morning."},
+  {"word": "morning", "pos": "n", "level": "A1", "meaning": "The early part of the day.", "synonyms": "dawn, AM", "example": "I drink coffee in the morning."},
+  {"word": "brother", "pos": "n", "level": "A1", "meaning": "A boy or man who has the same parents as you.", "synonyms": "sibling", "example": "My brother is older than me."},
+  {"word": "sister", "pos": "n", "level": "A1", "meaning": "A girl or woman who has the same parents as you.", "synonyms": "sibling", "example": "My sister plays the piano beautifully."},
+  {"word": "hungry", "pos": "adj", "level": "A1", "meaning": "Wanting or needing food.", "synonyms": "starving", "example": "I am hungry after playing soccer."},
+  {"word": "thirsty", "pos": "adj", "level": "A1", "meaning": "Needing a drink of water.", "synonyms": "dry", "example": "It is hot and I am very thirsty."},
+  {"word": "weather", "pos": "n", "level": "A1", "meaning": "The state of the air or atmosphere (rain, wind, sun).", "synonyms": "climate", "example": "The weather is beautiful and sunny today."},
+  {"word": "difficult", "pos": "adj", "level": "A1", "meaning": "Not easy to do or understand.", "synonyms": "hard, tough", "example": "This math question is very difficult."},
+  {"word": "important", "pos": "adj", "level": "A1", "meaning": "Having a great value or meaning.", "synonyms": "vital, crucial", "example": "Water is important for our health."},
+  {"word": "library", "pos": "n", "level": "A1", "meaning": "A room or building with many books to read or borrow.", "synonyms": "bookroom", "example": "I go to the library to study in quiet."},
+  {"word": "evening", "pos": "n", "level": "A1", "meaning": "The part of the day between afternoon and night.", "synonyms": "sunset, dusk", "example": "We watch television in the evening."},
+  {"word": "outside", "pos": "adv", "level": "A1", "meaning": "Not inside a building.", "synonyms": "outdoors, open air", "example": "The children want to play outside."},
+  {"word": "favorite", "pos": "adj", "level": "A1", "meaning": "Liked more than other people or things.", "synonyms": "preferred, best-loved", "example": "Apple is my favorite fruit."},
   {"word": "accident", "pos": "n", "level": "A2", "meaning": "Something bad that happens by chance.", "synonyms": "crash, mistake, mishap", "example": "He had a small accident on his bicycle."},
   {"word": "agree", "pos": "v", "level": "A2", "meaning": "To have the same opinion as someone.", "synonyms": "match, accept, say yes", "example": "I agree with you about this idea."},
   {"word": "believe", "pos": "v", "level": "A2", "meaning": "To think that something is true.", "synonyms": "trust, think, accept", "example": "I believe that you can pass the exam."},
@@ -1042,7 +1110,21 @@ body {
   {"word": "require", "pos": "v", "level": "A2", "meaning": "To need something or make it necessary.", "synonyms": "need, demand, call for", "example": "Most plants require sunlight to grow."},
   {"word": "suggest", "pos": "v", "level": "A2", "meaning": "To share an idea or plan for someone to think about.", "synonyms": "propose, offer, advise", "example": "I suggest we go for a walk."},
   {"word": "useful", "pos": "adj", "level": "A2", "meaning": "Helping you to do or get what you want.", "synonyms": "helpful, handy, valuable", "example": "A dictionary is a very useful book."},
-
+  {"word": "amazing", "pos": "adj", "level": "A2", "meaning": "Very surprising, wonderful, or excellent.", "synonyms": "wonderful, great, awesome", "example": "We saw an amazing sunset at the beach."},
+  {"word": "borrow", "pos": "v", "level": "A2", "meaning": "To take something from someone and return it later.", "synonyms": "take, use temporarily", "example": "Can I borrow your pen for a minute?"},
+  {"word": "complain", "pos": "v", "level": "A2", "meaning": "To say that you are not happy about something.", "synonyms": "grumble, object", "example": "Customers complain when the service is slow."},
+  {"word": "discover", "pos": "v", "level": "A2", "meaning": "To find or learn something for the first time.", "synonyms": "find, unearth, detect", "example": "Scientists discover new plants in the forest."},
+  {"word": "encourage", "pos": "v", "level": "A2", "meaning": "To give someone confidence and hope.", "synonyms": "support, urge, inspire", "example": "Teachers encourage students to read more."},
+  {"word": "healthy", "pos": "adj", "level": "A2", "meaning": "Strong and not sick.", "synonyms": "well, fit, sound", "example": "Eating fresh fruit keeps you healthy."},
+  {"word": "imagine", "pos": "v", "level": "A2", "meaning": "To form a picture or idea of something in your mind.", "synonyms": "think, picture, dream", "example": "Can you imagine living on a warm island?"},
+  {"word": "invent", "pos": "v", "level": "A2", "meaning": "To design or make something for the first time.", "synonyms": "create, design, originate", "example": "They want to invent a flying car."},
+  {"word": "mistake", "pos": "n", "level": "A2", "meaning": "Something that is done wrong.", "synonyms": "error, fault", "example": "I made a small mistake on my test."},
+  {"word": "neighbor", "pos": "n", "level": "A2", "meaning": "A person who lives near you.", "synonyms": "local, dweller", "example": "Our neighbor is very friendly and kind."},
+  {"word": "opinion", "pos": "n", "level": "A2", "meaning": "What you think or believe about something.", "synonyms": "belief, view, thought", "example": "What is your opinion on this new movie?"},
+  {"word": "remember", "pos": "v", "level": "A2", "meaning": "To bring back information into your mind.", "synonyms": "recall, keep in mind", "example": "Please remember to lock the door."},
+  {"word": "successful", "pos": "adj", "level": "A2", "meaning": "Achieving the results that you wanted.", "synonyms": "winning, prosperous", "example": "He is a very successful businessman."},
+  {"word": "travel", "pos": "v", "level": "A2", "meaning": "To go from one place to another.", "synonyms": "go, trip, journey", "example": "I want to travel to Spain next summer."},
+  {"word": "prepare", "pos": "v", "level": "A2", "meaning": "To make something ready for use.", "synonyms": "ready, arrange, fit", "example": "We need to prepare for the test tomorrow."},
   {"word": "abandon", "pos": "v", "level": "B1", "meaning": "To leave someone or something forever.", "synonyms": "leave, desert, quit", "example": "The sailors had to abandon the sinking ship."},
   {"word": "accurate", "pos": "adj", "level": "B1", "meaning": "Correct in all details; exact.", "synonyms": "correct, exact, true", "example": "We need an accurate map of the forest."},
   {"word": "achieve", "pos": "v", "level": "B1", "meaning": "To successfully finish or get something by working hard.", "synonyms": "accomplish, reach, win", "example": "She worked hard to achieve her dream."},
@@ -1057,7 +1139,34 @@ body {
   {"word": "frequent", "pos": "adj", "level": "B1", "meaning": "Happening often.", "synonyms": "often, common, regular", "example": "He is a frequent visitor to our local library."},
   {"word": "predict", "pos": "v", "level": "B1", "meaning": "To say what will happen in the future.", "synonyms": "foresee, forecast, guess", "example": "It is difficult to predict the weather accurately."},
   {"word": "resolve", "pos": "v", "level": "B1", "meaning": "To find an answer or solution to a problem.", "synonyms": "solve, settle, fix", "example": "They need to resolve their argument quickly."},
-  {"word": "sufficient", "pos": "adj", "level": "B1", "meaning": "As much as is needed; enough.", "synonyms": "enough, plenty, adequate", "example": "Do we have sufficient food for the guests?"}
+  {"word": "sufficient", "pos": "adj", "level": "B1", "meaning": "As much as is needed; enough.", "synonyms": "enough, plenty, adequate", "example": "Do we have sufficient food for the guests?"},
+  {"word": "approach", "pos": "v", "level": "B1", "meaning": "To come near or nearer to something in space or time.", "synonyms": "near, draw close", "example": "Winter is starting to approach quickly."},
+  {"word": "assume", "pos": "v", "level": "B1", "meaning": "To think that something is true, without proof.", "synonyms": "suppose, think, presume", "example": "Do not assume he is angry just because he is quiet."},
+  {"word": "benefit", "pos": "n", "level": "B1", "meaning": "An advantage or useful effect that you get from something.", "synonyms": "advantage, help, gain", "example": "Regular exercise is a great benefit to your health."},
+  {"word": "consequence", "pos": "n", "level": "B1", "meaning": "A result of a particular action or situation.", "synonyms": "result, outcome, effect", "example": "The consequence of being late was missing the train."},
+  {"word": "convince", "pos": "v", "level": "B1", "meaning": "To make someone believe that something is true.", "synonyms": "persuade, satisfy, win over", "example": "I managed to convince him to join our team."},
+  {"word": "critical", "pos": "adj", "level": "B1", "meaning": "Extremely important or serious; or saying what is wrong.", "synonyms": "crucial, vital, key", "example": "The doctor said his condition is critical but stable."},
+  {"word": "emphasize", "pos": "v", "level": "B1", "meaning": "To show that something is very important.", "synonyms": "stress, highlight, underline", "example": "Teachers emphasize the importance of practice."},
+  {"word": "estimate", "pos": "v", "level": "B1", "meaning": "To guess the size, cost, or value of something roughly.", "synonyms": "guess, evaluate, calculate", "example": "They estimate the project will take three weeks."},
+  {"word": "investigate", "pos": "v", "level": "B1", "meaning": "To study or examine something carefully to find the truth.", "synonyms": "examine, look into, explore", "example": "Police will investigate the cause of the fire."},
+  {"word": "maintain", "pos": "v", "level": "B1", "meaning": "To make something continue in the same way or condition.", "synonyms": "keep, continue, support", "example": "You should maintain a clean workspace."},
+  {"word": "obtain", "pos": "v", "level": "B1", "meaning": "To get something that you want, especially through effort.", "synonyms": "get, acquire, win", "example": "You must obtain permission before entering."},
+  {"word": "oppose", "pos": "v", "level": "B1", "meaning": "To disagree with or try to stop a plan or idea.", "synonyms": "resist, fight, object", "example": "Many locals oppose building a new highway here."},
+  {"word": "reject", "pos": "v", "level": "B1", "meaning": "To refuse to accept or believe something.", "synonyms": "refuse, turn down, deny", "example": "The school had to reject his application."},
+  {"word": "significant", "pos": "adj", "level": "B1", "meaning": "Large or important enough to have an effect or be noticed.", "synonyms": "important, major, notable", "example": "There was a significant improvement in her grades."},
+  {"word": "transform", "pos": "v", "level": "B1", "meaning": "To change the shape, appearance, or character of something completely.", "synonyms": "change, alter, convert", "example": "Computers can transform the way we learn."},
+  {"word": "comprehensive", "pos": "adj", "level": "B2", "meaning": "Including all, or almost all, the items or facts that may be involved.", "synonyms": "complete, thorough, full", "example": "The report gives a comprehensive overview of the issue."},
+  {"word": "crucial", "pos": "adj", "level": "B2", "meaning": "Extremely important because it will affect other things.", "synonyms": "vital, critical, key", "example": "Getting enough sleep is crucial for your memory."},
+  {"word": "disaster", "pos": "n", "level": "B2", "meaning": "An event that causes a lot of damage, destruction, or pain.", "synonyms": "catastrophe, tragedy", "example": "The flood was a terrible natural disaster."},
+  {"word": "efficient", "pos": "adj", "level": "B2", "meaning": "Working well and quickly without wasting time, money, or energy.", "synonyms": "effective, productive", "example": "An efficient heater uses less electricity."},
+  {"word": "flexible", "pos": "adj", "level": "B2", "meaning": "Able to change to fit new situations, or easy to bend.", "synonyms": "adaptable, bendable", "example": "We have flexible working hours at this office."},
+  {"word": "generate", "pos": "v", "level": "B2", "meaning": "To produce or create something.", "synonyms": "produce, create, make", "example": "The new solar panels generate green electricity."},
+  {"word": "hypothesis", "pos": "n", "level": "B2", "meaning": "An idea or explanation that is based on a few facts but is not yet proven.", "synonyms": "theory, guess, proposition", "example": "Scientists are testing their new hypothesis in the lab."},
+  {"word": "imply", "pos": "v", "level": "B2", "meaning": "To suggest that something is true without saying it directly.", "synonyms": "suggest, hint, signal", "example": "His silence seemed to imply that he agreed with us."},
+  {"word": "integrate", "pos": "v", "level": "B2", "meaning": "To combine two or more things so that they work together.", "synonyms": "combine, merge, link", "example": "We want to integrate the new software with our system."},
+  {"word": "justify", "pos": "v", "level": "B2", "meaning": "To show or prove that a decision or action is reasonable or right.", "synonyms": "explain, defend, warrant", "example": "You need to justify why you spent so much money."},
+  {"word": "maximize", "pos": "v", "level": "B2", "meaning": "To increase something as much as possible.", "synonyms": "increase, boost, expand", "example": "We must maximize our efforts to finish on time."},
+  {"word": "reconcile", "pos": "v", "level": "B2", "meaning": "To find an acceptable way of dealing with two opposing ideas or situations.", "synonyms": "settle, resolve, match", "example": "It is hard to reconcile his words with his actions."}
 ]
 </script>
 <script type="module">
@@ -1490,7 +1599,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     var countTotal = learnedCountTotal();
     var pct = Math.round((countPack/TOTAL)*100);
     $('homeRingNum').textContent = pct + '%';
-    $('homeRingLabel').textContent = 'of Curated Pack (' + countPack + '/' + TOTAL + ')';
+    $('homeRingLabel').textContent = 'of Vocabulary Pack (' + countPack + '/' + TOTAL + ')';
     var oxfordPct = ((countTotal / 5000) * 100).toFixed(2);
     $('homeRingSub').textContent = oxfordPct + '% of Oxford 5000';
     $('homeRingFill').setAttribute('stroke-dasharray', CIRC);
@@ -1516,7 +1625,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     if (grammarProgressFillEl) {
       grammarProgressFillEl.style.width = grammarPct + '%';
     }
-    var wordLevelLabel = getLevelFromWordsCount(countTotal);
+    var wordLevelLabel = userEnglishLevel === 'all' ? getLevelFromWordsCount(countTotal) : 'Level ' + userEnglishLevel;
     $('levelText').textContent = wordLevelLabel + ' (Lvl ' + levelFromScore(Progress.score) + ')';
 
     // Update Daily Goal Meter
@@ -1577,15 +1686,11 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     var cardTitleEl = document.querySelector('#cardOxford .card-title');
     var cardDescEl = document.querySelector('#cardOxford .card-desc');
     if (cardTitleEl && cardDescEl) {
-      if (userEnglishLevel === 'B2') {
-        cardTitleEl.textContent = 'B2 Core Words';
-        cardDescEl.textContent = 'Upper-Intermediate American Oxford 5000 words explained with simple meanings, synonyms, and helpful examples.';
-      } else if (userEnglishLevel === 'C1') {
-        cardTitleEl.textContent = 'C1 Advanced Words';
-        cardDescEl.textContent = 'Advanced/C1 American Oxford 5000 words explained with simple meanings, synonyms, and helpful examples.';
+      cardTitleEl.textContent = 'Learn New Vocabulary';
+      if (userEnglishLevel && userEnglishLevel !== 'all') {
+        cardDescEl.textContent = 'Essential ' + userEnglishLevel + ' level words explained with simple meanings, synonyms, and helpful examples.';
       } else {
-        cardTitleEl.textContent = 'Advanced Core Words';
-        cardDescEl.textContent = 'High-level B2 & C1 American Oxford 5000 words explained with simple meanings, synonyms, and helpful examples.';
+        cardDescEl.textContent = 'Essential English words matching your levels (A1 to C1) explained with simple meanings, synonyms, and helpful examples.';
       }
     }
 
@@ -1600,7 +1705,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
 
     var footerNoteEl = document.querySelector('#view-home .footer-note');
     if (footerNoteEl) {
-      var levelDesc = userEnglishLevel === 'all' ? 'B2–C1' : userEnglishLevel;
+      var levelDesc = userEnglishLevel === 'all' ? 'A1–C1' : userEnglishLevel;
       footerNoteEl.textContent = TOTAL + ' words · ' + levelDesc + ' · American Oxford 5000 wordlist with simplified definitions & synonyms';
     }
 
@@ -1851,6 +1956,14 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     if(wordId === meaningId){
       wordBtn.classList.remove('selected'); wordBtn.classList.add('matched');
       meaningBtn.classList.remove('selected'); meaningBtn.classList.add('matched');
+
+      // Erase matched word from user history (Progress.learned)
+      var matchedItem = matchState.pickedEntries[wordId];
+      if (matchedItem && Progress.learned[matchedItem.word]) {
+        delete Progress.learned[matchedItem.word];
+        saveProgress().catch(function(e){ console.error('Failed to save progress', e); });
+      }
+
       matchState.matchedCount++;
       $('matchScore').textContent = matchState.matchedCount;
       matchState.selectedWordId = null;
@@ -1966,9 +2079,28 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   }
 
   /* ---------------- study session ---------------- */
-  var session = { word:null, info:null, phase:null, attempts:0, sessionLearned:0, practiceMode:false };
+  var session = {
+    word: null,
+    info: null,
+    phase: null,
+    attempts: 0,
+    sessionLearned: 0,
+    sessionSkipped: 0,
+    skippedEntries: [],
+    repassingSkipped: false,
+    skippedIndex: 0,
+    initialTodayCount: 0,
+    sessionTarget: 10,
+    practiceMode: false
+  };
 
   function nextEntry(){
+    if (session.repassingSkipped) {
+      if (session.skippedIndex < session.skippedEntries.length) {
+        return session.skippedEntries[session.skippedIndex];
+      }
+      return null;
+    }
     while(Progress.index < TOTAL && Progress.learned[WORDS[Progress.index].word]){
       Progress.index++;
     }
@@ -1984,7 +2116,29 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   }
 
   async function startStudy(){
+    var remainingInLevel = TOTAL - learnedCountForCurrentPack();
+    if (remainingInLevel <= 0) {
+      alert("You've learned all " + TOTAL + " words for level " + (userEnglishLevel === 'all' ? 'All Levels' : userEnglishLevel) + "!\n\nUse the Preferences menu (click your level pill at the top) to change your level or increase your goal!");
+      $('settingsLevel').value = userEnglishLevel;
+      $('settingsWordsPerDay').value = userWordsPerDay;
+      $('settingsModal').style.display = 'flex';
+      return;
+    }
+
     session.practiceMode = false;
+    session.sessionLearned = 0;
+    session.sessionSkipped = 0;
+    session.skippedEntries = [];
+    session.repassingSkipped = false;
+    session.skippedIndex = 0;
+    session.initialTodayCount = wordsLearnedTodayCount();
+    
+    var wordsLeftToGoal = userWordsPerDay - session.initialTodayCount;
+    if (wordsLeftToGoal <= 0) {
+      wordsLeftToGoal = userWordsPerDay;
+    }
+    session.sessionTarget = Math.max(1, Math.min(wordsLeftToGoal, remainingInLevel));
+
     showView('study');
     updateStudyHeader();
     await loadNextWord();
@@ -1992,7 +2146,18 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
 
   async function loadNextWord(){
     var entry = nextEntry();
-    if(!entry){ renderAllComplete(); return; }
+    if(!entry){
+      if (session.repassingSkipped) {
+        finishStudySession();
+        return;
+      }
+      if (!session.repassingSkipped && session.skippedEntries && session.skippedEntries.length > 0) {
+        startSkippedReview();
+        return;
+      }
+      renderAllComplete(); 
+      return; 
+    }
     session.word = entry;
     session.attempts = 0;
     renderLoading();
@@ -2124,9 +2289,29 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
 
   function skipWord(){
     if(session.practiceMode){ showView('history'); renderHistoryList(); return; }
-    if(session.word){ Progress.index++; }
+    if(session.repassingSkipped){
+      session.skippedIndex++;
+      loadNextWord();
+      return;
+    }
+    if(session.word){
+      session.skippedEntries.push(session.word);
+      session.sessionSkipped++;
+      Progress.index++;
+    }
     saveProgress().catch(function(e){ console.error('Failed to save progress', e); });
-    loadNextWord();
+    
+    // Check if session limit reached
+    var sessionInteracted = session.sessionLearned + session.sessionSkipped;
+    if (sessionInteracted >= session.sessionTarget) {
+      if (session.skippedEntries.length > 0) {
+        startSkippedReview();
+      } else {
+        finishStudySession();
+      }
+    } else {
+      loadNextWord();
+    }
   }
 
   async function checkAnswer(value){
@@ -2163,21 +2348,36 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
         synonyms: session.info.synonyms || null,
         learnedAt: todayStr
       };
-      Progress.index++;
-      session.sessionLearned++;
+
+      if (session.repassingSkipped) {
+        session.skippedIndex++;
+        session.sessionLearned++;
+      } else {
+        Progress.index++;
+        session.sessionLearned++;
+      }
+
       saveProgress().catch(function(e){ console.error('Failed to save progress', e); });
       updateStudyHeader();
 
-      var todayCount = wordsLearnedTodayCount();
-      var hitGoalJustNow = (todayCount === userWordsPerDay);
-
       setTimeout(function(){
-        if(hitGoalJustNow){
-          renderDailyGoalCheckpoint();
-        } else if(session.sessionLearned > 0 && session.sessionLearned % 10 === 0){
-          renderCheckpoint();
+        if (session.repassingSkipped) {
+          if (session.skippedIndex >= session.skippedEntries.length) {
+            finishStudySession();
+          } else {
+            loadNextWord();
+          }
         } else {
-          loadNextWord();
+          var sessionInteracted = session.sessionLearned + session.sessionSkipped;
+          if (sessionInteracted >= session.sessionTarget) {
+            if (session.skippedEntries.length > 0) {
+              startSkippedReview();
+            } else {
+              finishStudySession();
+            }
+          } else {
+            loadNextWord();
+          }
         }
       }, 850);
     } else {
@@ -2195,6 +2395,36 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       feedback.className = 'feedback err';
       input.value = '';
       input.focus();
+    }
+  }
+
+  function startSkippedReview(){
+    session.repassingSkipped = true;
+    session.skippedIndex = 0;
+    session.phase = 'checkpoint';
+    stage.innerHTML =
+      '<div class="checkpoint-wrap" style="text-align:center; padding:40px 0;">' +
+        '<div class="checkpoint-icon" style="background:rgba(255,152,0,0.1); color:#FF9800; border-color:rgba(255,152,0,0.2); margin:0 auto 18px;">' +
+          '<svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+        '</div>' +
+        '<div class="checkpoint-title">Practice Skipped Words</div>' +
+        '<div class="checkpoint-sub">You\'ve finished the main session! Now, let\'s practice the <b>' + session.skippedEntries.length + '</b> word(s) you skipped to make sure you learn them.</div>' +
+        '<div class="checkpoint-actions" style="justify-content:center; margin-top:24px;">' +
+          '<button class="btn-solid" id="btnStartSkippedReview">Start Review</button>' +
+        '</div>' +
+      '</div>';
+    bindTap($('btnStartSkippedReview'), function(){
+      loadNextWord();
+    });
+  }
+
+  function finishStudySession() {
+    var todayCount = wordsLearnedTodayCount();
+    var hitGoalJustNow = (todayCount >= userWordsPerDay);
+    if (hitGoalJustNow) {
+      renderDailyGoalCheckpoint();
+    } else {
+      renderCheckpoint();
     }
   }
 
@@ -4679,6 +4909,65 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     initReminderSwipe();
     initThemeHandlers();
     startNewDayChecker();
+
+    bindTap($('levelPill'), function(){
+      $('settingsLevel').value = userEnglishLevel || 'A1';
+      $('settingsWordsPerDay').value = String(userWordsPerDay || 10);
+      $('settingsModal').style.display = 'flex';
+    });
+
+    bindTap($('closeSettingsBtn'), function(){
+      $('settingsModal').style.display = 'none';
+    });
+
+    bindTap($('cancelSettingsBtn'), function(){
+      $('settingsModal').style.display = 'none';
+    });
+
+    $('settingsModal').addEventListener('click', function(e){
+      if(e.target === $('settingsModal')){
+        $('settingsModal').style.display = 'none';
+      }
+    });
+
+    bindTap($('saveSettingsBtn'), async function(){
+      var newLvl = $('settingsLevel').value;
+      var newWordsPerDay = parseInt($('settingsWordsPerDay').value, 10) || 10;
+      
+      var saveBtn = $('saveSettingsBtn');
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving…';
+      
+      try {
+        await update(ref(db, 'users/' + currentUser.uid), {
+          englishLevel: newLvl,
+          wordsPerDay: newWordsPerDay
+        });
+        
+        userEnglishLevel = newLvl;
+        userWordsPerDay = newWordsPerDay;
+        
+        var originalWords = JSON.parse(document.getElementById('word-data').textContent);
+        if (userEnglishLevel && userEnglishLevel !== 'all') {
+          WORDS = originalWords.filter(function(w){ return w.level === userEnglishLevel; });
+        } else {
+          WORDS = originalWords;
+        }
+        TOTAL = WORDS.length;
+        
+        Progress.index = 0;
+        
+        renderHome();
+        
+        $('settingsModal').style.display = 'none';
+      } catch(e) {
+        console.error('Failed to save settings:', e);
+        alert('Could not save settings. Please try again.');
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save Changes';
+      }
+    });
 
     bindTap($('cardOxford'), startStudy);
     bindTap($('cardGrammar'), function(){ showView('grammar'); });
