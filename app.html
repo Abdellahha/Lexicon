@@ -549,6 +549,159 @@ body {
     justify-content: center;
   }
 }
+
+/* ---------- grammar view ---------- */
+.grammar-topic-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform .25s cubic-bezier(.22,1,.36,1), border-color .25s ease, box-shadow .25s ease;
+}
+.grammar-topic-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--ink);
+  box-shadow: var(--shadow);
+}
+.grammar-topic-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-top: 20px;
+}
+@media(max-width: 640px) {
+  .grammar-topic-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+}
+.grammar-topic-index {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.grammar-topic-title {
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 700;
+  margin: 6px 0 4px;
+  line-height: 1.3;
+}
+.grammar-topic-desc {
+  font-size: 13px;
+  color: var(--ink-dim);
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+.grammar-topic-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.grammar-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--bg-1);
+}
+.grammar-badge.completed {
+  background: var(--success-soft);
+  color: var(--success);
+  border-color: rgba(46,125,50,0.25);
+}
+
+.grammar-option-btn {
+  width: 100%;
+  text-align: left;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 18px;
+  font-size: 14.5px;
+  color: var(--ink);
+  line-height: 1.4;
+  font-family: var(--font-body);
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.grammar-option-btn:hover:not(:disabled) {
+  border-color: var(--ink);
+  background: var(--bg-1);
+}
+.grammar-option-btn.correct {
+  border-color: var(--success) !important;
+  background: var(--success-soft) !important;
+  color: var(--success) !important;
+  font-weight: 600;
+}
+.grammar-option-btn.incorrect {
+  border-color: var(--error) !important;
+  background: var(--error-soft) !important;
+  color: var(--error) !important;
+}
+.grammar-option-circle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--ink-faint);
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+.grammar-option-btn:hover:not(:disabled) .grammar-option-circle {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+.grammar-option-btn.correct .grammar-option-circle {
+  background: var(--success);
+  color: #fff;
+  border-color: var(--success);
+}
+.grammar-option-btn.incorrect .grammar-option-circle {
+  background: var(--error);
+  color: #fff;
+  border-color: var(--error);
+}
+
+.grammar-tip-box {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-top: 24px;
+  text-align: left;
+  line-height: 1.6;
+  font-size: 14px;
+  color: var(--ink-dim);
+}
+.grammar-tip-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+.grammar-tip-text b, .grammar-tip-text strong {
+  color: var(--ink);
+  font-weight: 600;
+}
 </style>
 </head>
 <body>
@@ -678,11 +831,14 @@ body {
         <div class="card-desc">Sound more natural in everyday conversation.</div>
         <div class="card-foot"><span class="card-badge">Coming soon</span></div>
       </div>
-      <div class="card locked">
+      <div class="card active-card" id="cardGrammar">
         <div class="card-index">03 · Grammar</div>
         <div class="card-title">Grammar in Context</div>
-        <div class="card-desc">Learn structure through real sentences.</div>
-        <div class="card-foot"><span class="card-badge">Coming soon</span></div>
+        <div class="card-desc">Learn English structure through real-world sentences.</div>
+        <div class="card-foot">
+          <div class="card-progress-bar"><div class="card-progress-fill" id="grammarProgressFill" style="width:0%"></div></div>
+          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
       </div>
     </div>
 
@@ -755,6 +911,49 @@ body {
     </div>
     <div class="match-wrap" id="matchWrap">
       <div class="match-grid" id="matchGrid"></div>
+    </div>
+  </div>
+
+  <!-- GRAMMAR VIEW -->
+  <div class="view" id="view-grammar">
+    <!-- State 1: Topics list -->
+    <div id="grammar-topics-screen">
+      <div class="study-top">
+        <button class="btn-ghost" id="btnGrammarBack">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Home
+        </button>
+        <div class="session-meta">
+          <span>Grammar Score <b id="grammarScore">0</b></span>
+        </div>
+      </div>
+      <div class="hero" style="margin-bottom: 24px; display: block; background: transparent; padding: 24px 0 0; text-align: left; box-shadow: none;">
+        <div class="hero-title" style="font-size: clamp(28px, 6vw, 36px); line-height: 1.2; font-family: var(--font-display); font-weight: 800; font-style: italic; margin-bottom: 8px;">Grammar <span style="color: var(--ink-faint); font-weight: 400;">in Context</span></div>
+        <p class="hero-sub" style="font-size: 14px; color: var(--ink-dim); line-height: 1.6; max-width: 60ch; margin: 0;">Learn English structures through active sentence builders. Choose a topic below to begin mastering grammar easily.</p>
+      </div>
+      <div class="section-label">Topics</div>
+      <div class="grammar-topic-grid" id="grammarTopicGrid">
+        <!-- topics dynamically rendered -->
+      </div>
+    </div>
+
+    <!-- State 2: Practice screen -->
+    <div id="grammar-practice-screen" style="display:none;">
+      <div class="study-top">
+        <button class="btn-ghost" id="btnGrammarPracticeBack">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Topics
+        </button>
+        <div class="session-meta">
+          <span id="grammarPracticeProgress">Question 1/10</span>
+          <span>Score <b id="grammarSessionScore">0</b></span>
+        </div>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="grammarPracticeProgressFill" style="width:0%"></div></div>
+
+      <div class="stage" id="grammarStage" style="min-height:auto; padding: 36px 30px; margin-bottom:20px; text-align: left; align-items: stretch; display: flex; flex-direction: column;">
+        <!-- Question, options, and tip rendered here -->
+      </div>
     </div>
   </div>
 
@@ -1211,7 +1410,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
 
   /* ---------------- dom refs ---------------- */
   var $ = function(id){ return document.getElementById(id); };
-  var viewHome = $('view-home'), viewStudy = $('view-study'), viewHistory = $('view-history'), viewMatch = $('view-match');
+  var viewHome = $('view-home'), viewStudy = $('view-study'), viewHistory = $('view-history'), viewMatch = $('view-match'), viewGrammar = $('view-grammar');
   var stage = $('stage');
 
   /* ---------------- home rendering ---------------- */
@@ -1267,6 +1466,23 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     $('statStreak').textContent = Progress.streak;
     $('statScore').textContent = Progress.score;
     $('cardProgressFill').style.width = pct + '%';
+    
+    // Calculate and update grammar card progress
+    Progress.grammar = Progress.grammar || {};
+    var completedGrammarCount = 0;
+    for (var tId in Progress.grammar) {
+      var topicAnswers = Progress.grammar[tId] || {};
+      for (var qIdx in topicAnswers) {
+        if (topicAnswers[qIdx]) {
+          completedGrammarCount++;
+        }
+      }
+    }
+    var grammarPct = Math.round((completedGrammarCount / 120) * 100);
+    var grammarProgressFillEl = $('grammarProgressFill');
+    if (grammarProgressFillEl) {
+      grammarProgressFillEl.style.width = grammarPct + '%';
+    }
     $('levelText').textContent = (userEnglishLevel === 'all' ? 'All Levels' : userEnglishLevel + ' Level') + ' (Lvl ' + levelFromScore(Progress.score) + ')';
 
     // Update Daily Goal Meter
@@ -1367,13 +1583,15 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
 
   /* ---------------- navigation ---------------- */
   function showView(name){
-    [viewHome, viewStudy, viewHistory, viewMatch].forEach(function(v){ if(v) v.classList.remove('active'); });
+    [viewHome, viewStudy, viewHistory, viewMatch, viewGrammar].forEach(function(v){ if(v) v.classList.remove('active'); });
     if(name==='home'){
       viewHome.classList.add('active'); renderHome(); scheduleReminder(true);
     } else if(name==='history'){
       viewHistory.classList.add('active'); reminderLoop = false; dismissReminder();
     } else if(name==='match'){
       viewMatch.classList.add('active'); reminderLoop = false; dismissReminder();
+    } else if(name==='grammar'){
+      viewGrammar.classList.add('active'); reminderLoop = false; dismissReminder(); renderGrammarTopics();
     } else {
       viewStudy.classList.add('active'); scheduleReminder(false);
     }
@@ -1993,6 +2211,1660 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     bindTap($('btnHome3'), function(){ showView('home'); });
   }
 
+  /* ---------------- grammar module ---------------- */
+  var GRAMMAR_TOPICS = [
+    {
+      id: "present_simple",
+      title: "Present Simple",
+      desc: "Master habits, daily routines, scientific facts, and general truths in the present.",
+      questions: [
+        {
+          sentence: "Water ________ at 100 degrees Celsius under standard atmospheric pressure.",
+          options: [
+            "boils",
+            "is boiling",
+            "boil",
+            "will boil"
+          ],
+          answer: 0,
+          tip: "Use **Present Simple** ('boils') for general truths and scientific facts."
+        },
+        {
+          sentence: "He ________ his dog in the park every morning before going to work.",
+          options: [
+            "walks",
+            "walk",
+            "is walking",
+            "has walked"
+          ],
+          answer: 0,
+          tip: "Use **Present Simple** ('walks') for regular habits and daily routines."
+        },
+        {
+          sentence: "The train to London ________ at exactly 8:15 AM tomorrow morning.",
+          options: [
+            "departs",
+            "is departing",
+            "will depart",
+            "has departed"
+          ],
+          answer: 0,
+          tip: "We use the **Present Simple** ('departs') for fixed timetables and scheduled future events."
+        },
+        {
+          sentence: "She ________ like seafood, so she always orders the vegetarian option.",
+          options: [
+            "doesn't",
+            "don't",
+            "isn't",
+            "hasn't"
+          ],
+          answer: 0,
+          tip: "For singular third-person subjects ('she'), the negative auxiliary verb is **doesn't**."
+        },
+        {
+          sentence: "How often ________ you go to the gym to work out?",
+          options: [
+            "do",
+            "does",
+            "are",
+            "have"
+          ],
+          answer: 0,
+          tip: "Use **do** with the subject 'you' for question structures in the Present Simple."
+        },
+        {
+          sentence: "My brother ________ in New York, but he is visiting us here this week.",
+          options: [
+            "lives",
+            "live",
+            "is living",
+            "has lived"
+          ],
+          answer: 0,
+          tip: "Use **Present Simple** ('lives') for permanent situations or states, and Present Continuous for temporary ones."
+        },
+        {
+          sentence: "I ________ very tired today, but I still have a lot of chores to finish.",
+          options: [
+            "am",
+            "is",
+            "are",
+            "be"
+          ],
+          answer: 0,
+          tip: "The Present Simple form of the verb 'to be' for 'I' is **am**."
+        },
+        {
+          sentence: "The earth ________ around the sun.",
+          options: [
+            "revolves",
+            "revolve",
+            "is revolving",
+            "revolved"
+          ],
+          answer: 0,
+          tip: "Scientific facts and laws of nature are expressed in the **Present Simple** ('revolves')."
+        },
+        {
+          sentence: "Every Sunday, they ________ lunch with their grandparents in the countryside.",
+          options: [
+            "have",
+            "has",
+            "are having",
+            "have had"
+          ],
+          answer: 0,
+          tip: "'They' is plural, so we use **have** for the Present Simple habitual action."
+        },
+        {
+          sentence: "I ________ your help; could you please explain this formula to me?",
+          options: [
+            "need",
+            "is needing",
+            "am needing",
+            "needs"
+          ],
+          answer: 0,
+          tip: "State verbs like **need**, want, know, love are not typically used in continuous forms."
+        }
+      ]
+    },
+    {
+      id: "present_continuous",
+      title: "Present Continuous",
+      desc: "Practice talking about actions happening right now, temporary states, and future arrangements.",
+      questions: [
+        {
+          sentence: "Please be quiet! The baby ________ soundly in the nursery right now.",
+          options: [
+            "is sleeping",
+            "sleeps",
+            "slept",
+            "has slept"
+          ],
+          answer: 0,
+          tip: "Use the **Present Continuous** ('is sleeping') for an action happening at the exact moment of speaking."
+        },
+        {
+          sentence: "I ________ a very interesting book about ancient history this week.",
+          options: [
+            "am reading",
+            "read",
+            "reads",
+            "have read"
+          ],
+          answer: 0,
+          tip: "Use the **Present Continuous** ('am reading') for temporary activities or ongoing projects that are happening around now but not necessarily at this exact second."
+        },
+        {
+          sentence: "They ________ to Spain next Friday for their summer vacation; the tickets are booked.",
+          options: [
+            "are flying",
+            "fly",
+            "flies",
+            "will fly"
+          ],
+          answer: 0,
+          tip: "Use **Present Continuous** ('are flying') to express definite personal arrangements and plans in the near future."
+        },
+        {
+          sentence: "Why ________ you ________ at me like that? Is there something on my face?",
+          options: [
+            "are; looking",
+            "do; look",
+            "is; looking",
+            "have; looked"
+          ],
+          answer: 0,
+          tip: "The question structure for Present Continuous is **am/is/are + subject + verb-ing**."
+        },
+        {
+          sentence: "The weather is changing; it ________ warmer day by day.",
+          options: [
+            "is getting",
+            "gets",
+            "got",
+            "has gotten"
+          ],
+          answer: 0,
+          tip: "Use **Present Continuous** ('is getting') to describe changing or developing situations over time."
+        },
+        {
+          sentence: "Look outside! It ________ heavily, so you should take an umbrella.",
+          options: [
+            "is raining",
+            "rains",
+            "rained",
+            "will rain"
+          ],
+          answer: 0,
+          tip: "The word 'Look!' draws attention to an event happening right now, requiring **Present Continuous** ('is raining')."
+        },
+        {
+          sentence: "He ________ a new language this semester to prepare for his study abroad program.",
+          options: [
+            "is learning",
+            "learns",
+            "learned",
+            "has learned"
+          ],
+          answer: 0,
+          tip: "Temporary educational courses or routines this semester use the **Present Continuous** ('is learning')."
+        },
+        {
+          sentence: "My computer ________ extremely slowly today, which is very frustrating.",
+          options: [
+            "is running",
+            "runs",
+            "ran",
+            "has run"
+          ],
+          answer: 0,
+          tip: "Use **Present Continuous** ('is running') to highlight a temporary state or behavior that differs from the norm."
+        },
+        {
+          sentence: "We ________ a meeting tomorrow afternoon to discuss the quarterly budget.",
+          options: [
+            "are holding",
+            "hold",
+            "holds",
+            "have held"
+          ],
+          answer: 0,
+          tip: "Planned future meetings and events use **Present Continuous** ('are holding')."
+        },
+        {
+          sentence: "She ________ always ________ her keys! It's so annoying.",
+          options: [
+            "is; losing",
+            "does; lose",
+            "has; lost",
+            "will; lose"
+          ],
+          answer: 0,
+          tip: "We use 'always' with **Present Continuous** ('is losing') to express continuous irritation or complaints about a repetitive habit."
+        }
+      ]
+    },
+    {
+      id: "present_perfect",
+      title: "Present Perfect",
+      desc: "Connect the past to the present. Use it for experiences, change over time, and recent events.",
+      questions: [
+        {
+          sentence: "I ________ that famous movie three times already, and I still love it.",
+          options: [
+            "have seen",
+            "saw",
+            "see",
+            "am seeing"
+          ],
+          answer: 0,
+          tip: "Use **Present Perfect** ('have seen') to express experiences at unspecified times in your life."
+        },
+        {
+          sentence: "She ________ her keys, so she cannot enter her apartment right now.",
+          options: [
+            "has lost",
+            "lost",
+            "loses",
+            "was losing"
+          ],
+          answer: 0,
+          tip: "Use **Present Perfect** ('has lost') when a past action has a direct, important consequence or result in the present."
+        },
+        {
+          sentence: "The company ________ its sales targets this month, which is great news.",
+          options: [
+            "has achieved",
+            "achieved",
+            "achieves",
+            "is achieving"
+          ],
+          answer: 0,
+          tip: "Use **Present Perfect** ('has achieved') with unfinished time periods (like 'this month', 'today', 'this year')."
+        },
+        {
+          sentence: "He ________ in London since he graduated from university in 2015.",
+          options: [
+            "has lived",
+            "lives",
+            "lived",
+            "is living"
+          ],
+          answer: 0,
+          tip: "Use **Present Perfect** ('has lived') with 'since' to show that an action started in the past and continues to the present."
+        },
+        {
+          sentence: "I ________ to Paris, but I would really love to go there someday.",
+          options: [
+            "have never been",
+            "was never",
+            "go never",
+            "am never being"
+          ],
+          answer: 0,
+          tip: "We use **have never been** in the Present Perfect to express that we don't have this life experience yet."
+        },
+        {
+          sentence: "They ________ their homework yet, so they cannot play video games.",
+          options: [
+            "haven't finished",
+            "didn't finish",
+            "don't finish",
+            "had not finished"
+          ],
+          answer: 0,
+          tip: "We use **Present Perfect** ('haven't finished') with 'yet' to talk about an expected event that has not happened yet."
+        },
+        {
+          sentence: "My English ________ significantly since I started using this app.",
+          options: [
+            "has improved",
+            "improved",
+            "is improving",
+            "improves"
+          ],
+          answer: 0,
+          tip: "**Present Perfect** ('has improved') describes a change or progress over a period starting in the past up to the present."
+        },
+        {
+          sentence: "________ you ever ________ a celebrity in real life?",
+          options: [
+            "Have; met",
+            "Did; meet",
+            "Do; meet",
+            "Were; meeting"
+          ],
+          answer: 0,
+          tip: "Ask about life experiences using **Have you ever + past participle** ('Have you met')."
+        },
+        {
+          sentence: "She ________ just ________ her morning coffee, so she is ready to work.",
+          options: [
+            "has; finished",
+            "is; finishing",
+            "did; finish",
+            "had; finished"
+          ],
+          answer: 0,
+          tip: "Use **Present Perfect** ('has finished') with 'just' to describe an action completed a very short time ago."
+        },
+        {
+          sentence: "This is the most beautiful painting I ________ ever ________.",
+          options: [
+            "have; seen",
+            "did; see",
+            "had; seen",
+            "saw"
+          ],
+          answer: 0,
+          tip: "We use **Present Perfect** ('have seen') after superlative structures ('the most... I have ever...')."
+        }
+      ]
+    },
+    {
+      id: "present_perfect_continuous",
+      title: "Present Perfect Continuous",
+      desc: "Practice describing ongoing activities that started in the past and have duration up to the present.",
+      questions: [
+        {
+          sentence: "I ________ for three hours, and my eyes are starting to feel very tired.",
+          options: [
+            "have been reading",
+            "am reading",
+            "read",
+            "had been reading"
+          ],
+          answer: 0,
+          tip: "Use **Present Perfect Continuous** ('have been reading') to emphasize the duration of an ongoing action starting in the past up to now."
+        },
+        {
+          sentence: "It ________ since early this morning, and the streets are starting to flood.",
+          options: [
+            "has been raining",
+            "rains",
+            "is raining",
+            "rained"
+          ],
+          answer: 0,
+          tip: "Use **Present Perfect Continuous** ('has been raining') with 'since' or 'for' for continuous weather events that began in the past and are still going."
+        },
+        {
+          sentence: "Your hands are covered in dirt! What ________ you ________?",
+          options: [
+            "have; been doing",
+            "are; doing",
+            "did; do",
+            "had; been doing"
+          ],
+          answer: 0,
+          tip: "Use **Present Perfect Continuous** ('have you been doing') to show the physical results or side-effects of a recently finished continuous activity."
+        },
+        {
+          sentence: "She ________ at this language school for six months, and her speaking is excellent.",
+          options: [
+            "has been studying",
+            "is studying",
+            "studied",
+            "has studied"
+          ],
+          answer: 0,
+          tip: "The continuous form strongly highlights the active duration (**has been studying** for six months)."
+        },
+        {
+          sentence: "They ________ for the bus for forty minutes, and they are getting impatient.",
+          options: [
+            "have been waiting",
+            "wait",
+            "are waiting",
+            "had been waiting"
+          ],
+          answer: 0,
+          tip: "Use **Present Perfect Continuous** ('have been waiting') to talk about wait times continuing to the present."
+        },
+        {
+          sentence: "Lately, I ________ very well because of the heat.",
+          options: [
+            "haven't been sleeping",
+            "don't sleep",
+            "am not sleeping",
+            "didn't sleep"
+          ],
+          answer: 0,
+          tip: "Use **Present Perfect Continuous** ('haven't been sleeping') with 'lately' or 'recently' to describe a temporary continuous trend."
+        },
+        {
+          sentence: "He ________ hard on his computer all day, so he needs a good break.",
+          options: [
+            "has been working",
+            "is working",
+            "worked",
+            "has worked"
+          ],
+          answer: 0,
+          tip: "Emphasize an entire day of continuous exertion with **has been working**."
+        },
+        {
+          sentence: "How long ________ you ________ English? Your accent is wonderful!",
+          options: [
+            "have; been learning",
+            "do; learn",
+            "are; learning",
+            "had; been learning"
+          ],
+          answer: 0,
+          tip: "Ask about the duration of an ongoing activity using **How long have you been + verb-ing** ('have you been learning')."
+        },
+        {
+          sentence: "We ________ this issue for an hour, but we still haven't found a solution.",
+          options: [
+            "have been discussing",
+            "discuss",
+            "are discussing",
+            "had discussed"
+          ],
+          answer: 0,
+          tip: "Ongoing debates or discussions up to the present use **Present Perfect Continuous** ('have been discussing')."
+        },
+        {
+          sentence: "The cat ________ in front of the heater all afternoon.",
+          options: [
+            "has been sleeping",
+            "is sleeping",
+            "sleeps",
+            "slept"
+          ],
+          answer: 0,
+          tip: "Continuous passive-like habits of duration up to the present use **Present Perfect Continuous** ('has been sleeping')."
+        }
+      ]
+    },
+    {
+      id: "past_simple",
+      title: "Past Simple",
+      desc: "Focus on completed, definite actions in the past with specific time references.",
+      questions: [
+        {
+          sentence: "I ________ to Berlin for a short business trip last weekend.",
+          options: [
+            "went",
+            "have gone",
+            "was going",
+            "had gone"
+          ],
+          answer: 0,
+          tip: "Use **Past Simple** ('went') for actions completed at a specific, finished time in the past ('last weekend')."
+        },
+        {
+          sentence: "He ________ his dinner, washed the dishes, and then watched a movie.",
+          options: [
+            "cooked",
+            "cooks",
+            "was cooking",
+            "has cooked"
+          ],
+          answer: 0,
+          tip: "Use **Past Simple** ('cooked') for a sequence of completed actions in past storytelling."
+        },
+        {
+          sentence: "When ________ you ________ your high school graduation exam?",
+          options: [
+            "did; pass",
+            "have; passed",
+            "do; pass",
+            "were; passing"
+          ],
+          answer: 0,
+          tip: "Questions about specific past times ('When...') require the Past Simple auxiliary **did** ('did you pass')."
+        },
+        {
+          sentence: "She ________ in Paris for three years when she was a child, but now lives in Canada.",
+          options: [
+            "lived",
+            "has lived",
+            "was living",
+            "had lived"
+          ],
+          answer: 0,
+          tip: "Use **Past Simple** ('lived') for completed past states that are no longer true."
+        },
+        {
+          sentence: "We ________ a great time at the concert yesterday evening.",
+          options: [
+            "had",
+            "have",
+            "were having",
+            "have had"
+          ],
+          answer: 0,
+          tip: "The specific past time 'yesterday evening' means we use the Past Simple **had**."
+        },
+        {
+          sentence: "The company ________ its first product back in 1998.",
+          options: [
+            "launched",
+            "has launched",
+            "was launching",
+            "launches"
+          ],
+          answer: 0,
+          tip: "Specific years in the past ('in 1998') require **Past Simple** ('launched')."
+        },
+        {
+          sentence: "I ________ her email because my inbox was completely full of spam.",
+          options: [
+            "didn't see",
+            "haven't seen",
+            "don't see",
+            "wasn't seeing"
+          ],
+          answer: 0,
+          tip: "The negative of Past Simple is **didn't + bare infinitive** ('didn't see')."
+        },
+        {
+          sentence: "Shakespeare ________ many famous plays, including Romeo and Juliet.",
+          options: [
+            "wrote",
+            "has written",
+            "writes",
+            "was writing"
+          ],
+          answer: 0,
+          tip: "Historical facts about deceased persons are expressed in the **Past Simple** ('wrote')."
+        },
+        {
+          sentence: "As a teenager, he ________ guitar in a local rock band every weekend.",
+          options: [
+            "played",
+            "has played",
+            "plays",
+            "was playing"
+          ],
+          answer: 0,
+          tip: "Use **Past Simple** ('played') to talk about past habits or repeated actions that no longer occur."
+        },
+        {
+          sentence: "The phone ________ twice, but nobody answered it.",
+          options: [
+            "rang",
+            "rung",
+            "ringed",
+            "is ringing"
+          ],
+          answer: 0,
+          tip: "Completed, sudden actions in the past use the irregular Past Simple **rang**."
+        }
+      ]
+    },
+    {
+      id: "past_continuous",
+      title: "Past Continuous",
+      desc: "Describe actions that were in progress at a specific past moment or when interrupted.",
+      questions: [
+        {
+          sentence: "I ________ a shower when the phone suddenly rang.",
+          options: [
+            "was taking",
+            "took",
+            "have taken",
+            "had been taking"
+          ],
+          answer: 0,
+          tip: "Use **Past Continuous** ('was taking') for an ongoing background action that was interrupted by a shorter action in the Past Simple."
+        },
+        {
+          sentence: "Yesterday at 3:00 PM, she ________ in the library for her exam.",
+          options: [
+            "was studying",
+            "studied",
+            "has been studying",
+            "had studied"
+          ],
+          answer: 0,
+          tip: "Use **Past Continuous** ('was studying') to show that an action was in progress at a specific moment in the past."
+        },
+        {
+          sentence: "While we ________ in the park, it started to rain heavily.",
+          options: [
+            "were walking",
+            "walked",
+            "have walked",
+            "had walked"
+          ],
+          answer: 0,
+          tip: "Use **Past Continuous** ('were walking') for a longer background past action introduced by 'while'."
+        },
+        {
+          sentence: "What ________ you ________ at this time yesterday afternoon?",
+          options: [
+            "were; doing",
+            "did; do",
+            "are; doing",
+            "have; been doing"
+          ],
+          answer: 0,
+          tip: "The question form for Past Continuous is **was/were + subject + verb-ing** ('were you doing')."
+        },
+        {
+          sentence: "They ________ because they didn't want to wake up the sleeping baby.",
+          options: [
+            "were whispering",
+            "whispered",
+            "have whispered",
+            "whisper"
+          ],
+          answer: 0,
+          tip: "An ongoing state or manner of action during a past interval uses **Past Continuous** ('were whispering')."
+        },
+        {
+          sentence: "While I ________ the dinner, my brother ________ the table.",
+          options: [
+            "was cooking; was setting",
+            "cooked; set",
+            "was cooking; set",
+            "cooked; was setting"
+          ],
+          answer: 0,
+          tip: "Use **Past Continuous** ('was cooking; was setting') for two parallel actions happening simultaneously in the past."
+        },
+        {
+          sentence: "The sun ________ and the birds ________ when I stepped outside.",
+          options: [
+            "was shining; were singing",
+            "shone; sang",
+            "is shining; are singing",
+            "was shining; sang"
+          ],
+          answer: 0,
+          tip: "Use **Past Continuous** ('was shining; were singing') to paint a descriptive background scene at the beginning of a story."
+        },
+        {
+          sentence: "I ________ attention to the teacher, so I didn't hear the question.",
+          options: [
+            "wasn't paying",
+            "didn't pay",
+            "haven't paid",
+            "hadn't been paying"
+          ],
+          answer: 0,
+          tip: "A continuous lack of attention in progress during a past class uses **Past Continuous** ('wasn't paying')."
+        },
+        {
+          sentence: "He ________ on his book all evening, trying to meet his deadline.",
+          options: [
+            "was working",
+            "worked",
+            "has worked",
+            "works"
+          ],
+          answer: 0,
+          tip: "Focus on the continuous effort over a past period ('all evening') with **Past Continuous** ('was working')."
+        },
+        {
+          sentence: "The car ________ fast when it suddenly hit a patch of black ice.",
+          options: [
+            "was traveling",
+            "traveled",
+            "has traveled",
+            "had traveled"
+          ],
+          answer: 0,
+          tip: "An ongoing movement in progress when an accident occurred is expressed in **Past Continuous** ('was traveling')."
+        }
+      ]
+    },
+    {
+      id: "past_perfect",
+      title: "Past Perfect",
+      desc: "Connect two past actions. Learn to use the 'past of the past' for events that happened first.",
+      questions: [
+        {
+          sentence: "By the time we arrived at the cinema, the movie ________ already ________.",
+          options: [
+            "had; started",
+            "has; started",
+            "did; start",
+            "was; starting"
+          ],
+          answer: 0,
+          tip: "Use **Past Perfect** ('had started') to show that an action happened before another past event ('arrived')."
+        },
+        {
+          sentence: "She was very nervous because she ________ on an airplane before.",
+          options: [
+            "had never flown",
+            "has never flown",
+            "never flew",
+            "was never flying"
+          ],
+          answer: 0,
+          tip: "Use **Past Perfect** ('had never flown') to describe a lack of experience prior to a specific point in the past."
+        },
+        {
+          sentence: "He realized he ________ his keys at home only after he reached the office.",
+          options: [
+            "had left",
+            "left",
+            "has left",
+            "was leaving"
+          ],
+          answer: 0,
+          tip: "The action of leaving the keys happened before the past realization, so we use **Past Perfect** ('had left')."
+        },
+        {
+          sentence: "I ________ my homework before my friends came over to play.",
+          options: [
+            "had finished",
+            "finished",
+            "have finished",
+            "was finishing"
+          ],
+          answer: 0,
+          tip: "Use **Past Perfect** ('had finished') to show an action completed prior to another past time reference."
+        },
+        {
+          sentence: "The ground was extremely wet because it ________ heavily during the night.",
+          options: [
+            "had rained",
+            "rained",
+            "has rained",
+            "was raining"
+          ],
+          answer: 0,
+          tip: "Use **Past Perfect** ('had rained') to explain the past cause of a past state or result."
+        },
+        {
+          sentence: "She ________ the email, so she was fully prepared for the meeting.",
+          options: [
+            "had read",
+            "read",
+            "has read",
+            "reads"
+          ],
+          answer: 0,
+          tip: "Reading the email occurred before the meeting started, requiring **Past Perfect** ('had read')."
+        },
+        {
+          sentence: "They ________ together for ten years before they decided to get married.",
+          options: [
+            "had lived",
+            "lived",
+            "have lived",
+            "were living"
+          ],
+          answer: 0,
+          tip: "Use **Past Perfect** ('had lived') to show the duration of a state up to a certain point in the past."
+        },
+        {
+          sentence: "We couldn't get a table at the restaurant because we ________ in advance.",
+          options: [
+            "hadn't booked",
+            "didn't book",
+            "haven't booked",
+            "would book"
+          ],
+          answer: 0,
+          tip: "The failure to book occurred before arriving at the restaurant, making **Past Perfect** ('hadn't booked') appropriate."
+        },
+        {
+          sentence: "The thief ________ before the police arrived at the jewelry shop.",
+          options: [
+            "had escaped",
+            "escaped",
+            "has escaped",
+            "was escaping"
+          ],
+          answer: 0,
+          tip: "The escape was fully completed prior to the arrival of the police, requiring **Past Perfect** ('had escaped')."
+        },
+        {
+          sentence: "As soon as he ________ his speech, the audience started clapping.",
+          options: [
+            "had finished",
+            "finished",
+            "has finished",
+            "was finishing"
+          ],
+          answer: 0,
+          tip: "Use **Past Perfect** ('had finished') after 'as soon as' to emphasize the completion of the first action before the second past action begins."
+        }
+      ]
+    },
+    {
+      id: "past_perfect_continuous",
+      title: "Past Perfect Continuous",
+      desc: "Practice expressing continuous past actions that led up to another past moment.",
+      questions: [
+        {
+          sentence: "They ________ for two hours when it finally started to snow.",
+          options: [
+            "had been hiking",
+            "were hiking",
+            "hiked",
+            "have been hiking"
+          ],
+          answer: 0,
+          tip: "Use **Past Perfect Continuous** ('had been hiking') to show the duration of an ongoing action up to a specific past interruption."
+        },
+        {
+          sentence: "He was absolutely exhausted because he ________ all night.",
+          options: [
+            "had been working",
+            "was working",
+            "worked",
+            "has been working"
+          ],
+          answer: 0,
+          tip: "Use **Past Perfect Continuous** ('had been working') to explain the cause of a past state, emphasizing continuous past labor."
+        },
+        {
+          sentence: "The ground was muddy because it ________ for several hours.",
+          options: [
+            "had been raining",
+            "was raining",
+            "rained",
+            "has been raining"
+          ],
+          answer: 0,
+          tip: "Use **Past Perfect Continuous** ('had been raining') to describe an ongoing past action that recently ended but left clear results in the past."
+        },
+        {
+          sentence: "She ________ the company for five years before she got promoted.",
+          options: [
+            "had been managing",
+            "managed",
+            "has been managing",
+            "was managing"
+          ],
+          answer: 0,
+          tip: "Use **Past Perfect Continuous** ('had been managing') to show the continuous duration of an action leading up to a milestone in the past."
+        },
+        {
+          sentence: "His eyes were red because he ________ at the screen for too long.",
+          options: [
+            "had been staring",
+            "was staring",
+            "stared",
+            "has been staring"
+          ],
+          answer: 0,
+          tip: "Continuous past strain leading to a past state uses **Past Perfect Continuous** ('had been staring')."
+        },
+        {
+          sentence: "We ________ for the missing cat for hours before we finally found it under the deck.",
+          options: [
+            "had been searching",
+            "were searching",
+            "searched",
+            "have been searching"
+          ],
+          answer: 0,
+          tip: "Continuous search efforts up to the point of finding the cat require **Past Perfect Continuous** ('had been searching')."
+        },
+        {
+          sentence: "How long ________ they ________ before the music stopped?",
+          options: [
+            "had; been dancing",
+            "were; dancing",
+            "did; dance",
+            "have; been dancing"
+          ],
+          answer: 0,
+          tip: "Ask about the duration of a past action prior to an interruption using **had been + verb-ing** ('had been dancing')."
+        },
+        {
+          sentence: "The engine failed because they ________ it properly for months.",
+          options: [
+            "hadn't been maintaining",
+            "weren't maintaining",
+            "didn't maintain",
+            "haven't been maintaining"
+          ],
+          answer: 0,
+          tip: "Ongoing neglect in the past leading up to a breakdown uses **Past Perfect Continuous** ('hadn't been maintaining')."
+        },
+        {
+          sentence: "He ________ English for three years before he could speak it fluently.",
+          options: [
+            "had been studying",
+            "studied",
+            "has been studying",
+            "was studying"
+          ],
+          answer: 0,
+          tip: "Duration of continuous learning prior to a past achievement is expressed with **Past Perfect Continuous** ('had been studying')."
+        },
+        {
+          sentence: "The children ________ video games for hours when their father told them to stop.",
+          options: [
+            "had been playing",
+            "were playing",
+            "played",
+            "have been playing"
+          ],
+          answer: 0,
+          tip: "Use **Past Perfect Continuous** ('had been playing') to describe a continuous activity that had been going on for a duration ('for hours') before another past action ('told them to stop')."
+        }
+      ]
+    },
+    {
+      id: "future_simple",
+      title: "Future Simple",
+      desc: "Practice predicting the future, making instant decisions (will), and stating intentions (going to).",
+      questions: [
+        {
+          sentence: "I think it ________ tomorrow, so we should stay indoors.",
+          options: [
+            "will rain",
+            "rains",
+            "is raining",
+            "has rained"
+          ],
+          answer: 0,
+          tip: "Use 'will' (**will rain**) for future predictions based on opinion rather than immediate evidence."
+        },
+        {
+          sentence: "Look at those dark clouds in the sky! It ________ rain.",
+          options: [
+            "is going to",
+            "will",
+            "rains",
+            "was going to"
+          ],
+          answer: 0,
+          tip: "Use 'be going to' (**is going to**) for predictions based on clear, present physical evidence."
+        },
+        {
+          sentence: "A: The phone is ringing. B: Don't worry, I ________ it!",
+          options: [
+            "will answer",
+            "am going to answer",
+            "answer",
+            "am answering"
+          ],
+          answer: 0,
+          tip: "Use 'will' (**will answer**) for instant decisions or offers made at the moment of speaking."
+        },
+        {
+          sentence: "We ________ buy a new house next year; we have already saved enough money.",
+          options: [
+            "are going to",
+            "will",
+            "buy",
+            "are buying"
+          ],
+          answer: 0,
+          tip: "Use 'be going to' (**are going to**) for prior intentions, plans, and decisions made before the moment of speaking."
+        },
+        {
+          sentence: "I promise I ________ you with your moving chores this weekend.",
+          options: [
+            "will help",
+            "help",
+            "am helping",
+            "am going to help"
+          ],
+          answer: 0,
+          tip: "Use 'will' (**will help**) to express promises and offers."
+        },
+        {
+          sentence: "The shops ________ open on public holidays, so make sure to buy food today.",
+          options: [
+            "won't be",
+            "are not",
+            "would be",
+            "haven't been"
+          ],
+          answer: 0,
+          tip: "Negative future prediction or certainty uses **won't be** ('will not be')."
+        },
+        {
+          sentence: "I ________ study medicine at university; it has been my dream since childhood.",
+          options: [
+            "am going to",
+            "will",
+            "study",
+            "studies"
+          ],
+          answer: 0,
+          tip: "A long-held personal dream or intention uses **be going to** ('am going to')."
+        },
+        {
+          sentence: "Perhaps we ________ go to Greece for our holiday this year, but we haven't decided.",
+          options: [
+            "will",
+            "are going to",
+            "are",
+            "go"
+          ],
+          answer: 0,
+          tip: "Use 'will' (**will**) with words expressing uncertainty, like 'perhaps', 'maybe', or 'probably'."
+        },
+        {
+          sentence: "Don't carry all those heavy bags alone. I ________ carry them for you.",
+          options: [
+            "will",
+            "am going to",
+            "help",
+            "am helping"
+          ],
+          answer: 0,
+          tip: "An immediate spontaneous offer of help uses 'will' (**will**)."
+        },
+        {
+          sentence: "In fifty years, cars ________ completely electric.",
+          options: [
+            "will be",
+            "are",
+            "are going to be",
+            "will have been"
+          ],
+          answer: 0,
+          tip: "Use 'will be' (**will be**) for general future predictions about the distant future."
+        }
+      ]
+    },
+    {
+      id: "future_continuous",
+      title: "Future Continuous",
+      desc: "Practice describing actions that will be in progress at a specific time in the future.",
+      questions: [
+        {
+          sentence: "This time tomorrow, I ________ on a sunny beach in Bali.",
+          options: [
+            "will be lying",
+            "am lying",
+            "will lie",
+            "have been lying"
+          ],
+          answer: 0,
+          tip: "Use **Future Continuous** ('will be lying') for an action that will be in progress at a specific time in the future."
+        },
+        {
+          sentence: "Please don't call me between 2 PM and 4 PM tomorrow. I ________ an exam.",
+          options: [
+            "will be taking",
+            "will take",
+            "take",
+            "am taking"
+          ],
+          answer: 0,
+          tip: "Use **Future Continuous** ('will be taking') to show that an action will be in progress over a specific future duration."
+        },
+        {
+          sentence: "We ________ dinner when you arrive, so feel free to join us at the table.",
+          options: [
+            "will be having",
+            "will have",
+            "have",
+            "are having"
+          ],
+          answer: 0,
+          tip: "**Future Continuous** ('will be having') describes a longer background future action that is interrupted by a shorter future event ('when you arrive')."
+        },
+        {
+          sentence: "What ________ you ________ at 9:00 PM tonight?",
+          options: [
+            "will; be doing",
+            "will; do",
+            "are; doing",
+            "do; do"
+          ],
+          answer: 0,
+          tip: "Form questions in the Future Continuous using **will + subject + be + verb-ing** ('will you be doing')."
+        },
+        {
+          sentence: "In ten years, scientists ________ new ways to combat climate change.",
+          options: [
+            "will be developing",
+            "develop",
+            "will develop",
+            "will have developed"
+          ],
+          answer: 0,
+          tip: "Use **Future Continuous** ('will be developing') to describe projects or trends that will be ongoing in the future."
+        },
+        {
+          sentence: "He ________ the company's annual conference in London next week.",
+          options: [
+            "will be attending",
+            "attends",
+            "will attend",
+            "has attended"
+          ],
+          answer: 0,
+          tip: "Use **Future Continuous** ('will be attending') to talk about future events that are fixed or scheduled to happen as part of a routine."
+        },
+        {
+          sentence: "I ________ home at 6 PM, so we can meet up right after.",
+          options: [
+            "will be driving",
+            "drive",
+            "will drive",
+            "will have driven"
+          ],
+          answer: 0,
+          tip: "Driving home is an action in progress at that future hour, requiring **Future Continuous** ('will be driving')."
+        },
+        {
+          sentence: "They ________ on their new project all afternoon tomorrow.",
+          options: [
+            "will be working",
+            "will work",
+            "work",
+            "will have worked"
+          ],
+          answer: 0,
+          tip: "Emphasize the future ongoing duration of work with **will be working**."
+        },
+        {
+          sentence: "She ________ English at a summer camp during July and August.",
+          options: [
+            "will be teaching",
+            "teaches",
+            "will teach",
+            "will have taught"
+          ],
+          answer: 0,
+          tip: "A temporary continuous future job or activity uses **Future Continuous** ('will be teaching')."
+        },
+        {
+          sentence: "A: Can I use your lawnmower tomorrow? B: Sure, I ________ it anyway.",
+          options: [
+            "won't be using",
+            "am not using",
+            "won't use",
+            "haven't used"
+          ],
+          answer: 0,
+          tip: "Negative Future Continuous (**won't be using**) states that an action won't be in progress, so the tool is free."
+        }
+      ]
+    },
+    {
+      id: "future_perfect",
+      title: "Future Perfect",
+      desc: "Describe actions that will be completed before a specific point in the future.",
+      questions: [
+        {
+          sentence: "By the end of this year, I ________ from university with a master's degree.",
+          options: [
+            "will have graduated",
+            "will graduate",
+            "graduate",
+            "will be graduating"
+          ],
+          answer: 0,
+          tip: "Use **Future Perfect** ('will have graduated') to say that an action will be completed before a specific future time ('by the end of this year')."
+        },
+        {
+          sentence: "Don't arrive before 8 PM. We ________ cooking the dinner yet.",
+          options: [
+            "won't have finished",
+            "won't finish",
+            "aren't finishing",
+            "won't be finishing"
+          ],
+          answer: 0,
+          tip: "Negative Future Perfect states that an action will not be completed before a certain future point (**won't have finished**)."
+        },
+        {
+          sentence: "In ten years, the city ________ many new skyscrapers.",
+          options: [
+            "will have built",
+            "will build",
+            "builds",
+            "will be building"
+          ],
+          answer: 0,
+          tip: "Use **Future Perfect** ('will have built') to project forward in time and look back on a completed action."
+        },
+        {
+          sentence: "By next Monday, she ________ all the lessons in this application.",
+          options: [
+            "will have completed",
+            "will complete",
+            "completes",
+            "is completing"
+          ],
+          answer: 0,
+          tip: "Completion of lessons before next Monday requires the **Future Perfect** ('will have completed')."
+        },
+        {
+          sentence: "They ________ for twenty years by the time they celebrate their anniversary next month.",
+          options: [
+            "will have been married",
+            "will be married",
+            "marry",
+            "will have married"
+          ],
+          answer: 0,
+          tip: "Use **Future Perfect** ('will have been married') for states that will be true for a certain duration up to a future point."
+        },
+        {
+          sentence: "We ________ 500 miles by the time we reach our destination tonight.",
+          options: [
+            "will have driven",
+            "will drive",
+            "drive",
+            "will be driving"
+          ],
+          answer: 0,
+          tip: "Accumulated quantity or distance completed before a future event ('by the time we reach...') uses **Future Perfect** ('will have driven')."
+        },
+        {
+          sentence: "I ________ reading this thick novel by tomorrow evening, so you can borrow it then.",
+          options: [
+            "will have finished",
+            "will finish",
+            "finish",
+            "am finishing"
+          ],
+          answer: 0,
+          tip: "Use **Future Perfect** ('will have finished') to indicate completion of a task before a future deadline."
+        },
+        {
+          sentence: "The package ________ at your doorstep before noon.",
+          options: [
+            "will have arrived",
+            "will arrive",
+            "arrives",
+            "is arriving"
+          ],
+          answer: 0,
+          tip: "Expected arrival completed before a specific future clock time uses **Future Perfect** ('will have arrived')."
+        },
+        {
+          sentence: "________ you ________ the project by Friday's deadline?",
+          options: [
+            "Will; have completed",
+            "Will; complete",
+            "Are; completing",
+            "Do; complete"
+          ],
+          answer: 0,
+          tip: "Form Future Perfect questions using **Will + subject + have + past participle** ('Will you have completed')."
+        },
+        {
+          sentence: "By next summer, he ________ ten kilograms thanks to his strict diet.",
+          options: [
+            "will have lost",
+            "will lose",
+            "loses",
+            "will be losing"
+          ],
+          answer: 0,
+          tip: "A completed change of state before a future date uses **Future Perfect** ('will have lost')."
+        }
+      ]
+    },
+    {
+      id: "future_perfect_continuous",
+      title: "Future Perfect Continuous",
+      desc: "Master describing the duration of an ongoing action up to a specific time in the future.",
+      questions: [
+        {
+          sentence: "By next December, I ________ at this company for five years.",
+          options: [
+            "will have been working",
+            "will be working",
+            "will work",
+            "have been working"
+          ],
+          answer: 0,
+          tip: "Use **Future Perfect Continuous** ('will have been working') to show the continuous duration of an action up to a specific point in the future ('by next December')."
+        },
+        {
+          sentence: "She ________ for three hours by the time her train finally arrives.",
+          options: [
+            "will have been waiting",
+            "will be waiting",
+            "waits",
+            "is waiting"
+          ],
+          answer: 0,
+          tip: "Use **Future Perfect Continuous** ('will have been waiting') to describe the continuous duration of an activity leading up to a specific future event."
+        },
+        {
+          sentence: "In thirty minutes, they ________ on this highway for eight hours straight.",
+          options: [
+            "will have been driving",
+            "will be driving",
+            "will drive",
+            "are driving"
+          ],
+          answer: 0,
+          tip: "Use **Future Perfect Continuous** ('will have been driving') to state the accumulated duration of an ongoing future action at a specific time milestone."
+        },
+        {
+          sentence: "How long ________ you ________ English by the time you move to London next year?",
+          options: [
+            "will; have been studying",
+            "will; be studying",
+            "are; studying",
+            "do; study"
+          ],
+          answer: 0,
+          tip: "Form questions about future duration up to a point using **Will + subject + have been + verb-ing** ('will you have been studying')."
+        },
+        {
+          sentence: "By 10 PM, the kids ________ video games all afternoon.",
+          options: [
+            "will have been playing",
+            "will be playing",
+            "play",
+            "will have played"
+          ],
+          answer: 0,
+          tip: "Emphasize continuous activity throughout a future day or afternoon using **Future Perfect Continuous** ('will have been playing')."
+        },
+        {
+          sentence: "We ________ in this house for ten years next month.",
+          options: [
+            "will have been living",
+            "will be living",
+            "live",
+            "are living"
+          ],
+          answer: 0,
+          tip: "Duration of a permanent action up to a future date uses **Future Perfect Continuous** ('will have been living')."
+        },
+        {
+          sentence: "He ________ for two hours by the time the film finishes, as he is so tired.",
+          options: [
+            "will have been sleeping",
+            "will be sleeping",
+            "sleeps",
+            "is sleeping"
+          ],
+          answer: 0,
+          tip: "Continuous passive-like future sleep with duration up to a specific event uses **Future Perfect Continuous** ('will have been sleeping')."
+        },
+        {
+          sentence: "By the end of this session, we ________ grammar rules for an hour.",
+          options: [
+            "will have been practicing",
+            "will be practicing",
+            "practice",
+            "will have practiced"
+          ],
+          answer: 0,
+          tip: "Duration of practice up to the end of a session uses **Future Perfect Continuous** ('will have been practicing')."
+        },
+        {
+          sentence: "She ________ all day, so she will probably want to rest when she gets home.",
+          options: [
+            "will have been teaching",
+            "will teach",
+            "teaches",
+            "is teaching"
+          ],
+          answer: 0,
+          tip: "Use **Future Perfect Continuous** ('will have been teaching') to show the continuous cause of a future state ('probably want to rest')."
+        },
+        {
+          sentence: "By midnight, it ________ for twenty-four hours without stopping.",
+          options: [
+            "will have been raining",
+            "will be raining",
+            "rains",
+            "has been raining"
+          ],
+          answer: 0,
+          tip: "Continuous weather events with duration up to a future milestone use **Future Perfect Continuous** ('will have been raining')."
+        }
+      ]
+    }
+  ];
+
+  var grammarSession = null;
+
+  function renderGrammarTopics() {
+    Progress.grammar = Progress.grammar || {};
+    var container = $('grammarTopicGrid');
+    if (!container) return;
+
+    var totalGlobalScore = 0;
+    var topicsHtml = GRAMMAR_TOPICS.map(function(topic, index) {
+      var topicAnswers = Progress.grammar[topic.id] || {};
+      var completedCount = 0;
+      for (var qIdx = 0; qIdx < 10; qIdx++) {
+        if (topicAnswers[qIdx]) completedCount++;
+      }
+      totalGlobalScore += (completedCount * 10);
+
+      var isCompleted = completedCount === 10;
+      var pct = Math.round((completedCount / 10) * 100);
+
+      var statusBadge = '';
+      if (isCompleted) {
+        statusBadge = '<span class="grammar-badge completed">✓ Mastered</span>';
+      } else if (completedCount > 0) {
+        statusBadge = '<span class="grammar-badge">' + completedCount + '/10 Solved</span>';
+      } else {
+        statusBadge = '<span class="grammar-badge" style="color:var(--ink-faint);">Not started</span>';
+      }
+
+      var displayIndex = (index + 1) < 10 ? '0' + (index + 1) : '' + (index + 1);
+
+      return '<div class="grammar-topic-card" data-topic-id="' + topic.id + '">' +
+        '<div>' +
+          '<div class="grammar-topic-index">Lesson ' + displayIndex + '</div>' +
+          '<div class="grammar-topic-title">' + escapeHtml(topic.title) + '</div>' +
+          '<div class="grammar-topic-desc">' + escapeHtml(topic.desc) + '</div>' +
+        '</div>' +
+        '<div class="grammar-topic-foot">' +
+          '<div class="card-progress-bar" style="max-width:120px;"><div class="card-progress-fill" style="width:' + pct + '%"></div></div>' +
+          statusBadge +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    container.innerHTML = topicsHtml;
+    $('grammarScore').textContent = totalGlobalScore;
+
+    // bind clicks on cards
+    var cards = container.querySelectorAll('.grammar-topic-card');
+    Array.prototype.forEach.call(cards, function(card) {
+      bindTap(card, function() {
+        var topicId = card.getAttribute('data-topic-id');
+        startGrammarPractice(topicId);
+      });
+    });
+  }
+
+  function startGrammarPractice(topicId) {
+    var topic = GRAMMAR_TOPICS.find(function(t) { return t.id === topicId; });
+    if (!topic) return;
+
+    Progress.grammar = Progress.grammar || {};
+    Progress.grammar[topicId] = Progress.grammar[topicId] || {};
+
+    grammarSession = {
+      topicId: topicId,
+      title: topic.title,
+      questions: topic.questions,
+      currentIdx: 0,
+      correctAttempts: 0
+    };
+
+    $('grammar-topics-screen').style.display = 'none';
+    $('grammar-practice-screen').style.display = 'block';
+    
+    renderGrammarQuestion();
+  }
+
+  function renderGrammarQuestion() {
+    var session = grammarSession;
+    var qIdx = session.currentIdx;
+    var question = session.questions[qIdx];
+    
+    $('grammarPracticeProgress').textContent = 'Sentence ' + (qIdx + 1) + ' of 10';
+    var pct = Math.round((qIdx / 10) * 100);
+    $('grammarPracticeProgressFill').style.width = pct + '%';
+    
+    // Calculate total score of this specific topic session
+    var topicAnswers = Progress.grammar[session.topicId] || {};
+    var sessionScore = 0;
+    for (var i = 0; i < 10; i++) {
+      if (topicAnswers[i]) sessionScore += 10;
+    }
+    $('grammarSessionScore').textContent = sessionScore;
+
+    var stageEl = $('grammarStage');
+    if (!stageEl) return;
+
+    // Replace ________ with an elegant underlined blank container
+    var sentenceFormatted = question.sentence.replace(/________/g, '<span style="border-bottom: 2px dashed var(--accent); color: var(--accent); padding: 0 12px; font-weight: 700; font-family: var(--font-body);">&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span>');
+
+    var optionsHtml = question.options.map(function(opt, idx) {
+      var letter = String.fromCharCode(65 + idx); // A, B, C, D
+      return '<button class="grammar-option-btn" data-idx="' + idx + '" type="button">' +
+        '<div class="grammar-option-circle">' + letter + '</div>' +
+        '<span>' + escapeHtml(opt) + '</span>' +
+      '</button>';
+    }).join('');
+
+    stageEl.innerHTML = 
+      '<div style="font-family: var(--font-mono); font-size:11px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:12px;">Construct the sentence</div>' +
+      '<div class="cloze-sentence" style="font-size: clamp(16px, 4.5vw, 20px); font-family: var(--font-body); color: var(--ink); line-height: 1.6; margin-bottom: 24px; text-align: left; font-weight:500;">' + sentenceFormatted + '</div>' +
+      '<div style="display: flex; flex-direction: column; gap: 10px;" id="grammarOptionsCol">' +
+        optionsHtml +
+      '</div>' +
+      '<div id="grammarFeedbackBox" style="display:none;"></div>' +
+      '<div style="display:none; margin-top:24px; justify-content: flex-end;" id="grammarActionRow">' +
+        '<button class="btn-solid" id="btnGrammarNext">Next Sentence</button>' +
+      '</div>';
+
+    var optionBtns = stageEl.querySelectorAll('.grammar-option-btn');
+    var feedbackBox = stageEl.querySelector('#grammarFeedbackBox');
+    var actionRow = stageEl.querySelector('#grammarActionRow');
+    var hasAnswered = false;
+
+    Array.prototype.forEach.call(optionBtns, function(btn) {
+      bindTap(btn, function() {
+        if (hasAnswered) return;
+        hasAnswered = true;
+
+        var selectedIdx = parseInt(btn.getAttribute('data-idx'), 10);
+        var isCorrect = selectedIdx === question.answer;
+
+        // Disable all option buttons and highlight correct/incorrect
+        Array.prototype.forEach.call(optionBtns, function(b) {
+          b.disabled = true;
+          var bIdx = parseInt(b.getAttribute('data-idx'), 10);
+          if (bIdx === question.answer) {
+            b.classList.add('correct');
+          }
+        });
+
+        if (isCorrect) {
+          btn.classList.add('correct');
+          session.correctAttempts++;
+          
+          // Mark as solved
+          Progress.grammar[session.topicId][qIdx] = true;
+          // Increment actual global user score!
+          Progress.score += 10;
+          Progress.streak++;
+          
+          // Read aloud the finished sentence!
+          var completeSentence = question.sentence.replace(/________/g, question.options[question.answer]);
+          speak(completeSentence);
+          
+          saveProgress();
+        } else {
+          btn.classList.add('incorrect');
+          Progress.streak = 0;
+          saveProgress();
+        }
+
+        // Render explanation tip beautifully
+        var explanationMarkdown = question.tip;
+        // Parse simple markdown-like **bold** in tips
+        var htmlTip = explanationMarkdown.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        htmlTip = htmlTip.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+        feedbackBox.innerHTML = 
+          '<div class="grammar-tip-box" style="animation: fadeIn 0.3s ease-out;">' +
+            '<div class="grammar-tip-title">Grammar Tip &amp; Context</div>' +
+            '<div class="grammar-tip-text" style="font-size:13.5px; line-height:1.6; color:var(--ink-dim);">' + htmlTip + '</div>' +
+          '</div>';
+        feedbackBox.style.display = 'block';
+        actionRow.style.display = 'flex';
+      });
+    });
+
+    bindTap(stageEl.querySelector('#btnGrammarNext'), function() {
+      session.currentIdx++;
+      if (session.currentIdx < 10) {
+        renderGrammarQuestion();
+      } else {
+        renderGrammarTopicComplete();
+      }
+    });
+  }
+
+  function renderGrammarTopicComplete() {
+    var session = grammarSession;
+    var completedCount = session.correctAttempts;
+    
+    // Check if fully mastered
+    var isFullySolvedNow = true;
+    var topicAnswers = Progress.grammar[session.topicId] || {};
+    for (var i = 0; i < 10; i++) {
+      if (!topicAnswers[i]) isFullySolvedNow = false;
+    }
+
+    var iconBg = completedCount >= 8 ? 'rgba(76,175,80,0.1)' : 'rgba(255,152,0,0.1)';
+    var iconColor = completedCount >= 8 ? '#4CAF50' : '#FF9800';
+    var iconSvg = completedCount >= 8 ? 
+      '<svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/></svg>' :
+      '<svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+
+    var title = completedCount >= 8 ? 'Fantastic Work! 🎉' : 'Lesson Finished';
+    var desc = 'You scored <b>' + (completedCount * 10) + '%</b> on <b>' + escapeHtml(session.title) + '</b>.<br>' +
+      (completedCount >= 8 ? 'You have a great grasp of this topic.' : 'Keep practicing to get a perfect score and master the lesson!');
+
+    var stageEl = $('grammarStage');
+    stageEl.innerHTML = 
+      '<div class="match-complete" style="text-align: center; width:100%;">' +
+        '<div class="checkpoint-icon" style="background:' + iconBg + '; color:' + iconColor + '; margin: 0 auto 18px;">' + iconSvg + '</div>' +
+        '<div class="checkpoint-title" style="font-size:24px; margin-bottom:8px;">' + title + '</div>' +
+        '<div class="checkpoint-sub" style="font-size:14px; max-width: 50ch; margin: 0 auto 20px;">' + desc + '</div>' +
+        '<div class="checkpoint-stats" style="margin-bottom:24px;">' +
+          '<div class="cstat"><b>' + completedCount + '/10</b><span>Correct</span></div>' +
+          '<div class="cstat"><b>+' + (completedCount * 10) + '</b><span>Score gained</span></div>' +
+          '<div class="cstat"><b>Lvl ' + levelFromScore(Progress.score) + '</b><span>Current level</span></div>' +
+        '</div>' +
+        '<div class="checkpoint-actions" style="justify-content:center; gap: 12px; display:flex;">' +
+          '<button class="btn-solid" id="btnGrammarFinishDone">View Lessons</button>' +
+          '<button class="btn-ghost" id="btnGrammarRetryTopic">Try Again</button>' +
+        '</div>' +
+      '</div>';
+
+    bindTap($('btnGrammarFinishDone'), function() {
+      exitGrammarPractice();
+    });
+
+    bindTap($('btnGrammarRetryTopic'), function() {
+      // Clear current topic local answers to try again from scratch!
+      Progress.grammar[session.topicId] = {};
+      saveProgress();
+      startGrammarPractice(session.topicId);
+    });
+  }
+
+  function exitGrammarPractice() {
+    if('speechSynthesis' in window) speechSynthesis.cancel();
+    grammarSession = null;
+    $('grammar-practice-screen').style.display = 'none';
+    $('grammar-topics-screen').style.display = 'block';
+    renderGrammarTopics();
+  }
+
   /* ---------------- init ---------------- */
   function showGateError(err){
     var statusEl = $('authGateStatus');
@@ -2041,6 +3913,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     initThemeHandlers();
 
     bindTap($('cardOxford'), startStudy);
+    bindTap($('cardGrammar'), function(){ showView('grammar'); });
     bindTap($('btnExit'), function(){
       if(currentAudioEl) currentAudioEl.pause();
       if('speechSynthesis' in window) speechSynthesis.cancel();
@@ -2052,6 +3925,8 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     bindTap($('btnShowAllWords'), function(){ historyShowAll = !historyShowAll; renderHistoryList(); });
     bindTap($('btnStartMatch'), function(){ showView('match'); renderMatchGame(); });
     bindTap($('btnMatchBack'), function(){ showView('history'); renderHistoryList(); });
+    bindTap($('btnGrammarBack'), function(){ showView('home'); });
+    bindTap($('btnGrammarPracticeBack'), function(){ exitGrammarPractice(); });
 
     var userText = $('userText');
     var userPill = $('userPill');
