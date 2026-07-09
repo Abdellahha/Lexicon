@@ -1436,6 +1436,39 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     return count;
   }
 
+  function getLevelFromWordsCount(count) {
+    if (count >= 4000) {
+      return "C1-C2 (Advanced)";
+    } else if (count >= 1000) {
+      return "B1-B2 (Intermediate)";
+    } else if (count >= 500) {
+      return "A1-A2 (Beginner)";
+    } else {
+      return "A1 (Beginner)";
+    }
+  }
+
+  var lastCheckedDateStr = '';
+  function startNewDayChecker() {
+    var localDate = new Date();
+    var year = localDate.getFullYear();
+    var month = String(localDate.getMonth() + 1).padStart(2, '0');
+    var day = String(localDate.getDate()).padStart(2, '0');
+    lastCheckedDateStr = year + '-' + month + '-' + day;
+
+    setInterval(function() {
+      var d = new Date();
+      var y = d.getFullYear();
+      var m = String(d.getMonth() + 1).padStart(2, '0');
+      var dy = String(d.getDate()).padStart(2, '0');
+      var currentStr = y + '-' + m + '-' + dy;
+      if (currentStr !== lastCheckedDateStr) {
+        lastCheckedDateStr = currentStr;
+        renderHome();
+      }
+    }, 1000);
+  }
+
   function levelFromScore(score){ return Math.floor(score/100) + 1; }
 
   function historyEntriesDesc(){
@@ -1483,7 +1516,8 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     if (grammarProgressFillEl) {
       grammarProgressFillEl.style.width = grammarPct + '%';
     }
-    $('levelText').textContent = (userEnglishLevel === 'all' ? 'All Levels' : userEnglishLevel + ' Level') + ' (Lvl ' + levelFromScore(Progress.score) + ')';
+    var wordLevelLabel = getLevelFromWordsCount(countTotal);
+    $('levelText').textContent = wordLevelLabel + ' (Lvl ' + levelFromScore(Progress.score) + ')';
 
     // Update Daily Goal Meter
     var todayCount = wordsLearnedTodayCount();
@@ -2173,7 +2207,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       '<div class="checkpoint-stats">' +
         '<div class="cstat"><b>' + learnedCountTotal() + '</b><span>Total learned</span></div>' +
         '<div class="cstat"><b>' + Progress.score + '</b><span>Score</span></div>' +
-        '<div class="cstat"><b>Lvl ' + levelFromScore(Progress.score) + '</b><span>Level</span></div>' +
+        '<div class="cstat" style="min-width: 110px;"><b>Lvl ' + levelFromScore(Progress.score) + '</b><span>' + getLevelFromWordsCount(learnedCountTotal()) + '</span></div>' +
       '</div>' +
       '<div class="checkpoint-actions">' +
         '<button class="btn-solid" id="btnContinue">Continue studying</button>' +
@@ -2192,7 +2226,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       '<div class="checkpoint-stats">' +
         '<div class="cstat"><b>' + learnedCountTotal() + '</b><span>Total learned</span></div>' +
         '<div class="cstat"><b>' + Progress.score + '</b><span>Score</span></div>' +
-        '<div class="cstat"><b>Lvl ' + levelFromScore(Progress.score) + '</b><span>Level</span></div>' +
+        '<div class="cstat" style="min-width: 110px;"><b>Lvl ' + levelFromScore(Progress.score) + '</b><span>' + getLevelFromWordsCount(learnedCountTotal()) + '</span></div>' +
       '</div>' +
       '<div class="checkpoint-actions">' +
         '<button class="btn-solid" id="btnContinue">Keep Studying</button>' +
@@ -3911,6 +3945,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     showView('home');
     initReminderSwipe();
     initThemeHandlers();
+    startNewDayChecker();
 
     bindTap($('cardOxford'), startStudy);
     bindTap($('cardGrammar'), function(){ showView('grammar'); });
