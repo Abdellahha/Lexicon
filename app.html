@@ -891,6 +891,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
 
   /* ---------------- data ---------------- */
   var WORDS = JSON.parse(document.getElementById('word-data').textContent);
+  var ALL_WORDS_LIST = WORDS.slice();
   var TOTAL = WORDS.length;
   var CIRC = 2 * Math.PI * 42; // home ring
 
@@ -925,7 +926,11 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   var isProgressLoaded = false;
 
   function wordsLearnedTodayCount(){
-    var todayStr = new Date().toISOString().split('T')[0];
+    var localDate = new Date();
+    var year = localDate.getFullYear();
+    var month = String(localDate.getMonth() + 1).padStart(2, '0');
+    var day = String(localDate.getDate()).padStart(2, '0');
+    var todayStr = year + '-' + month + '-' + day;
     var count = 0;
     for (var w in Progress.learned) {
       if (Progress.learned[w] && Progress.learned[w].learnedAt === todayStr) {
@@ -1210,7 +1215,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   var stage = $('stage');
 
   /* ---------------- home rendering ---------------- */
-  function learnedCount(){
+  function learnedCountForCurrentPack(){
     var count = 0;
     for (var w in Progress.learned) {
       var exists = WORDS.some(function(item){ return item.word === w; });
@@ -1220,6 +1225,18 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     }
     return count;
   }
+
+  function learnedCountTotal(){
+    var count = 0;
+    for (var w in Progress.learned) {
+      var exists = ALL_WORDS_LIST.some(function(item){ return item.word === w; });
+      if (exists) {
+        count++;
+      }
+    }
+    return count;
+  }
+
   function levelFromScore(score){ return Math.floor(score/100) + 1; }
 
   function historyEntriesDesc(){
@@ -1228,7 +1245,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     for(var i=0; i<keys.length; i++){
       var w = keys[i];
       var info = Progress.learned[w];
-      var exists = WORDS.some(function(item){ return item.word === w; });
+      var exists = ALL_WORDS_LIST.some(function(item){ return item.word === w; });
       if(exists){
         list.push({ word: w, pos: info.pos, level: info.level, meaning: info.meaning, synonyms: info.synonyms || null });
       }
@@ -1237,15 +1254,16 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   }
 
   function renderHome(){
-    var count = learnedCount();
-    var pct = Math.round((count/TOTAL)*100);
+    var countPack = learnedCountForCurrentPack();
+    var countTotal = learnedCountTotal();
+    var pct = Math.round((countPack/TOTAL)*100);
     $('homeRingNum').textContent = pct + '%';
-    $('homeRingLabel').textContent = 'of Curated Pack (' + count + '/' + TOTAL + ')';
-    var oxfordPct = ((count / 5000) * 100).toFixed(2);
+    $('homeRingLabel').textContent = 'of Curated Pack (' + countPack + '/' + TOTAL + ')';
+    var oxfordPct = ((countTotal / 5000) * 100).toFixed(2);
     $('homeRingSub').textContent = oxfordPct + '% of Oxford 5000';
     $('homeRingFill').setAttribute('stroke-dasharray', CIRC);
     $('homeRingFill').setAttribute('stroke-dashoffset', CIRC - (CIRC*pct/100));
-    $('statLearned').textContent = count;
+    $('statLearned').textContent = countTotal;
     $('statStreak').textContent = Progress.streak;
     $('statScore').textContent = Progress.score;
     $('cardProgressFill').style.width = pct + '%';
@@ -1278,7 +1296,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     }
 
     // Update Entire 5000 Words Meter
-    var oxfordPctValue = ((count / 5000) * 100);
+    var oxfordPctValue = ((countTotal / 5000) * 100);
     var oxfordPctText = oxfordPctValue.toFixed(2) + '%';
     
     var oxfordPctTextInnerEl = $('oxfordPctTextInner');
@@ -1303,7 +1321,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     
     var oxfordWordsCountEl = $('oxfordWordsCount');
     if (oxfordWordsCountEl) {
-      oxfordWordsCountEl.textContent = count + ' of 5000 words';
+      oxfordWordsCountEl.textContent = countTotal + ' of 5000 words';
     }
 
     var cardTitleEl = document.querySelector('#cardOxford .card-title');
@@ -1343,7 +1361,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       recentList.innerHTML = '';
     }
     if(historyCta){
-      historyCta.style.display = count > 0 ? '' : 'none';
+      historyCta.style.display = countTotal > 0 ? '' : 'none';
     }
   }
 
@@ -1618,15 +1636,9 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       if(matchState.incorrectWords[idx]){
         nextSubPool.push(item);
       } else {
-        // Remove from history
-        delete Progress.learned[item.word];
         passedWordsCount++;
       }
     });
-
-    if(passedWordsCount > 0){
-      await saveProgress();
-    }
 
     if(nextSubPool.length > 0){
       $('matchWrap').innerHTML =
@@ -1691,7 +1703,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       '<div class="match-complete">' +
         '<div class="checkpoint-icon" style="margin:0 auto 18px;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
         '<div class="checkpoint-title">All matched!</div>' +
-        '<div class="checkpoint-sub">Excellent! You\'ve successfully matched all words without errors and cleared them from history.</div>' +
+        '<div class="checkpoint-sub">Excellent! You\'ve successfully matched all words without any errors. Keep up the great work!</div>' +
         '<div class="checkpoint-actions" style="justify-content:center;margin-top:18px;">' +
           '<button class="btn-solid" id="btnMatchAgain">Play again</button>' +
           '<button class="btn-ghost" id="btnMatchDone">Back to history</button>' +
@@ -1715,8 +1727,8 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   function updateStudyHeader(){
     $('studyScore').textContent = Progress.score;
     $('studyStreak').textContent = Progress.streak;
-    $('studyCount').textContent = learnedCount();
-    $('studyProgressFill').style.width = Math.round((learnedCount()/TOTAL)*100) + '%';
+    $('studyCount').textContent = learnedCountTotal();
+    $('studyProgressFill').style.width = Math.round((learnedCountForCurrentPack()/TOTAL)*100) + '%';
   }
 
   async function startStudy(){
@@ -1886,12 +1898,18 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       feedback.className = 'feedback ok';
       Progress.score += hintUsed ? 5 : 10;
       Progress.streak += 1;
+      var localDate = new Date();
+      var year = localDate.getFullYear();
+      var month = String(localDate.getMonth() + 1).padStart(2, '0');
+      var day = String(localDate.getDate()).padStart(2, '0');
+      var todayStr = year + '-' + month + '-' + day;
+
       Progress.learned[session.word.word] = {
         pos: session.word.pos,
         level: session.word.level,
         meaning: session.info.meaning,
         synonyms: session.info.synonyms || null,
-        learnedAt: new Date().toISOString().split('T')[0]
+        learnedAt: todayStr
       };
       Progress.index++;
       session.sessionLearned++;
@@ -1935,7 +1953,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       '<div class="checkpoint-title">' + session.sessionLearned + ' words this session</div>' +
       '<div class="checkpoint-sub">Nice pace. Keep going while it\'s fresh, or take a break — your progress is saved.</div>' +
       '<div class="checkpoint-stats">' +
-        '<div class="cstat"><b>' + learnedCount() + '</b><span>Total learned</span></div>' +
+        '<div class="cstat"><b>' + learnedCountTotal() + '</b><span>Total learned</span></div>' +
         '<div class="cstat"><b>' + Progress.score + '</b><span>Score</span></div>' +
         '<div class="cstat"><b>Lvl ' + levelFromScore(Progress.score) + '</b><span>Level</span></div>' +
       '</div>' +
@@ -1954,7 +1972,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       '<div class="checkpoint-title">Daily Goal Achieved! 🎉</div>' +
       '<div class="checkpoint-sub">Fantastic! You have learned your daily target of ' + userWordsPerDay + ' words today. You can keep studying to get ahead, or rest for today.</div>' +
       '<div class="checkpoint-stats">' +
-        '<div class="cstat"><b>' + learnedCount() + '</b><span>Total learned</span></div>' +
+        '<div class="cstat"><b>' + learnedCountTotal() + '</b><span>Total learned</span></div>' +
         '<div class="cstat"><b>' + Progress.score + '</b><span>Score</span></div>' +
         '<div class="cstat"><b>Lvl ' + levelFromScore(Progress.score) + '</b><span>Level</span></div>' +
       '</div>' +
