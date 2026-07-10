@@ -240,27 +240,60 @@ input:-webkit-autofill:active {
       let email = loginIdentifier;
       // If the identifier doesn't look like an email (doesn't contain '@'), look up the username.
       if (!loginIdentifier.includes('@')) {
-        let snapshot;
-        try {
-          const usersRef = ref(db, 'users');
-          const usernameQuery = query(usersRef, orderByChild('username'), equalTo(loginIdentifier));
-          snapshot = await get(usernameQuery);
-        } catch (dbErr) {
-          console.error("Username database query failed:", dbErr);
-          throw { code: 'db/permission-denied-username', originalError: dbErr };
-        }
-        
-        if (!snapshot || !snapshot.exists()) {
-          throw { code: 'auth/invalid-credential' };
-        }
-        
         let foundEmail = null;
-        snapshot.forEach((child) => {
-          const val = child.val();
-          if (val && val.email) {
-            foundEmail = val.email;
+        
+        // 1. Try direct lowercase lookup under /usernames index node
+        try {
+          const usernameRef = ref(db, 'usernames/' + loginIdentifier.toLowerCase());
+          const snapshot = await get(usernameRef);
+          if (snapshot && snapshot.exists()) {
+            const val = snapshot.val();
+            if (typeof val === 'string') {
+              foundEmail = val;
+            } else if (val && val.email) {
+              foundEmail = val.email;
+            }
           }
-        });
+        } catch (dbErr) {
+          console.warn("Username index database read failed, trying fallbacks:", dbErr);
+        }
+        
+        // 2. Fallback 1: Query users by username (case-sensitive)
+        if (!foundEmail) {
+          try {
+            const usersRef = ref(db, 'users');
+            const usernameQuery = query(usersRef, orderByChild('username'), equalTo(loginIdentifier));
+            const snapshot = await get(usernameQuery);
+            if (snapshot && snapshot.exists()) {
+              snapshot.forEach((child) => {
+                const val = child.val();
+                if (val && val.email) {
+                  foundEmail = val.email;
+                }
+              });
+            }
+          } catch (dbErr) {
+            console.warn("Case-sensitive fallback query failed:", dbErr);
+          }
+        }
+        
+        // 3. Fallback 2: Full scan of users (case-insensitive for old accounts)
+        if (!foundEmail) {
+          try {
+            const usersRef = ref(db, 'users');
+            const snapshot = await get(usersRef);
+            if (snapshot && snapshot.exists()) {
+              snapshot.forEach((child) => {
+                const val = child.val();
+                if (val && val.username && val.username.toLowerCase() === loginIdentifier.toLowerCase()) {
+                  foundEmail = val.email;
+                }
+              });
+            }
+          } catch (dbErr) {
+            console.warn("Case-insensitive full scan failed:", dbErr);
+          }
+        }
         
         if (!foundEmail) {
           throw { code: 'auth/invalid-credential' };
@@ -287,31 +320,63 @@ input:-webkit-autofill:active {
     try {
       let email = loginIdentifier;
       if (!loginIdentifier.includes('@')) {
-        let snapshot;
-        try {
-          const usersRef = ref(db, 'users');
-          const usernameQuery = query(usersRef, orderByChild('username'), equalTo(loginIdentifier));
-          snapshot = await get(usernameQuery);
-        } catch (dbErr) {
-          console.error("Username database query failed:", dbErr);
-          throw { code: 'db/permission-denied-username', originalError: dbErr };
-        }
-        
-        if (!snapshot || !snapshot.exists()) {
-          showMsg('No account found with that username.', 'err');
-          return;
-        }
-        
         let foundEmail = null;
-        snapshot.forEach((child) => {
-          const val = child.val();
-          if (val && val.email) {
-            foundEmail = val.email;
+        
+        // 1. Try direct lowercase lookup under /usernames index node
+        try {
+          const usernameRef = ref(db, 'usernames/' + loginIdentifier.toLowerCase());
+          const snapshot = await get(usernameRef);
+          if (snapshot && snapshot.exists()) {
+            const val = snapshot.val();
+            if (typeof val === 'string') {
+              foundEmail = val;
+            } else if (val && val.email) {
+              foundEmail = val.email;
+            }
           }
-        });
+        } catch (dbErr) {
+          console.warn("Username index database read failed, trying fallbacks:", dbErr);
+        }
+        
+        // 2. Fallback 1: Query users by username (case-sensitive)
+        if (!foundEmail) {
+          try {
+            const usersRef = ref(db, 'users');
+            const usernameQuery = query(usersRef, orderByChild('username'), equalTo(loginIdentifier));
+            const snapshot = await get(usernameQuery);
+            if (snapshot && snapshot.exists()) {
+              snapshot.forEach((child) => {
+                const val = child.val();
+                if (val && val.email) {
+                  foundEmail = val.email;
+                }
+              });
+            }
+          } catch (dbErr) {
+            console.warn("Case-sensitive fallback query failed:", dbErr);
+          }
+        }
+        
+        // 3. Fallback 2: Full scan of users (case-insensitive for old accounts)
+        if (!foundEmail) {
+          try {
+            const usersRef = ref(db, 'users');
+            const snapshot = await get(usersRef);
+            if (snapshot && snapshot.exists()) {
+              snapshot.forEach((child) => {
+                const val = child.val();
+                if (val && val.username && val.username.toLowerCase() === loginIdentifier.toLowerCase()) {
+                  foundEmail = val.email;
+                }
+              });
+            }
+          } catch (dbErr) {
+            console.warn("Case-insensitive full scan failed:", dbErr);
+          }
+        }
         
         if (!foundEmail) {
-          showMsg('No email address associated with that username.', 'err');
+          showMsg('No account found with that username.', 'err');
           return;
         }
         email = foundEmail;
