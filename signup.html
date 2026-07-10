@@ -241,7 +241,7 @@ input:-webkit-autofill:active {
 
   function friendlyError(code){
     switch(code){
-      case 'auth/email-already-in-use': return 'An account with this email already exists.';
+      case 'auth/email-already-in-use': return 'This username is already taken. Please choose another one.';
       case 'auth/invalid-email': return 'That email address doesn\'t look right.';
       case 'auth/weak-password': return 'Password should be at least 6 characters.';
       default: return 'Something went wrong. Please try again.';
@@ -265,78 +265,27 @@ input:-webkit-autofill:active {
       return;
     }
 
+    if (username.includes('@')) {
+      showMsg('Username cannot contain the "@" symbol.', 'err');
+      return;
+    }
+
     submitBtn.disabled = true;
     submitBtn.textContent = 'Creating account…';
     signupInProgress = true;
 
     try {
-      // First, check if username already exists (case-insensitive check for maximum security)
-      let usernameExists = false;
-      try {
-        const usersRef = ref(db, 'users');
-        const snapshot = await get(usersRef);
-        
-        if (snapshot.exists()) {
-          snapshot.forEach((child) => {
-            const val = child.val();
-            if (val && val.username && val.username.toLowerCase() === username.toLowerCase()) {
-              usernameExists = true;
-            }
-          });
-        }
-      } catch (checkErr) {
-        console.warn("Username uniqueness pre-check was skipped/failed due to database rules/permissions:", checkErr);
-      }
-
-      if (usernameExists) {
-        showMsg('This username is already taken. Please choose another one.', 'err');
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Sign up';
-        signupInProgress = false;
-        return;
-      }
-
-      const cred = await createUserWithEmailAndPassword(auth, email, password);
-
-      // We are now authenticated! Run a final, guaranteed-permission check to prevent duplicates.
-      let postUsernameExists = false;
-      try {
-        const usersRef = ref(db, 'users');
-        const snapshot = await get(usersRef);
-        if (snapshot.exists()) {
-          snapshot.forEach((child) => {
-            const val = child.val();
-            // Make sure we don't flag the current user's newly written data (which hasn't been written yet, but safety first)
-            if (val && val.username && child.key !== cred.user.uid && val.username.toLowerCase() === username.toLowerCase()) {
-              postUsernameExists = true;
-            }
-          });
-        }
-      } catch (postCheckErr) {
-        console.error("Authenticated username check failed:", postCheckErr);
-      }
-
-      if (postUsernameExists) {
-        // Duplicate detected under authenticated session! Rollback (delete Auth user) and reject.
-        try {
-          await cred.user.delete();
-        } catch (delErr) {
-          console.error("Failed to delete duplicate Auth user during signup rollback:", delErr);
-        }
-        await signOut(auth);
-        showMsg('This username is already taken. Please choose another one.', 'err');
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Sign up';
-        signupInProgress = false;
-        return;
-      }
+      // Use the username as the primary Auth credential under a dedicated app domain.
+      // This guarantees absolute uniqueness and instant login resolution, bypass-proof.
+      const authEmail = username.toLowerCase() + '@lexicon-app.internal';
+      const cred = await createUserWithEmailAndPassword(auth, authEmail, password);
 
       await updateProfile(cred.user, { displayName: username });
 
       // Create the user's profile + fresh progress record in the Realtime Database.
       await set(ref(db, 'users/' + cred.user.uid), {
         username: username,
-        email: email,
+        email: email, // Store their real email address here
         englishLevel: englishLevel,
         wordsPerDay: wordsPerDay,
         createdAt: serverTimestamp(),

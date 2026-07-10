@@ -238,55 +238,21 @@ input:-webkit-autofill:active {
 
     try {
       let email = loginIdentifier;
-      // If the identifier doesn't look like an email (doesn't contain '@'), look up the username.
+      
+      // If the identifier doesn't contain '@', treat it as a username.
       if (!loginIdentifier.includes('@')) {
-        let foundEmail = null;
-        
-        // 1. Query users by username (case-sensitive)
-        try {
-          const usersRef = ref(db, 'users');
-          const usernameQuery = query(usersRef, orderByChild('username'), equalTo(loginIdentifier));
-          const snapshot = await get(usernameQuery);
-          if (snapshot && snapshot.exists()) {
-            snapshot.forEach((child) => {
-              const val = child.val();
-              if (val && val.email) {
-                foundEmail = val.email;
-              }
-            });
-          }
-        } catch (dbErr) {
-          console.warn("Case-sensitive query failed:", dbErr);
-        }
-        
-        // 2. Full scan of users (case-insensitive fallback)
-        if (!foundEmail) {
-          try {
-            const usersRef = ref(db, 'users');
-            const snapshot = await get(usersRef);
-            if (snapshot && snapshot.exists()) {
-              snapshot.forEach((child) => {
-                const val = child.val();
-                if (val && val.username && val.username.toLowerCase() === loginIdentifier.toLowerCase()) {
-                  foundEmail = val.email;
-                }
-              });
-            }
-          } catch (dbErr) {
-            console.warn("Case-insensitive full scan failed:", dbErr);
-          }
-        }
-        
-        if (!foundEmail) {
-          throw { code: 'auth/invalid-credential' };
-        }
-        email = foundEmail;
+        email = loginIdentifier.toLowerCase() + '@lexicon-app.internal';
       }
 
       await signInWithEmailAndPassword(auth, email, password);
       window.location.href = 'app.html';
     } catch (err) {
-      showMsg(friendlyError(err.code), 'err');
+      console.error("Login failed:", err);
+      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found') {
+        showMsg('Incorrect email, username, or password. If you have an older account, please try logging in with your email.', 'err');
+      } else {
+        showMsg(friendlyError(err.code), 'err');
+      }
       submitBtn.disabled = false;
       submitBtn.textContent = 'Log in';
     }
@@ -302,48 +268,8 @@ input:-webkit-autofill:active {
     try {
       let email = loginIdentifier;
       if (!loginIdentifier.includes('@')) {
-        let foundEmail = null;
-        
-        // 1. Query users by username (case-sensitive)
-        try {
-          const usersRef = ref(db, 'users');
-          const usernameQuery = query(usersRef, orderByChild('username'), equalTo(loginIdentifier));
-          const snapshot = await get(usernameQuery);
-          if (snapshot && snapshot.exists()) {
-            snapshot.forEach((child) => {
-              const val = child.val();
-              if (val && val.email) {
-                foundEmail = val.email;
-              }
-            });
-          }
-        } catch (dbErr) {
-          console.warn("Case-sensitive query failed:", dbErr);
-        }
-        
-        // 2. Full scan of users (case-insensitive fallback)
-        if (!foundEmail) {
-          try {
-            const usersRef = ref(db, 'users');
-            const snapshot = await get(usersRef);
-            if (snapshot && snapshot.exists()) {
-              snapshot.forEach((child) => {
-                const val = child.val();
-                if (val && val.username && val.username.toLowerCase() === loginIdentifier.toLowerCase()) {
-                  foundEmail = val.email;
-                }
-              });
-            }
-          } catch (dbErr) {
-            console.warn("Case-insensitive full scan failed:", dbErr);
-          }
-        }
-        
-        if (!foundEmail) {
-          showMsg('No account found with that username.', 'err');
-          return;
-        }
-        email = foundEmail;
+        showMsg('Password reset requires your registered email address. Please enter your email instead of your username.', 'err');
+        return;
       }
 
       await sendPasswordResetEmail(auth, email);
