@@ -273,25 +273,16 @@ input:-webkit-autofill:active {
       // First, check if username already exists (case-insensitive check for maximum security)
       let usernameExists = false;
       try {
-        // A. Direct check on the usernames index
-        const usernamesRef = ref(db, 'usernames/' + username.toLowerCase());
-        const usernameSnap = await get(usernamesRef);
-        if (usernameSnap.exists()) {
-          usernameExists = true;
-        } else {
-          // B. Fallback to scanning users
-          const usersRef = ref(db, 'users');
-          const usernameQuery = query(usersRef, orderByChild('username'));
-          const snapshot = await get(usernameQuery);
-          
-          if (snapshot.exists()) {
-            snapshot.forEach((child) => {
-              const val = child.val();
-              if (val && val.username && val.username.toLowerCase() === username.toLowerCase()) {
-                usernameExists = true;
-              }
-            });
-          }
+        const usersRef = ref(db, 'users');
+        const snapshot = await get(usersRef);
+        
+        if (snapshot.exists()) {
+          snapshot.forEach((child) => {
+            const val = child.val();
+            if (val && val.username && val.username.toLowerCase() === username.toLowerCase()) {
+              usernameExists = true;
+            }
+          });
         }
       } catch (checkErr) {
         console.warn("Username uniqueness pre-check was skipped/failed due to database rules/permissions:", checkErr);
@@ -310,24 +301,16 @@ input:-webkit-autofill:active {
       // We are now authenticated! Run a final, guaranteed-permission check to prevent duplicates.
       let postUsernameExists = false;
       try {
-        // A. Direct index check
-        const usernamesRef = ref(db, 'usernames/' + username.toLowerCase());
-        const usernameSnap = await get(usernamesRef);
-        if (usernameSnap.exists()) {
-          postUsernameExists = true;
-        } else {
-          // B. Direct users check
-          const usersRef = ref(db, 'users');
-          const snapshot = await get(usersRef);
-          if (snapshot.exists()) {
-            snapshot.forEach((child) => {
-              const val = child.val();
-              // Make sure we don't flag the current user's newly written data (which hasn't been written yet, but safety first)
-              if (val && val.username && child.key !== cred.user.uid && val.username.toLowerCase() === username.toLowerCase()) {
-                postUsernameExists = true;
-              }
-            });
-          }
+        const usersRef = ref(db, 'users');
+        const snapshot = await get(usersRef);
+        if (snapshot.exists()) {
+          snapshot.forEach((child) => {
+            const val = child.val();
+            // Make sure we don't flag the current user's newly written data (which hasn't been written yet, but safety first)
+            if (val && val.username && child.key !== cred.user.uid && val.username.toLowerCase() === username.toLowerCase()) {
+              postUsernameExists = true;
+            }
+          });
         }
       } catch (postCheckErr) {
         console.error("Authenticated username check failed:", postCheckErr);
@@ -358,13 +341,6 @@ input:-webkit-autofill:active {
         wordsPerDay: wordsPerDay,
         createdAt: serverTimestamp(),
         progress: { learned: {}, index: 0, score: 0, streak: 0 }
-      });
-
-      // Write to the /usernames index to make future checkups and case-insensitive logins instant
-      await set(ref(db, 'usernames/' + username.toLowerCase()), {
-        email: email,
-        uid: cred.user.uid,
-        username: username
       });
 
       // Account created — sign back out so the person logs in explicitly.

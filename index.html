@@ -242,42 +242,24 @@ input:-webkit-autofill:active {
       if (!loginIdentifier.includes('@')) {
         let foundEmail = null;
         
-        // 1. Try direct lowercase lookup under /usernames index node
+        // 1. Query users by username (case-sensitive)
         try {
-          const usernameRef = ref(db, 'usernames/' + loginIdentifier.toLowerCase());
-          const snapshot = await get(usernameRef);
+          const usersRef = ref(db, 'users');
+          const usernameQuery = query(usersRef, orderByChild('username'), equalTo(loginIdentifier));
+          const snapshot = await get(usernameQuery);
           if (snapshot && snapshot.exists()) {
-            const val = snapshot.val();
-            if (typeof val === 'string') {
-              foundEmail = val;
-            } else if (val && val.email) {
-              foundEmail = val.email;
-            }
+            snapshot.forEach((child) => {
+              const val = child.val();
+              if (val && val.email) {
+                foundEmail = val.email;
+              }
+            });
           }
         } catch (dbErr) {
-          console.warn("Username index database read failed, trying fallbacks:", dbErr);
+          console.warn("Case-sensitive query failed:", dbErr);
         }
         
-        // 2. Fallback 1: Query users by username (case-sensitive)
-        if (!foundEmail) {
-          try {
-            const usersRef = ref(db, 'users');
-            const usernameQuery = query(usersRef, orderByChild('username'), equalTo(loginIdentifier));
-            const snapshot = await get(usernameQuery);
-            if (snapshot && snapshot.exists()) {
-              snapshot.forEach((child) => {
-                const val = child.val();
-                if (val && val.email) {
-                  foundEmail = val.email;
-                }
-              });
-            }
-          } catch (dbErr) {
-            console.warn("Case-sensitive fallback query failed:", dbErr);
-          }
-        }
-        
-        // 3. Fallback 2: Full scan of users (case-insensitive for old accounts)
+        // 2. Full scan of users (case-insensitive fallback)
         if (!foundEmail) {
           try {
             const usersRef = ref(db, 'users');
@@ -322,42 +304,24 @@ input:-webkit-autofill:active {
       if (!loginIdentifier.includes('@')) {
         let foundEmail = null;
         
-        // 1. Try direct lowercase lookup under /usernames index node
+        // 1. Query users by username (case-sensitive)
         try {
-          const usernameRef = ref(db, 'usernames/' + loginIdentifier.toLowerCase());
-          const snapshot = await get(usernameRef);
+          const usersRef = ref(db, 'users');
+          const usernameQuery = query(usersRef, orderByChild('username'), equalTo(loginIdentifier));
+          const snapshot = await get(usernameQuery);
           if (snapshot && snapshot.exists()) {
-            const val = snapshot.val();
-            if (typeof val === 'string') {
-              foundEmail = val;
-            } else if (val && val.email) {
-              foundEmail = val.email;
-            }
+            snapshot.forEach((child) => {
+              const val = child.val();
+              if (val && val.email) {
+                foundEmail = val.email;
+              }
+            });
           }
         } catch (dbErr) {
-          console.warn("Username index database read failed, trying fallbacks:", dbErr);
+          console.warn("Case-sensitive query failed:", dbErr);
         }
         
-        // 2. Fallback 1: Query users by username (case-sensitive)
-        if (!foundEmail) {
-          try {
-            const usersRef = ref(db, 'users');
-            const usernameQuery = query(usersRef, orderByChild('username'), equalTo(loginIdentifier));
-            const snapshot = await get(usernameQuery);
-            if (snapshot && snapshot.exists()) {
-              snapshot.forEach((child) => {
-                const val = child.val();
-                if (val && val.email) {
-                  foundEmail = val.email;
-                }
-              });
-            }
-          } catch (dbErr) {
-            console.warn("Case-sensitive fallback query failed:", dbErr);
-          }
-        }
-        
-        // 3. Fallback 2: Full scan of users (case-insensitive for old accounts)
+        // 2. Full scan of users (case-insensitive fallback)
         if (!foundEmail) {
           try {
             const usersRef = ref(db, 'users');
