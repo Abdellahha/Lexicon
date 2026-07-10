@@ -1808,29 +1808,49 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     var toggleBtn = $('btnShowAllWords');
     var label = $('historySectionLabel');
 
+    var localDate = new Date();
+    var year = localDate.getFullYear();
+    var month = String(localDate.getMonth() + 1).padStart(2, '0');
+    var day = String(localDate.getDate()).padStart(2, '0');
+    var todayStr = year + '-' + month + '-' + day;
+
+    var todayEntries = entries.filter(function(e){
+      var info = Progress.learned[e.word];
+      return info && info.learnedAt === todayStr;
+    });
+
     if(!entries.length){
-      $('historyCount').textContent = 0;
-      if(label) label.firstChild.textContent = 'Today\'s words (';
+      if(label) label.innerHTML = 'Today\'s words (<span id="historyCount">0 of ' + userWordsPerDay + '</span>)';
       list.innerHTML = '<div class="history-empty">You haven\'t learned any words yet — start a study session to build your history.</div>';
       if(toggleWrap) toggleWrap.style.display = 'none';
       return;
     }
 
-    var showingAll = historyShowAll || entries.length <= DAILY_REVIEW_COUNT;
-    var visible = showingAll ? entries : entries.slice(0, DAILY_REVIEW_COUNT);
+    var showingAll = historyShowAll;
+    var visible = showingAll ? entries : todayEntries;
 
-    $('historyCount').textContent = visible.length;
-    if(label) label.firstChild.textContent = showingAll ? 'All your words (' : 'Today\'s words (';
+    if (showingAll) {
+      if(label) {
+        label.innerHTML = 'All learned words (<span id="historyCount">' + entries.length + '</span>)';
+      }
+    } else {
+      if(label) {
+        label.innerHTML = 'Today\'s words (<span id="historyCount">' + todayEntries.length + ' of ' + userWordsPerDay + '</span>)';
+      }
+    }
 
     if(toggleWrap && toggleBtn){
-      if(entries.length > DAILY_REVIEW_COUNT){
-        toggleWrap.style.display = '';
-        toggleBtn.textContent = showingAll
-          ? 'Show just today\'s 10 words'
-          : 'Show all learned words (' + entries.length + ')';
-      } else {
-        toggleWrap.style.display = 'none';
-      }
+      toggleWrap.style.display = '';
+      toggleBtn.textContent = showingAll
+        ? "Show just today's words"
+        : 'Show all learned words (' + entries.length + ')';
+    }
+
+    if(!visible.length){
+      list.innerHTML = showingAll
+        ? '<div class="history-empty">No words learned yet.</div>'
+        : '<div class="history-empty">You haven\'t learned any words today yet. (Daily Target: ' + userWordsPerDay + ')</div>';
+      return;
     }
 
     list.innerHTML = visible.map(function(e, i){
@@ -1846,6 +1866,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
         '<button class="practice-btn" type="button" data-idx="' + i + '">Practice</button>' +
       '</div>';
     }).join('');
+
     Array.prototype.forEach.call(list.querySelectorAll('.practice-btn'), function(btn){
       bindTap(btn, function(){
         var idx = parseInt(btn.getAttribute('data-idx'), 10);
@@ -2451,18 +2472,30 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     session.phase = 'checkpoint';
     stage.innerHTML =
       '<div class="checkpoint-icon" style="background:var(--success-soft); color:var(--success); border-color:rgba(27,94,32,0.2);"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" stroke="currentColor" stroke-width="2"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
-      '<div class="checkpoint-title">Daily Goal Achieved! 🎉</div>' +
-      '<div class="checkpoint-sub">Fantastic! You have learned your daily target of ' + userWordsPerDay + ' words today. You can keep studying to get ahead, or rest for today.</div>' +
-      '<div class="checkpoint-stats">' +
+      '<div class="checkpoint-title" style="color:var(--success); font-weight:800; font-size:22px; margin-bottom:8px;">Daily Goal Achieved! 🎉</div>' +
+      '<div class="checkpoint-sub" style="font-size:15px; font-weight:600; color:var(--ink); margin-bottom:24px; line-height:1.6; max-width:360px; margin-left:auto; margin-right:auto; padding:12px; background:var(--bg-1); border:1px solid var(--border); border-radius:8px;">' +
+        'Wait! Get back tomorrow.<br>' +
+        '<span style="color:var(--success); font-weight:700;">Now go to practice the words you learned.</span>' +
+      '</div>' +
+      '<div class="checkpoint-stats" style="margin-bottom:24px;">' +
         '<div class="cstat"><b>' + learnedCountTotal() + '</b><span>Total learned</span></div>' +
         '<div class="cstat"><b>' + Progress.score + '</b><span>Score</span></div>' +
         '<div class="cstat" style="min-width: 110px;"><b>Lvl ' + levelFromScore(Progress.score) + '</b><span>' + getLevelFromWordsCount(learnedCountTotal()) + '</span></div>' +
       '</div>' +
-      '<div class="checkpoint-actions">' +
-        '<button class="btn-solid" id="btnContinue">Keep Studying</button>' +
-        '<button class="btn-ghost" id="btnHome2">Back home</button>' +
+      '<div class="checkpoint-actions" style="flex-direction:column; gap:10px; width:100%; max-width:280px; margin:0 auto; display:flex;">' +
+        '<button class="btn-solid" id="btnContinue" style="width:100%;">Keep Studying</button>' +
+        '<button class="btn-solid" id="btnPracticeWords" style="width:100%; background:var(--success); color:var(--bg); border:none;">Go to Practice</button>' +
+        '<button class="btn-ghost" id="btnHome2" style="width:100%;">Back home</button>' +
       '</div>';
-    bindTap($('btnContinue'), function(){ loadNextWord(); });
+    bindTap($('btnContinue'), function(){
+      session.sessionTarget += userWordsPerDay;
+      loadNextWord();
+    });
+    bindTap($('btnPracticeWords'), function(){
+      historyShowAll = false;
+      showView('history');
+      renderHistoryList();
+    });
     bindTap($('btnHome2'), function(){ showView('home'); });
   }
 
