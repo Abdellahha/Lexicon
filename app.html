@@ -5505,6 +5505,24 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     
     // Reset state
     resetSpeakingRecordingState();
+
+    // Background pre-fetch for target words phonetics to display them immediately
+    fetch('/api/evaluate-speech', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        targetText: currentSpeakingChallengeText,
+        spokenText: "",
+        words: currentSpeakingChallengeWords
+      })
+    })
+    .then(function(res){ if (res.ok) return res.json(); })
+    .then(function(data){
+      if (data && data.targetWordsPhonetics) {
+        updatePillsWithPhonetics(data.targetWordsPhonetics);
+      }
+    })
+    .catch(function(e){ console.warn("Prefetch phonetics failed:", e); });
   }
 
   function resetSpeakingRecordingState() {
@@ -5537,6 +5555,8 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     return rec;
   }
 
+  var lastFinalTranscript = '';
+
   function startSpeakingRecording() {
     if (isRecording) return;
     if ('speechSynthesis' in window) {
@@ -5550,6 +5570,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     }
     
     isRecording = true;
+    lastFinalTranscript = '';
     $('speakingStatusLabel').textContent = 'Listening... Speak now!';
     $('speakingStatusLabel').style.color = 'var(--success)';
     $('btnSpeakingMic').style.borderColor = 'var(--success)';
@@ -5568,6 +5589,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
           interimTranscript += event.results[i][0].transcript;
         }
       }
+      lastFinalTranscript = finalTranscript;
       var showTxt = finalTranscript || interimTranscript || '...';
       $('speakingTranscriptionContainer').style.display = 'block';
       $('speakingSpokenText').textContent = '"' + showTxt + '"';
@@ -5583,7 +5605,8 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     
     recognition.onend = function() {
       if (isRecording) {
-        evaluateSpokenText(finalTranscript);
+        isRecording = false;
+        evaluateSpokenText(lastFinalTranscript);
       }
     };
     
@@ -5605,6 +5628,8 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     $('btnSpeakingMic').style.background = 'var(--bg-card)';
     $('btnSpeakingMic').style.color = 'var(--ink)';
     $('micPulseRing').style.opacity = '0';
+
+    evaluateSpokenText(lastFinalTranscript);
   }
 
   function normalizeText(txt) {
@@ -5614,7 +5639,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
               .trim();
   }
 
-  function evaluateSpokenText(spokenText) {
+  async function evaluateSpokenText(spokenText) {
     isRecording = false;
     
     if (!spokenText || spokenText.trim() === '') {
@@ -5637,105 +5662,232 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       $('btnSpeakingNext').style.display = 'none';
       return;
     }
-    
-    var targetNorm = normalizeText(currentSpeakingChallengeText);
-    var spokenNorm = normalizeText(spokenText);
-    
-    var targetWords = targetNorm.split(' ');
-    var spokenWords = spokenNorm.split(' ');
-    
-    var spokenWordsCopy = spokenWords.slice();
-    var matchedCount = 0;
-    targetWords.forEach(function(tw) {
-      var idx = spokenWordsCopy.indexOf(tw);
-      if (idx !== -1) {
-        matchedCount++;
-        spokenWordsCopy.splice(idx, 1);
+
+    $('speakingStatusLabel').textContent = 'Evaluating with AI...';
+    $('speakingStatusLabel').style.color = '#8b5cf6';
+    $('speakingFeedbackBox').style.display = 'none';
+    $('speakingActions').style.display = 'none';
+
+    try {
+      var response = await fetch('/api/evaluate-speech', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          targetText: currentSpeakingChallengeText,
+          spokenText: spokenText,
+          words: currentSpeakingChallengeWords
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Speech evaluation API error');
       }
-    });
-    
-    var baseRatio = targetWords.length > 0 ? (matchedCount / targetWords.length) : 0;
-    
-    var vocabMatchedCount = 0;
-    var vocabDetails = [];
-    currentSpeakingChallengeWords.forEach(function(vw) {
-      var normV = normalizeText(vw);
-      var matched = false;
-      for (var i = 0; i < spokenWords.length; i++) {
-        var sw = spokenWords[i];
-        if (sw === normV || sw === (normV + 's') || sw === (normV + 'ed') || sw === (normV + 'ing') || sw === (normV + 'd') || sw.indexOf(normV) === 0 && Math.abs(sw.length - normV.length) <= 3) {
-          matched = true;
-          break;
+
+      var resData = await response.json();
+      
+      // Update target words phonetic badges on pills if returned
+      if (resData.targetWordsPhonetics) {
+        updatePillsWithPhonetics(resData.targetWordsPhonetics);
+      }
+
+      var roundedScore = resData.score;
+      var passed = resData.passed;
+      var feedbackBox = $('speakingFeedbackBox');
+      feedbackBox.style.display = 'block';
+      $('speakingActions').style.display = 'flex';
+
+      var ratingColor = passed ? 'var(--success)' : 'var(--error)';
+      var ratingBg = passed ? 'var(--success-soft)' : 'var(--error-soft)';
+      var ratingBorder = passed ? 'rgba(27,94,32,0.15)' : 'rgba(183,28,28,0.15)';
+
+      feedbackBox.style.background = ratingBg;
+      feedbackBox.style.border = '1px solid ' + ratingBorder;
+      feedbackBox.style.color = passed ? 'var(--success)' : 'var(--error)';
+
+      var titleText = passed ? 'Passed! Excellent Reading! 🌟' : 'Repeat Needed 🔄';
+      var iconHtml = passed ? 
+        '<div style="font-size: 20px; display: inline-block; margin-right: 8px;">🎉</div>' : 
+        '<div style="font-size: 20px; display: inline-block; margin-right: 8px;">✍️</div>';
+
+      // Build corrections markup
+      var correctionsHtml = '';
+      if (resData.corrections && resData.corrections.length > 0) {
+        correctionsHtml += '<div style="margin-top: 14px; border-top: 1px solid ' + ratingBorder + '; padding-top: 14px;">';
+        correctionsHtml += '<div style="font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.8; margin-bottom: 8px; color: var(--ink);">Pronunciation & Spelling Errors:</div>';
+        correctionsHtml += '<div style="display: flex; flex-direction: column; gap: 10px;">';
+        resData.corrections.forEach(function(corr) {
+          correctionsHtml += 
+            '<div style="background: var(--bg-card); border-radius: 6px; padding: 10px; border: 1px solid ' + ratingBorder + '; display: flex; flex-direction: column; gap: 4px;">' +
+              '<div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">' +
+                '<span style="font-size: 13px; font-weight: 700; color: var(--error);"><del style="opacity: 0.6; margin-right: 4px;">' + (corr.spoken || "None") + '</del> &rarr; <span style="text-decoration: underline;">' + corr.expected + '</span></span>' +
+                '<span style="font-family: var(--font-mono); font-size: 11px; background: rgba(139, 92, 246, 0.08); color: #8b5cf6; padding: 1px 6px; border-radius: 4px; font-weight: 600; border: 1px solid rgba(139, 92, 246, 0.15);">' + corr.phonetic + '</span>' +
+              '</div>' +
+              '<div style="font-size: 12px; color: var(--ink-dim); line-height: 1.4;">' + corr.guidance + '</div>' +
+            '</div>';
+        });
+        correctionsHtml += '</div></div>';
+      } else {
+        correctionsHtml += '<div style="margin-top: 14px; border-top: 1px solid ' + ratingBorder + '; padding-top: 14px; color: var(--success); font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px;">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+          'Flawless pronunciation! No errors detected.' +
+        '</div>';
+      }
+
+      feedbackBox.innerHTML = 
+        '<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">' +
+          '<div style="display: flex; align-items: center; font-weight: 800; font-size: 17px;">' + iconHtml + titleText + '</div>' +
+          '<div style="font-family: var(--font-mono); font-size: 16px; font-weight: 800; padding: 4px 12px; border-radius: 20px; border: 1.5px solid ' + ratingColor + '; background: var(--bg-card); color: ' + ratingColor + ';">' + roundedScore + ' / 10</div>' +
+        '</div>' +
+        '<p style="font-size: 13.5px; opacity: 0.9; margin: 8px 0 0; line-height: 1.4;">' +
+          resData.feedback +
+        '</p>' +
+        correctionsHtml;
+
+      $('speakingStatusLabel').textContent = passed ? 'Passed!' : 'Needs Revision';
+      $('speakingStatusLabel').style.color = ratingColor;
+
+      if (passed) {
+        Progress.score += 10;
+        saveProgress();
+        
+        $('btnSpeakingNext').style.display = 'block';
+        $('btnSpeakingRetry').style.display = 'none';
+        speakingIndex++;
+      } else {
+        $('btnSpeakingNext').style.display = 'none';
+        $('btnSpeakingRetry').style.display = 'block';
+      }
+      
+      $('speakingScore').textContent = Progress.score;
+
+    } catch (apiErr) {
+      console.error('AI speech evaluation failed, falling back:', apiErr);
+      // Local fallback in case of errors
+      var targetNorm = normalizeText(currentSpeakingChallengeText);
+      var spokenNorm = normalizeText(spokenText);
+      var targetWords = targetNorm.split(' ');
+      var spokenWords = spokenNorm.split(' ');
+      
+      var spokenWordsCopy = spokenWords.slice();
+      var matchedCount = 0;
+      targetWords.forEach(function(tw) {
+        var idx = spokenWordsCopy.indexOf(tw);
+        if (idx !== -1) {
+          matchedCount++;
+          spokenWordsCopy.splice(idx, 1);
+        }
+      });
+      
+      var baseRatio = targetWords.length > 0 ? (matchedCount / targetWords.length) : 0;
+      var vocabMatchedCount = 0;
+      var vocabDetails = [];
+      currentSpeakingChallengeWords.forEach(function(vw) {
+        var normV = normalizeText(vw);
+        var matched = false;
+        for (var i = 0; i < spokenWords.length; i++) {
+          var sw = spokenWords[i];
+          if (sw === normV || sw === (normV + 's') || sw === (normV + 'ed') || sw === (normV + 'ing') || sw === (normV + 'd') || sw.indexOf(normV) === 0 && Math.abs(sw.length - normV.length) <= 3) {
+            matched = true;
+            break;
+          }
+        }
+        if (matched) {
+          vocabMatchedCount++;
+          vocabDetails.push({ word: vw, passed: true });
+        } else {
+          vocabDetails.push({ word: vw, passed: false });
+        }
+      });
+      
+      var vocabRatio = vocabMatchedCount / 3;
+      var finalScore = (baseRatio * 0.4 + vocabRatio * 0.6) * 10;
+      var roundedScore = Math.round(finalScore * 10) / 10;
+      if (roundedScore < 0.5 && spokenWords.length > 0) roundedScore = 0.5;
+      if (roundedScore > 10) roundedScore = 10;
+      
+      var passed = (roundedScore >= 5);
+      var feedbackBox = $('speakingFeedbackBox');
+      feedbackBox.style.display = 'block';
+      $('speakingActions').style.display = 'flex';
+      
+      var ratingColor = passed ? 'var(--success)' : 'var(--error)';
+      var ratingBg = passed ? 'var(--success-soft)' : 'var(--error-soft)';
+      var ratingBorder = passed ? 'rgba(27,94,32,0.15)' : 'rgba(183,28,28,0.15)';
+      
+      feedbackBox.style.background = ratingBg;
+      feedbackBox.style.border = '1px solid ' + ratingBorder;
+      feedbackBox.style.color = passed ? 'var(--success)' : 'var(--error)';
+      
+      var titleText = passed ? 'Passed! Excellent Reading! 🌟' : 'Repeat Needed 🔄';
+      var iconHtml = passed ? 
+        '<div style="font-size: 20px; display: inline-block; margin-right: 8px;">🎉</div>' : 
+        '<div style="font-size: 20px; display: inline-block; margin-right: 8px;">✍️</div>';
+      
+      var breakdownHtml = '<div style="margin-top: 12px; border-top: 1px solid ' + ratingBorder + '; padding-top: 12px; font-size: 13px; display: flex; flex-direction: column; gap: 6px;">';
+      breakdownHtml += '<div style="font-family: var(--font-mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.8; margin-bottom: 2px; color: var(--ink);">Vocabulary Pronunciation:</div>';
+      breakdownHtml += '<div style="display: flex; gap: 8px; flex-wrap: wrap;">';
+      vocabDetails.forEach(function(detail) {
+        var badgeBg = detail.passed ? 'rgba(27,94,32,0.12)' : 'rgba(183,28,28,0.12)';
+        var badgeText = detail.passed ? 'rgba(27,94,32,1)' : 'rgba(183,28,28,1)';
+        var checkIcon = detail.passed ? '✓' : '✗';
+        breakdownHtml += '<span style="font-size: 12px; padding: 4px 10px; border-radius: 4px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; background:' + badgeBg + '; color:' + badgeText + ';">' + checkIcon + ' ' + detail.word + '</span>';
+      });
+      breakdownHtml += '</div></div>';
+      
+      feedbackBox.innerHTML = 
+        '<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">' +
+          '<div style="display: flex; align-items: center; font-weight: 800; font-size: 17px;">' + iconHtml + titleText + '</div>' +
+          '<div style="font-family: var(--font-mono); font-size: 16px; font-weight: 800; padding: 4px 12px; border-radius: 20px; border: 1.5px solid ' + ratingColor + '; background: var(--bg-card); color: ' + ratingColor + ';">' + roundedScore + ' / 10</div>' +
+        '</div>' +
+        '<p style="font-size: 13.5px; opacity: 0.9; margin: 8px 0 0; line-height: 1.4;">' +
+          (passed ? 
+            'Amazing job! You read ' + matchedCount + ' of ' + targetWords.length + ' words correctly with high accuracy. Let\'s continue to the next text!' : 
+            'You scored ' + roundedScore + '/10. Standard is 5.0/10 to pass. Please try reading the text again, making sure to pronounce the vocabulary words clearly!') +
+        '</p>' +
+        breakdownHtml;
+
+      $('speakingStatusLabel').textContent = passed ? 'Passed!' : 'Needs Revision';
+      $('speakingStatusLabel').style.color = ratingColor;
+      
+      if (passed) {
+        Progress.score += 10;
+        saveProgress();
+        
+        $('btnSpeakingNext').style.display = 'block';
+        $('btnSpeakingRetry').style.display = 'none';
+        speakingIndex++;
+      } else {
+        $('btnSpeakingNext').style.display = 'none';
+        $('btnSpeakingRetry').style.display = 'block';
+      }
+      
+      $('speakingScore').textContent = Progress.score;
+    }
+  }
+
+  function updatePillsWithPhonetics(phoneticsList) {
+    if (!phoneticsList) return;
+    phoneticsList.forEach(function(item) {
+      var pillEl = document.querySelector('.tag.clickable-speaking-word[data-word="' + item.word + '"]');
+      if (pillEl) {
+        var phonEl = pillEl.querySelector('.word-phonetic-badge');
+        if (!phonEl) {
+          var span = document.createElement('span');
+          span.className = 'word-phonetic-badge';
+          span.style.fontFamily = 'var(--font-mono)';
+          span.style.fontSize = '9.5px';
+          span.style.marginLeft = '6px';
+          span.style.opacity = '0.85';
+          span.style.background = 'rgba(139, 92, 246, 0.08)';
+          span.style.color = '#8b5cf6';
+          span.style.padding = '1px 5px';
+          span.style.borderRadius = '3px';
+          span.style.border = '1px solid rgba(139, 92, 246, 0.15)';
+          span.textContent = item.phonetic;
+          pillEl.appendChild(span);
         }
       }
-      if (matched) {
-        vocabMatchedCount++;
-        vocabDetails.push({ word: vw, passed: true });
-      } else {
-        vocabDetails.push({ word: vw, passed: false });
-      }
     });
-    
-    var vocabRatio = vocabMatchedCount / 3;
-    var finalScore = (baseRatio * 0.4 + vocabRatio * 0.6) * 10;
-    var roundedScore = Math.round(finalScore * 10) / 10;
-    if (roundedScore < 0.5 && spokenWords.length > 0) roundedScore = 0.5;
-    if (roundedScore > 10) roundedScore = 10;
-    
-    var passed = (roundedScore >= 5);
-    var feedbackBox = $('speakingFeedbackBox');
-    feedbackBox.style.display = 'block';
-    $('speakingActions').style.display = 'flex';
-    
-    var ratingColor = passed ? 'var(--success)' : 'var(--error)';
-    var ratingBg = passed ? 'var(--success-soft)' : 'var(--error-soft)';
-    var ratingBorder = passed ? 'rgba(27,94,32,0.15)' : 'rgba(183,28,28,0.15)';
-    
-    feedbackBox.style.background = ratingBg;
-    feedbackBox.style.border = '1px solid ' + ratingBorder;
-    feedbackBox.style.color = passed ? 'var(--success)' : 'var(--error)';
-    
-    var titleText = passed ? 'Passed! Excellent Reading! 🌟' : 'Repeat Needed 🔄';
-    var iconHtml = passed ? 
-      '<div style="font-size: 20px; display: inline-block; margin-right: 8px;">🎉</div>' : 
-      '<div style="font-size: 20px; display: inline-block; margin-right: 8px;">✍️</div>';
-    
-    var breakdownHtml = '<div style="margin-top: 12px; border-top: 1px solid ' + ratingBorder + '; padding-top: 12px; font-size: 13px; display: flex; flex-direction: column; gap: 6px;">';
-    breakdownHtml += '<div style="font-family: var(--font-mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.8; margin-bottom: 2px;">Vocabulary Pronunciation:</div>';
-    breakdownHtml += '<div style="display: flex; gap: 8px; flex-wrap: wrap;">';
-    vocabDetails.forEach(function(detail) {
-      var badgeBg = detail.passed ? 'rgba(27,94,32,0.12)' : 'rgba(183,28,28,0.12)';
-      var badgeText = detail.passed ? 'rgba(27,94,32,1)' : 'rgba(183,28,28,1)';
-      var checkIcon = detail.passed ? '✓' : '✗';
-      breakdownHtml += '<span style="font-size: 12px; padding: 4px 10px; border-radius: 4px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; background:' + badgeBg + '; color:' + badgeText + ';">' + checkIcon + ' ' + detail.word + '</span>';
-    });
-    breakdownHtml += '</div></div>';
-    
-    feedbackBox.innerHTML = 
-      '<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">' +
-        '<div style="display: flex; align-items: center; font-weight: 800; font-size: 17px;">' + iconHtml + titleText + '</div>' +
-        '<div style="font-family: var(--font-mono); font-size: 16px; font-weight: 800; padding: 4px 12px; border-radius: 20px; border: 1.5px solid ' + ratingColor + '; background: var(--bg-card);">' + roundedScore + ' / 10</div>' +
-      '</div>' +
-      '<p style="font-size: 13.5px; opacity: 0.9; margin: 8px 0 0; line-height: 1.4;">' +
-        (passed ? 
-          'Amazing job! You read ' + matchedCount + ' of ' + targetWords.length + ' words correctly with high accuracy. Let\'s continue to the next text!' : 
-          'You scored ' + roundedScore + '/10. Standard is 5.0/10 to pass. Please try reading the text again, making sure to pronounce the vocabulary words clearly!') +
-      '</p>' +
-      breakdownHtml;
-    
-    if (passed) {
-      Progress.score += 10;
-      saveProgress();
-      
-      $('btnSpeakingNext').style.display = 'block';
-      $('btnSpeakingRetry').style.display = 'none';
-      speakingIndex++;
-    } else {
-      $('btnSpeakingNext').style.display = 'none';
-      $('btnSpeakingRetry').style.display = 'block';
-    }
-    
-    $('speakingScore').textContent = Progress.score;
   }
 
   function exitGrammarPractice() {
