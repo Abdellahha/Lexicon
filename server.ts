@@ -132,6 +132,173 @@ Generate your response in the specified JSON schema. Keep the advice friendly, c
     }
   });
 
+  // API Route to evaluate spoken text for Speak & Read Practice
+  app.post("/api/evaluate-speech", async (req, res) => {
+    try {
+      const { targetText, spokenText, words } = req.body;
+      const targetWordsArray = Array.isArray(words) ? words : [];
+
+      const ai = getGeminiClient();
+      if (!ai) {
+        // Fallback rule-based speech evaluator if API key is missing
+        const normTarget = (targetText || "").toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']/g,"").replace(/\s+/g," ").trim();
+        const normSpoken = (spokenText || "").toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']/g,"").replace(/\s+/g," ").trim();
+        
+        const targetWords = normTarget.split(" ");
+        const spokenWords = normSpoken.split(" ");
+
+        let matchedCount = 0;
+        const spokenWordsCopy = [...spokenWords];
+        targetWords.forEach((tw) => {
+          const idx = spokenWordsCopy.indexOf(tw);
+          if (idx !== -1) {
+            matchedCount++;
+            spokenWordsCopy.splice(idx, 1);
+          }
+        });
+
+        const baseRatio = targetWords.length > 0 ? (matchedCount / targetWords.length) : 0;
+        
+        let vocabMatchedCount = 0;
+        const corrections: any[] = [];
+        
+        targetWordsArray.forEach((vw: string) => {
+          const normV = vw.toLowerCase().trim();
+          let matched = false;
+          for (const sw of spokenWords) {
+            if (sw === normV || sw === (normV + 's') || sw === (normV + 'ed') || sw === (normV + 'ing') || sw === (normV + 'd') || (sw.startsWith(normV) && Math.abs(sw.length - normV.length) <= 3)) {
+              matched = true;
+              break;
+            }
+          }
+          if (matched) {
+            vocabMatchedCount++;
+          } else {
+            corrections.push({
+              word: vw,
+              expected: vw,
+              spoken: spokenWords.length > 0 ? spokenWords[0] : "None",
+              status: "mispronounced",
+              phonetic: `/${normV}/`,
+              guidance: `Make sure to emphasize the syllables of the word "${vw}" clearly when reading.`
+            });
+          }
+        });
+
+        const vocabRatio = targetWordsArray.length > 0 ? (vocabMatchedCount / targetWordsArray.length) : 0;
+        const finalScore = (baseRatio * 0.4 + vocabRatio * 0.6) * 10;
+        let roundedScore = Math.round(finalScore * 10) / 10;
+        if (roundedScore < 0.5 && spokenWords.length > 0) roundedScore = 0.5;
+        if (roundedScore > 10) roundedScore = 10;
+        const passed = roundedScore >= 5;
+
+        const targetWordsPhonetics = targetWordsArray.map((vw: string) => ({
+          word: vw,
+          phonetic: `/${vw.toLowerCase()}/`
+        }));
+
+        return res.json({
+          score: roundedScore,
+          passed,
+          feedback: passed ? "Well read! You successfully pronounced the key words." : "Please try reading again, paying attention to the target words.",
+          corrections,
+          targetWordsPhonetics
+        });
+      }
+
+      const prompt = `Evaluate an English language learner's speech output for pronunciation and spelling mistakes.
+The user was asked to read the following target sentence aloud:
+"${targetText}"
+
+The target vocabulary words of focus are: ${JSON.stringify(targetWordsArray)}
+
+The speech-to-text engine transcribed their spoken output as:
+"${spokenText}"
+
+Evaluate their pronunciation, accuracy, and completeness:
+1. Provide a final score out of 10 (decimal, e.g., 8.5) reflecting their reading performance. A score of 5.0 or above is a Pass.
+2. For any words that were omitted, mispronounced, or misspelled (such as substituting similar sounding words), include them in the "corrections" list. For each correction, show:
+   - "word": the expected vocabulary word
+   - "expected": the correct spelling/word
+   - "spoken": what they actually said/what was transcribed instead
+   - "status": either "mispronounced" or "omitted"
+   - "phonetic": the standard IPA phonetic spelling of the word (e.g., "/ˌkoʊ.ɪnˈsaɪd/")
+   - "guidance": extremely clear, actionable, friendly advice on how to physically pronounce this word (e.g., "Break it into co-in-cide. Focus on the final 'syde' sound.")
+3. In "targetWordsPhonetics", list all the targeted words (${JSON.stringify(targetWordsArray)}) and provide their standard IPA phonetic spellings (e.g., "/ˌkoʊ.ɪnˈsaɪd/").
+
+Keep your overall feedback friendly, professional, and highly encouraging. Return the output in the specified JSON schema format.`;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-3.5-flash",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              score: {
+                type: Type.NUMBER,
+                description: "The evaluation score out of 10. A score of 5.0 or more is a Pass."
+              },
+              passed: {
+                type: Type.BOOLEAN,
+                description: "True if score is >= 5.0"
+              },
+              feedback: {
+                type: Type.STRING,
+                description: "Enthusiastic and motivating feedback summary of the user's reading. Max 50 words."
+              },
+              corrections: {
+                type: Type.ARRAY,
+                description: "Details of misspelled or mispronounced words.",
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    word: { type: Type.STRING },
+                    expected: { type: Type.STRING },
+                    spoken: { type: Type.STRING },
+                    status: { type: Type.STRING, description: "either 'mispronounced' or 'omitted'" },
+                    phonetic: { type: Type.STRING, description: "Phonetic IPA spelling of the word" },
+                    guidance: { type: Type.STRING, description: "Short tip to improve pronunciation" }
+                  },
+                  required: ["word", "expected", "spoken", "status", "phonetic", "guidance"]
+                }
+              },
+              targetWordsPhonetics: {
+                type: Type.ARRAY,
+                description: "The correct phonetic IPA spellings of each target word in the exercise.",
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    word: { type: Type.STRING },
+                    phonetic: { type: Type.STRING, description: "IPA spelling of the target word" }
+                  },
+                  required: ["word", "phonetic"]
+                }
+              }
+            },
+            required: ["score", "passed", "feedback", "corrections", "targetWordsPhonetics"]
+          }
+        }
+      });
+
+      const responseText = response.text || "{}";
+      const result = JSON.parse(responseText.trim());
+      res.json(result);
+
+    } catch (err: any) {
+      console.error("Error evaluating speech with Gemini:", err);
+      res.status(500).json({
+        error: "Failed to evaluate speech",
+        score: 5.0,
+        passed: true,
+        feedback: "Nice effort! Practice makes perfect.",
+        corrections: [],
+        targetWordsPhonetics: []
+      });
+    }
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
