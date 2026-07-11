@@ -835,11 +835,14 @@ body {
           <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
       </div>
-      <div class="card locked">
+      <div class="card active-card" id="cardSpeaking">
         <div class="card-index">02 · Speaking</div>
-        <div class="card-title">Idioms &amp; Phrasal Verbs</div>
-        <div class="card-desc">Sound more natural in everyday conversation.</div>
-        <div class="card-foot"><span class="card-badge">Coming soon</span></div>
+        <div class="card-title">Speak &amp; Read Practice</div>
+        <div class="card-desc">Read short texts containing words you learned and get instant microphone feedback on your spelling &amp; pronunciation!</div>
+        <div class="card-foot">
+          <div class="card-progress-bar"><div class="card-progress-fill" id="speakingProgressFill" style="width:0%"></div></div>
+          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
       </div>
       <div class="card active-card" id="cardGrammar">
         <div class="card-index">03 · Grammar</div>
@@ -921,6 +924,96 @@ body {
     </div>
     <div class="match-wrap" id="matchWrap">
       <div class="match-grid" id="matchGrid"></div>
+    </div>
+  </div>
+
+  <!-- SPEAKING VIEW -->
+  <div class="view" id="view-speaking">
+    <div class="study-top">
+      <button class="btn-ghost" id="btnSpeakingBack">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Home
+      </button>
+      <div class="session-meta">
+        <span>Speaking Score <b id="speakingScore">0</b></span>
+      </div>
+    </div>
+
+    <!-- Intro / Setup State -->
+    <div id="speaking-intro-screen" style="display: block;">
+      <div class="hero" style="margin-bottom: 24px; display: block; background: transparent; padding: 24px 0 0; text-align: left; box-shadow: none;">
+        <div class="hero-title" style="font-size: clamp(28px, 6vw, 36px); line-height: 1.2; font-family: var(--font-display); font-weight: 800; font-style: italic; margin-bottom: 8px;">Speak <span style="color: var(--ink-faint); font-weight: 400;">&amp; Read</span></div>
+        <p class="hero-sub" style="font-size: 14px; color: var(--ink-dim); line-height: 1.6; max-width: 60ch; margin: 0;">Practice your pronunciation! We will create short texts containing 3 words you've already learned. Read them aloud to get scored in real-time.</p>
+      </div>
+
+      <div class="stage" style="padding: 40px 30px; text-align: center; border-radius: 12px; background: var(--bg-card); border: 1px solid var(--border); box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 250px;">
+        <div id="speaking-intro-content" style="width:100%; display: flex; flex-direction: column; align-items: center; gap: 20px;">
+          <!-- Content populated via JavaScript depending on learned words count -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Practice State -->
+    <div id="speaking-practice-screen" style="display: none;">
+      <div class="progress-track" style="margin-bottom: 24px;"><div class="progress-fill" id="speakingProgressFillInner" style="width:0%"></div></div>
+
+      <div class="stage" style="padding: 36px 30px; text-align: center; border-radius: 12px; background: var(--bg-card); border: 1px solid var(--border); box-shadow: var(--shadow); position: relative;">
+        <!-- Level & words practiced indicators -->
+        <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-faint); margin-bottom: 24px; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--border-soft); padding-bottom: 12px;">
+          <span>Exercise <b id="speakingIndex">1</b></span>
+          <span>Spoken Target: <b>Score &ge; 5 to Pass</b></span>
+        </div>
+
+        <!-- Target Words Pillbox -->
+        <div style="margin-bottom: 16px; font-size: 11px; color: var(--ink-faint); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600;">Vocabulary practiced:</div>
+        <div id="speakingWordsPills" style="display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 28px;">
+          <!-- pills for the 3 words -->
+        </div>
+
+        <!-- Text to read container -->
+        <div class="reading-box" style="margin-bottom: 32px; background: var(--bg-1); border: 1px dashed var(--border); border-radius: 12px; padding: 28px 24px; position: relative;">
+          <!-- TTS Play button on the text card -->
+          <button id="btnPlayTargetTTS" class="btn-ghost" style="position: absolute; top: 12px; right: 12px; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; padding: 0; border: 1px solid var(--border-soft); background: var(--bg-card);" title="Listen to text">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-volume-2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+          </button>
+          
+          <p id="speakingTargetText" style="font-family: var(--font-display); font-size: clamp(18px, 4.5vw, 22px); line-height: 1.6; font-weight: 500; color: var(--ink); margin: 0; padding-right: 28px; text-align: left;">
+            <!-- Short text containing 3 words -->
+          </p>
+        </div>
+
+        <!-- Mic Button Area -->
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; margin-bottom: 28px;">
+          <button id="btnSpeakingMic" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--border); background: var(--bg-card); color: var(--ink); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); outline: none; position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+            <!-- Pulsing outer ring when recording -->
+            <div id="micPulseRing" style="position: absolute; inset: -6px; border-radius: 50%; border: 2px solid var(--success); opacity: 0; transform: scale(1); pointer-events: none; transition: all 0.3s ease;"></div>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="micIconSvg"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+          </button>
+          
+          <div id="speakingStatusLabel" style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-faint); font-weight: 600;">
+            Click to Start Reading
+          </div>
+        </div>
+
+        <!-- User speech transcription output -->
+        <div id="speakingTranscriptionContainer" style="display: none; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 24px; text-align: left;">
+          <div style="font-family: var(--font-mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-faint); margin-bottom: 6px;">You said:</div>
+          <p id="speakingSpokenText" style="font-size: 14.5px; line-height: 1.5; color: var(--ink-dim); margin: 0; font-style: italic;">
+            "..."
+          </p>
+        </div>
+
+        <!-- Scoring feedback (green/red block) -->
+        <div id="speakingFeedbackBox" style="display: none; border-radius: 12px; padding: 24px; text-align: left; margin-bottom: 24px; animation: fadeIn 0.3s ease;">
+          <!-- Success / fail message, score breakdown -->
+        </div>
+
+        <!-- Next / Try Again Actions -->
+        <div id="speakingActions" style="display: none; gap: 12px; justify-content: center; width: 100%;">
+          <button id="btnSpeakingNext" class="btn-solid" style="background: var(--success); color: var(--bg); border: none; min-width: 140px; display: none;">Next Challenge</button>
+          <button id="btnSpeakingRetry" class="btn-solid" style="background: var(--ink); color: var(--bg); border: none; min-width: 140px; display: none;">Try Again</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1233,6 +1326,13 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   // SAFETY GUARD: Prevents blank local values from overwriting your database
   var isProgressLoaded = false;
 
+  // Speaking practice state
+  var speakingIndex = 1;
+  var currentSpeakingChallengeWords = [];
+  var currentSpeakingChallengeText = '';
+  var isRecording = false;
+  var recognition = null;
+
   function wordsLearnedTodayCount(){
     var localDate = new Date();
     var year = localDate.getFullYear();
@@ -1519,7 +1619,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
 
   /* ---------------- dom refs ---------------- */
   var $ = function(id){ return document.getElementById(id); };
-  var viewHome = $('view-home'), viewStudy = $('view-study'), viewHistory = $('view-history'), viewMatch = $('view-match'), viewGrammar = $('view-grammar');
+  var viewHome = $('view-home'), viewStudy = $('view-study'), viewHistory = $('view-history'), viewMatch = $('view-match'), viewGrammar = $('view-grammar'), viewSpeaking = $('view-speaking');
   var stage = $('stage');
 
   /* ---------------- home rendering ---------------- */
@@ -1607,7 +1707,11 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     $('statLearned').textContent = countTotal;
     $('statStreak').textContent = Progress.streak;
     $('statScore').textContent = Progress.score;
-    $('cardProgressFill').style.width = pct + '%';
+    
+    // Progress fill of the "Learn New Vocabulary" card represents daily goal completion
+    var todayCount = wordsLearnedTodayCount();
+    var dailyPct = Math.min(100, Math.round((todayCount / userWordsPerDay) * 100));
+    $('cardProgressFill').style.width = dailyPct + '%';
     
     // Calculate and update grammar card progress
     Progress.grammar = Progress.grammar || {};
@@ -1624,6 +1728,14 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     var grammarProgressFillEl = $('grammarProgressFill');
     if (grammarProgressFillEl) {
       grammarProgressFillEl.style.width = grammarPct + '%';
+    }
+
+    // Calculate and update speaking card progress
+    var speakingProgressFillEl = $('speakingProgressFill');
+    if (speakingProgressFillEl) {
+      var learnedKeysCount = Object.keys(Progress.learned).length;
+      var speakingPct = learnedKeysCount >= 3 ? Math.min(100, Math.round(((speakingIndex - 1) * 3 / learnedKeysCount) * 100)) : 0;
+      speakingProgressFillEl.style.width = speakingPct + '%';
     }
     var wordLevelLabel = userEnglishLevel === 'all' ? getLevelFromWordsCount(countTotal) : 'Level ' + userEnglishLevel;
     $('levelText').textContent = wordLevelLabel + ' (Lvl ' + levelFromScore(Progress.score) + ')';
@@ -1738,7 +1850,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
 
   /* ---------------- navigation ---------------- */
   function showView(name){
-    [viewHome, viewStudy, viewHistory, viewMatch, viewGrammar].forEach(function(v){ if(v) v.classList.remove('active'); });
+    [viewHome, viewStudy, viewHistory, viewMatch, viewGrammar, viewSpeaking].forEach(function(v){ if(v) v.classList.remove('active'); });
     if(name==='home'){
       viewHome.classList.add('active'); renderHome(); scheduleReminder(true);
     } else if(name==='history'){
@@ -1747,6 +1859,8 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       viewMatch.classList.add('active'); reminderLoop = false; dismissReminder();
     } else if(name==='grammar'){
       viewGrammar.classList.add('active'); reminderLoop = false; dismissReminder(); renderGrammarTopics();
+    } else if(name==='speaking'){
+      viewSpeaking.classList.add('active'); reminderLoop = false; dismissReminder();
     } else {
       viewStudy.classList.add('active'); scheduleReminder(false);
     }
@@ -4910,6 +5024,341 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     });
   }
 
+  /* ---------------- SPEAKING PRACTICE MODULE ---------------- */
+  function findWordEntry(word) {
+    return WORDS.find(function(e){ return e.word.toLowerCase() === word.toLowerCase(); });
+  }
+
+  function generateTextForWords(w1, w2, w3) {
+    var e1 = findWordEntry(w1);
+    var e2 = findWordEntry(w2);
+    var e3 = findWordEntry(w3);
+    
+    var ex1 = e1 ? e1.example : (w1 + " is an important word to learn.");
+    var ex2 = e2 ? e2.example : (w2 + " helps us express our thoughts clearly.");
+    var ex3 = e3 ? e3.example : ("We can improve by practicing " + w3 + ".");
+    
+    // Ensure they end with periods
+    if (!ex1.endsWith('.')) ex1 += '.';
+    if (!ex2.endsWith('.')) ex2 += '.';
+    if (!ex3.endsWith('.')) ex3 += '.';
+    
+    return ex1 + " " + ex2 + " " + ex3;
+  }
+
+  function startSpeakingPractice() {
+    var learnedKeys = Object.keys(Progress.learned);
+    if (learnedKeys.length < 3) {
+      $('speaking-intro-screen').style.display = 'block';
+      $('speaking-practice-screen').style.display = 'none';
+      
+      $('speaking-intro-content').innerHTML = 
+        '<div style="font-size: 48px; margin-bottom: 8px;">🔒</div>' +
+        '<h3 style="font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--ink); margin: 0;">Learn 3 Words to Unlock</h3>' +
+        '<p style="font-size: 14px; color: var(--ink-dim); max-width: 320px; margin: 0; line-height: 1.5; text-align: center;">' +
+          'You have learned <b>' + learnedKeys.length + '</b> word' + (learnedKeys.length === 1 ? '' : 's') + ' so far. Please study at least 3 words to start speaking and pronunciation practice!' +
+        '</p>' +
+        '<button class="btn-solid" id="btnGoToStudyFromSpeaking" style="margin-top: 12px; background: var(--ink); color: var(--bg); border: none; padding: 12px 24px;">Start Learning Vocabulary</button>';
+      
+      bindTap($('btnGoToStudyFromSpeaking'), function(){
+        showView('study');
+        startStudy();
+      });
+      return;
+    }
+    
+    // Show intro screen play button
+    $('speaking-intro-screen').style.display = 'block';
+    $('speaking-practice-screen').style.display = 'none';
+    
+    $('speaking-intro-content').innerHTML = 
+      '<div style="font-size: 48px; margin-bottom: 8px;">🗣️</div>' +
+      '<h3 style="font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--ink); margin: 0;">Speaking Challenge</h3>' +
+      '<p style="font-size: 14px; color: var(--ink-dim); max-width: 360px; margin: 0; line-height: 1.5; text-align: center;">' +
+        'Ready to practice? We will choose 3 of your learned words (you have learned ' + learnedKeys.length + ') and test your pronunciation.' +
+      '</p>' +
+      '<button class="btn-solid" id="btnStartSpeakingChallenge" style="margin-top: 12px; background: var(--success); color: var(--bg); border: none; padding: 14px 28px; font-weight: 700;">Start Speaking Now</button>';
+    
+    bindTap($('btnStartSpeakingChallenge'), function(){
+      $('speaking-intro-screen').style.display = 'none';
+      $('speaking-practice-screen').style.display = 'block';
+      loadNextSpeakingChallenge();
+    });
+  }
+
+  function loadNextSpeakingChallenge() {
+    var learnedKeys = Object.keys(Progress.learned);
+    if (learnedKeys.length < 3) {
+      startSpeakingPractice();
+      return;
+    }
+    
+    // Select 3 random unique words
+    var shuffled = learnedKeys.slice().sort(function() { return 0.5 - Math.random(); });
+    currentSpeakingChallengeWords = shuffled.slice(0, 3);
+    
+    // Generate text
+    currentSpeakingChallengeText = generateTextForWords(
+      currentSpeakingChallengeWords[0],
+      currentSpeakingChallengeWords[1],
+      currentSpeakingChallengeWords[2]
+    );
+    
+    // Update UI
+    $('speakingIndex').textContent = speakingIndex;
+    
+    // Render pills
+    var pillsHtml = '';
+    currentSpeakingChallengeWords.forEach(function(w){
+      var e = findWordEntry(w);
+      var pos = e && e.pos ? ' <span style="font-size:9px;opacity:0.6;font-style:italic;">' + e.pos + '</span>' : '';
+      pillsHtml += '<span class="tag" style="background: var(--bg-1); border: 1px solid var(--border); color: var(--ink); padding: 5px 12px; border-radius: 20px; font-weight: 600; font-size: 12px;">' + w + pos + '</span>';
+    });
+    $('speakingWordsPills').innerHTML = pillsHtml;
+    
+    // Highlight target words in the text to read
+    var textToShow = currentSpeakingChallengeText;
+    currentSpeakingChallengeWords.forEach(function(w){
+      var regex = new RegExp('\\b(' + w + 's?|' + w + 'd?|' + w + 'ed?|' + w + 'ing?)\\b', 'gi');
+      textToShow = textToShow.replace(regex, '<b style="color: var(--success); text-decoration: underline; text-underline-offset: 4px;">$1</b>');
+    });
+    $('speakingTargetText').innerHTML = textToShow;
+    
+    // Reset state
+    resetSpeakingRecordingState();
+  }
+
+  function resetSpeakingRecordingState() {
+    if (isRecording) {
+      stopSpeakingRecording();
+    }
+    $('speakingStatusLabel').textContent = 'Click to Start Reading';
+    $('speakingStatusLabel').style.color = 'var(--ink-faint)';
+    $('btnSpeakingMic').style.borderColor = 'var(--border)';
+    $('btnSpeakingMic').style.background = 'var(--bg-card)';
+    $('btnSpeakingMic').style.color = 'var(--ink)';
+    $('micPulseRing').style.opacity = '0';
+    $('micPulseRing').style.transform = 'scale(1)';
+    
+    $('speakingTranscriptionContainer').style.display = 'none';
+    $('speakingFeedbackBox').style.display = 'none';
+    $('speakingActions').style.display = 'none';
+    $('btnSpeakingNext').style.display = 'none';
+    $('btnSpeakingRetry').style.display = 'none';
+  }
+
+  function initSpeechRecognition() {
+    var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return null;
+    
+    var rec = new SpeechRecognition();
+    rec.continuous = true;
+    rec.interimResults = true;
+    rec.lang = 'en-US';
+    return rec;
+  }
+
+  function startSpeakingRecording() {
+    if (isRecording) return;
+    if ('speechSynthesis' in window) {
+      speechSynthesis.cancel();
+    }
+    
+    recognition = initSpeechRecognition();
+    if (!recognition) {
+      alert("Speech Recognition is not fully supported in this browser. Please use Google Chrome, Safari, or Microsoft Edge for microphone practice.");
+      return;
+    }
+    
+    isRecording = true;
+    $('speakingStatusLabel').textContent = 'Listening... Speak now!';
+    $('speakingStatusLabel').style.color = 'var(--success)';
+    $('btnSpeakingMic').style.borderColor = 'var(--success)';
+    $('btnSpeakingMic').style.background = 'var(--success-soft)';
+    $('btnSpeakingMic').style.color = 'var(--success)';
+    $('micPulseRing').style.opacity = '1';
+    $('micPulseRing').style.transform = 'scale(1.15)';
+    
+    var finalTranscript = '';
+    recognition.onresult = function(event) {
+      var interimTranscript = '';
+      for (var i = event.resultNoMatch ? 0 : event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript;
+        } else {
+          interimTranscript += event.results[i][0].transcript;
+        }
+      }
+      var showTxt = finalTranscript || interimTranscript || '...';
+      $('speakingTranscriptionContainer').style.display = 'block';
+      $('speakingSpokenText').textContent = '"' + showTxt + '"';
+    };
+    
+    recognition.onerror = function(event) {
+      console.error('Speech recognition error:', event.error);
+      if (event.error === 'not-allowed') {
+        alert("Microphone permission was denied. Please allow microphone access in your browser settings to practice reading.");
+        stopSpeakingRecording();
+      }
+    };
+    
+    recognition.onend = function() {
+      if (isRecording) {
+        evaluateSpokenText(finalTranscript);
+      }
+    };
+    
+    recognition.start();
+  }
+
+  function stopSpeakingRecording() {
+    if (!isRecording) return;
+    isRecording = false;
+    if (recognition) {
+      try {
+        recognition.stop();
+      } catch(e){}
+    }
+    
+    $('speakingStatusLabel').textContent = 'Processing...';
+    $('speakingStatusLabel').style.color = 'var(--ink-faint)';
+    $('btnSpeakingMic').style.borderColor = 'var(--border)';
+    $('btnSpeakingMic').style.background = 'var(--bg-card)';
+    $('btnSpeakingMic').style.color = 'var(--ink)';
+    $('micPulseRing').style.opacity = '0';
+  }
+
+  function normalizeText(txt) {
+    return txt.toLowerCase()
+              .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"'’]/g, "")
+              .replace(/\s+/g, " ")
+              .trim();
+  }
+
+  function evaluateSpokenText(spokenText) {
+    isRecording = false;
+    
+    if (!spokenText || spokenText.trim() === '') {
+      $('speakingStatusLabel').textContent = 'No voice detected';
+      $('speakingStatusLabel').style.color = 'var(--error)';
+      
+      $('speakingTranscriptionContainer').style.display = 'block';
+      $('speakingSpokenText').textContent = "(No words recognized. Please speak clearly into your microphone)";
+      
+      $('speakingFeedbackBox').style.display = 'block';
+      $('speakingFeedbackBox').style.background = 'var(--error-soft)';
+      $('speakingFeedbackBox').style.border = '1px solid rgba(183,28,28,0.15)';
+      $('speakingFeedbackBox').style.color = 'var(--error)';
+      $('speakingFeedbackBox').innerHTML = 
+        '<div style="font-weight: 800; font-size: 16px; margin-bottom: 4px;">Could not hear you! 🎙️</div>' +
+        '<div style="font-size: 13.5px; opacity: 0.9; line-height: 1.4;">Please make sure your mic is enabled, click the mic button, and read the sentence aloud.</div>';
+      
+      $('speakingActions').style.display = 'flex';
+      $('btnSpeakingRetry').style.display = 'block';
+      $('btnSpeakingNext').style.display = 'none';
+      return;
+    }
+    
+    var targetNorm = normalizeText(currentSpeakingChallengeText);
+    var spokenNorm = normalizeText(spokenText);
+    
+    var targetWords = targetNorm.split(' ');
+    var spokenWords = spokenNorm.split(' ');
+    
+    var spokenWordsCopy = spokenWords.slice();
+    var matchedCount = 0;
+    targetWords.forEach(function(tw) {
+      var idx = spokenWordsCopy.indexOf(tw);
+      if (idx !== -1) {
+        matchedCount++;
+        spokenWordsCopy.splice(idx, 1);
+      }
+    });
+    
+    var baseRatio = targetWords.length > 0 ? (matchedCount / targetWords.length) : 0;
+    
+    var vocabMatchedCount = 0;
+    var vocabDetails = [];
+    currentSpeakingChallengeWords.forEach(function(vw) {
+      var normV = normalizeText(vw);
+      var matched = false;
+      for (var i = 0; i < spokenWords.length; i++) {
+        var sw = spokenWords[i];
+        if (sw === normV || sw === (normV + 's') || sw === (normV + 'ed') || sw === (normV + 'ing') || sw === (normV + 'd') || sw.indexOf(normV) === 0 && Math.abs(sw.length - normV.length) <= 3) {
+          matched = true;
+          break;
+        }
+      }
+      if (matched) {
+        vocabMatchedCount++;
+        vocabDetails.push({ word: vw, passed: true });
+      } else {
+        vocabDetails.push({ word: vw, passed: false });
+      }
+    });
+    
+    var vocabRatio = vocabMatchedCount / 3;
+    var finalScore = (baseRatio * 0.4 + vocabRatio * 0.6) * 10;
+    var roundedScore = Math.round(finalScore * 10) / 10;
+    if (roundedScore < 0.5 && spokenWords.length > 0) roundedScore = 0.5;
+    if (roundedScore > 10) roundedScore = 10;
+    
+    var passed = (roundedScore >= 5);
+    var feedbackBox = $('speakingFeedbackBox');
+    feedbackBox.style.display = 'block';
+    $('speakingActions').style.display = 'flex';
+    
+    var ratingColor = passed ? 'var(--success)' : 'var(--error)';
+    var ratingBg = passed ? 'var(--success-soft)' : 'var(--error-soft)';
+    var ratingBorder = passed ? 'rgba(27,94,32,0.15)' : 'rgba(183,28,28,0.15)';
+    
+    feedbackBox.style.background = ratingBg;
+    feedbackBox.style.border = '1px solid ' + ratingBorder;
+    feedbackBox.style.color = passed ? 'var(--success)' : 'var(--error)';
+    
+    var titleText = passed ? 'Passed! Excellent Reading! 🌟' : 'Repeat Needed 🔄';
+    var iconHtml = passed ? 
+      '<div style="font-size: 20px; display: inline-block; margin-right: 8px;">🎉</div>' : 
+      '<div style="font-size: 20px; display: inline-block; margin-right: 8px;">✍️</div>';
+    
+    var breakdownHtml = '<div style="margin-top: 12px; border-top: 1px solid ' + ratingBorder + '; padding-top: 12px; font-size: 13px; display: flex; flex-direction: column; gap: 6px;">';
+    breakdownHtml += '<div style="font-family: var(--font-mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.8; margin-bottom: 2px;">Vocabulary Pronunciation:</div>';
+    breakdownHtml += '<div style="display: flex; gap: 8px; flex-wrap: wrap;">';
+    vocabDetails.forEach(function(detail) {
+      var badgeBg = detail.passed ? 'rgba(27,94,32,0.12)' : 'rgba(183,28,28,0.12)';
+      var badgeText = detail.passed ? 'rgba(27,94,32,1)' : 'rgba(183,28,28,1)';
+      var checkIcon = detail.passed ? '✓' : '✗';
+      breakdownHtml += '<span style="font-size: 12px; padding: 4px 10px; border-radius: 4px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; background:' + badgeBg + '; color:' + badgeText + ';">' + checkIcon + ' ' + detail.word + '</span>';
+    });
+    breakdownHtml += '</div></div>';
+    
+    feedbackBox.innerHTML = 
+      '<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">' +
+        '<div style="display: flex; align-items: center; font-weight: 800; font-size: 17px;">' + iconHtml + titleText + '</div>' +
+        '<div style="font-family: var(--font-mono); font-size: 16px; font-weight: 800; padding: 4px 12px; border-radius: 20px; border: 1.5px solid ' + ratingColor + '; background: var(--bg-card);">' + roundedScore + ' / 10</div>' +
+      '</div>' +
+      '<p style="font-size: 13.5px; opacity: 0.9; margin: 8px 0 0; line-height: 1.4;">' +
+        (passed ? 
+          'Amazing job! You read ' + matchedCount + ' of ' + targetWords.length + ' words correctly with high accuracy. Let\'s continue to the next text!' : 
+          'You scored ' + roundedScore + '/10. Standard is 5.0/10 to pass. Please try reading the text again, making sure to pronounce the vocabulary words clearly!') +
+      '</p>' +
+      breakdownHtml;
+    
+    if (passed) {
+      Progress.score += 10;
+      saveProgress();
+      
+      $('btnSpeakingNext').style.display = 'block';
+      $('btnSpeakingRetry').style.display = 'none';
+      speakingIndex++;
+    } else {
+      $('btnSpeakingNext').style.display = 'none';
+      $('btnSpeakingRetry').style.display = 'block';
+    }
+    
+    $('speakingScore').textContent = Progress.score;
+  }
+
   function exitGrammarPractice() {
     if('speechSynthesis' in window) speechSynthesis.cancel();
     grammarSession = null;
@@ -5026,6 +5475,37 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     });
 
     bindTap($('cardOxford'), startStudy);
+    bindTap($('cardSpeaking'), function(){
+      showView('speaking');
+      startSpeakingPractice();
+    });
+    bindTap($('btnSpeakingBack'), function(){
+      if (isRecording) {
+        stopSpeakingRecording();
+      }
+      if ('speechSynthesis' in window) {
+        speechSynthesis.cancel();
+      }
+      showView('home');
+    });
+    bindTap($('btnSpeakingMic'), function(){
+      if (isRecording) {
+        stopSpeakingRecording();
+      } else {
+        startSpeakingRecording();
+      }
+    });
+    bindTap($('btnSpeakingNext'), function(){
+      loadNextSpeakingChallenge();
+    });
+    bindTap($('btnSpeakingRetry'), function(){
+      resetSpeakingRecordingState();
+    });
+    bindTap($('btnPlayTargetTTS'), function(){
+      if (currentSpeakingChallengeText) {
+        speakFallback(currentSpeakingChallengeText);
+      }
+    });
     bindTap($('cardGrammar'), function(){ showView('grammar'); });
     bindTap($('btnExit'), function(){
       if(currentAudioEl) currentAudioEl.pause();
