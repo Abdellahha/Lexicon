@@ -958,6 +958,37 @@ body {
           </div>
         </div>
 
+        <!-- AI Level Advisor Box -->
+        <div id="aiLevelAdvisorBox" style="display: none; background: var(--bg-1); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; align-items: flex-start; gap: 14px; margin-top: 4px; transition: all 0.3s ease; position: relative; overflow: hidden;">
+          <!-- Subtle top gradient strip indicating premium AI functionality -->
+          <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #8b5cf6, #6366f1, #3b82f6);"></div>
+          
+          <div style="background: rgba(139, 92, 246, 0.12); color: #8b5cf6; border-radius: 50%; padding: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; border: 1px solid rgba(139, 92, 246, 0.2);">
+            <!-- Elegant AI / Sparkle icon -->
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z"/>
+            </svg>
+          </div>
+          
+          <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+              <span style="font-family: var(--font-display); font-size: 11px; font-weight: 700; color: var(--ink); letter-spacing: 0.05em; text-transform: uppercase;">AI Level Advisor</span>
+              <span id="aiAdvisorBadge" style="font-family: var(--font-mono); font-size: 8px; background: rgba(139, 92, 246, 0.12); color: #8b5cf6; padding: 2px 8px; border-radius: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em;">Observing</span>
+            </div>
+            
+            <div id="aiAdvisorText" style="font-size: 12px; color: var(--ink-dim); line-height: 1.5; font-family: var(--font-sans);">
+              Observing your practice sessions to recommend the perfect English difficulty level transition...
+            </div>
+            
+            <div id="aiAdvisorActionContainer" style="display: none; margin-top: 4px;">
+              <button id="btnAiAdvisorChange" style="font-family: var(--font-mono); font-size: 9px; font-weight: 700; text-transform: uppercase; border: 1px solid rgba(139, 92, 246, 0.4); background: rgba(139, 92, 246, 0.08); color: #8b5cf6; padding: 6px 12px; border-radius: 4px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; outline: none;">
+                <span>Switch to Recommended Level</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Secondary metrics & Curated Pack reference (keeps old elements for backward-compatibility) -->
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
           <div style="display: flex; gap: 20px;">
@@ -1588,6 +1619,152 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     }
   }
 
+  /* ---------------- AI Level Advisor ---------------- */
+  var recommendedLevelGlobal = null;
+
+  async function updateAILevelAdvisor(countTotal) {
+    var box = $('aiLevelAdvisorBox');
+    if (!box) return;
+
+    if (countTotal < 3) {
+      box.style.display = 'none';
+      return;
+    }
+
+    box.style.display = 'flex';
+
+    var cacheKey = "ai_advice_" + (userEnglishLevel || 'all') + "_" + countTotal;
+    var cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        var data = JSON.parse(cached);
+        renderAiAdvice(data);
+        return;
+      } catch(e) {
+        localStorage.removeItem(cacheKey);
+      }
+    }
+
+    // Prepare breakdown
+    var originalWords = JSON.parse(document.getElementById('word-data').textContent);
+    var breakdown = { A1: 0, A2: 0, B1: 0, B2: 0, C1: 0 };
+    for (var w in Progress.learned) {
+      var entry = originalWords.find(function(e){ return e.word.toLowerCase() === w.toLowerCase(); });
+      if (entry && entry.level && breakdown[entry.level] !== undefined) {
+        breakdown[entry.level]++;
+      }
+    }
+    var totals = { A1: 0, A2: 0, B1: 0, B2: 0, C1: 0 };
+    originalWords.forEach(function(w){
+      if (w.level && totals[w.level] !== undefined) {
+        totals[w.level]++;
+      }
+    });
+
+    $('aiAdvisorBadge').textContent = 'Analyzing...';
+    $('aiAdvisorBadge').style.background = 'rgba(139, 92, 246, 0.08)';
+    $('aiAdvisorBadge').style.color = 'var(--ink-dim)';
+
+    try {
+      var response = await fetch('/api/ai-advice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          englishLevel: userEnglishLevel || 'all',
+          totalLearned: countTotal,
+          score: Progress.score || 0,
+          streak: Progress.streak || 0,
+          levelBreakdown: breakdown,
+          levelTotals: totals
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('API response was not ok');
+      }
+
+      var resData = await response.json();
+      localStorage.setItem(cacheKey, JSON.stringify(resData));
+      renderAiAdvice(resData);
+    } catch (err) {
+      console.warn('AI advisor API error, falling back to local heuristic:', err);
+      // Run local resilient fallback
+      var currentLvl = userEnglishLevel || 'A1';
+      var learnedInCurrent = breakdown[currentLvl] || 0;
+      var totalInCurrent = totals[currentLvl] || 50;
+      
+      var advice = `Great job! You've learned ${learnedInCurrent} words in level ${currentLvl}. Keep practicing to expand your English vocabulary!`;
+      var recommendLevelUp = false;
+      var recommendedLevel = null;
+
+      if (currentLvl !== 'all' && currentLvl !== 'C1') {
+        var nextLevels = { 'A1': 'A2', 'A2': 'B1', 'B1': 'B2', 'B2': 'C1' };
+        var next = nextLevels[currentLvl];
+        if (learnedInCurrent >= 15 || (totalInCurrent > 0 && (learnedInCurrent / totalInCurrent) >= 0.5)) {
+          advice = `Fantastic progress! You have mastered ${learnedInCurrent} words in ${currentLvl}. I advise you to challenge yourself and switch to the ${next} level!`;
+          recommendLevelUp = true;
+          recommendedLevel = next;
+        }
+      }
+      var localData = { advice: advice, recommendLevelUp: recommendLevelUp, recommendedLevel: recommendedLevel };
+      renderAiAdvice(localData);
+    }
+  }
+
+  function renderAiAdvice(data) {
+    $('aiAdvisorText').textContent = data.advice || 'Keep learning to build your custom vocabulary path!';
+    
+    var badge = $('aiAdvisorBadge');
+    var actionBtnContainer = $('aiAdvisorActionContainer');
+    
+    if (data.recommendLevelUp && data.recommendedLevel) {
+      recommendedLevelGlobal = data.recommendedLevel;
+      badge.textContent = 'Recommendation Ready';
+      badge.style.background = 'rgba(76, 175, 80, 0.12)';
+      badge.style.color = '#4CAF50';
+      actionBtnContainer.style.display = 'block';
+      $('btnAiAdvisorChange').querySelector('span').textContent = 'Switch to Recommended Level ' + data.recommendedLevel;
+    } else {
+      recommendedLevelGlobal = null;
+      badge.textContent = 'Observation Active';
+      badge.style.background = 'rgba(139, 92, 246, 0.12)';
+      badge.style.color = '#8b5cf6';
+      actionBtnContainer.style.display = 'none';
+    }
+  }
+
+  async function changeUserLevelTo(newLvl) {
+    if (!currentUser || !newLvl) return;
+    
+    try {
+      await update(ref(db, 'users/' + currentUser.uid), {
+        englishLevel: newLvl
+      });
+      
+      userEnglishLevel = newLvl;
+      
+      var originalWords = JSON.parse(document.getElementById('word-data').textContent);
+      if (userEnglishLevel && userEnglishLevel !== 'all') {
+        WORDS = originalWords.filter(function(w){ return w.level === userEnglishLevel; });
+      } else {
+        WORDS = originalWords;
+      }
+      TOTAL = WORDS.length;
+      
+      Progress.index = 0;
+      
+      // Clear cache for fresh observations
+      var cacheKey = "ai_advice_" + newLvl + "_" + learnedCountTotal();
+      localStorage.removeItem(cacheKey);
+      
+      renderHome();
+      showToast("Level changed to " + newLvl + "! Enjoy learning.");
+    } catch (e) {
+      console.error('Failed to save recommended level:', e);
+      showToast('Could not update level. Please try again.');
+    }
+  }
+
   /* ---------------- lightweight toast for background errors ---------------- */
   var toastTimer = null;
   function showToast(text){
@@ -2034,6 +2211,9 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     if(historyCta){
       historyCta.style.display = countTotal > 0 ? '' : 'none';
     }
+    
+    // Call the AI Level Advisor to observe progress and make recommendation
+    updateAILevelAdvisor(countTotal);
   }
 
   /* ---------------- navigation ---------------- */
@@ -2360,46 +2540,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       return;
     }
 
-    // All words are successfully passed! Check for Level Up!
-    var canLevelUp = false;
-    var nextLvl = null;
-    if (userEnglishLevel && userEnglishLevel !== 'all' && Progress.index >= TOTAL) {
-      nextLvl = getNextLevel(userEnglishLevel);
-      if (nextLvl) {
-        canLevelUp = true;
-      }
-    }
-
-    if (canLevelUp) {
-      try {
-        userEnglishLevel = nextLvl;
-        Progress.index = 0;
-        await update(ref(db, 'users/' + currentUser.uid), { englishLevel: nextLvl, progress: Progress });
-        
-        $('matchWrap').innerHTML =
-          '<div class="match-complete">' +
-            '<div class="checkpoint-icon" style="background:rgba(76,175,80,0.1); color:#4CAF50;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2 4 6v6c0 5 3.4 8.5 8 10 4.6-1.5 8-5 8-10V6l-8-4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></div>' +
-            '<div class="checkpoint-title" style="font-size:24px; margin-bottom:8px;">LEVEL UP! 🎉</div>' +
-            '<div class="checkpoint-sub">Incredible! You completed all words for level <b>' + (nextLvl === 'A2' ? 'A1' : nextLvl === 'B1' ? 'A2' : nextLvl === 'B2' ? 'B1' : 'B2') + '</b> and passed the matching practice.<br>You are promoted to <b>Level ' + nextLvl + '</b>!</div>' +
-            '<div class="checkpoint-actions" style="justify-content:center;margin-top:24px;">' +
-              '<button class="btn-solid" id="btnGoHomeLevel">Start Level ' + nextLvl + '</button>' +
-            '</div>' +
-          '</div>';
-        
-        bindTap($('btnGoHomeLevel'), function(){
-          var originalWords = JSON.parse(document.getElementById('word-data').textContent);
-          WORDS = originalWords.filter(function(w){ return w.level === userEnglishLevel; });
-          TOTAL = WORDS.length;
-          
-          renderHome();
-          showView('home');
-        });
-        return;
-      } catch (e) {
-        console.error('Failed to save level up', e);
-      }
-    }
-
+    // All words are successfully passed! Just show the completion screen.
     $('matchWrap').innerHTML =
       '<div class="match-complete">' +
         '<div class="checkpoint-icon" style="margin:0 auto 18px;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
@@ -5776,6 +5917,12 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       if(currentAudioEl) currentAudioEl.pause();
       if('speechSynthesis' in window) speechSynthesis.cancel();
       showView('home');
+    });
+
+    bindTap($('btnAiAdvisorChange'), function() {
+      if (recommendedLevelGlobal) {
+        changeUserLevelTo(recommendedLevelGlobal);
+      }
     });
 
     bindTap($('btnOpenHistory'), function(){ historyShowAll = false; showView('history'); renderHistoryList(); });
