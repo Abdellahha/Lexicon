@@ -712,6 +712,159 @@ body {
   color: var(--ink);
   font-weight: 600;
 }
+
+.clickable-speaking-word {
+  transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+.clickable-speaking-word:hover {
+  opacity: 0.8;
+}
+.tag.clickable-speaking-word:hover {
+  opacity: 1;
+  border-color: var(--ink) !important;
+  background: var(--bg-2) !important;
+}
+
+/* Word Details Modal styles */
+.word-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(28, 28, 28, 0.25);
+  backdrop-filter: blur(4px);
+  z-index: 10000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.word-modal-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.word-modal-card {
+  width: calc(100% - 32px);
+  max-width: 440px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.12);
+  transform: scale(0.95);
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+}
+.word-modal-backdrop.active .word-modal-card {
+  transform: scale(1);
+}
+.word-modal-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border-soft);
+  background: var(--bg-card);
+  color: var(--ink-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+.word-modal-close-btn:hover {
+  background: var(--bg-1);
+  color: var(--ink);
+  border-color: var(--border);
+}
+.word-modal-word {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 28px;
+  color: var(--ink);
+  margin: 0 0 12px 0;
+  padding-right: 32px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.word-modal-badges {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.word-modal-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.word-modal-badge.pos {
+  background: var(--bg-1);
+  color: var(--ink-dim);
+  border: 1px solid var(--border);
+}
+.word-modal-badge.level {
+  background: var(--success-soft);
+  color: var(--success);
+  border: 1px solid rgba(27,94,32,0.15);
+}
+.word-modal-section {
+  margin-top: 18px;
+}
+.word-modal-section-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.word-modal-section-body {
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--ink-dim);
+  margin: 0;
+}
+.word-modal-example {
+  font-style: italic;
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--ink);
+  border-left: 3px solid var(--border);
+  padding-left: 12px;
+  margin: 6px 0 0 0;
+}
+.word-modal-speak-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-1);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  margin-top: 18px;
+}
+.word-modal-speak-btn:hover {
+  background: var(--bg-2);
+  border-color: var(--ink);
+}
 </style>
 </head>
 <body>
@@ -1106,6 +1259,41 @@ body {
   </div>
 
 </div>
+
+  <!-- Word Details Modal -->
+  <div class="word-modal-backdrop" id="wordDetailsModal">
+    <div class="word-modal-card">
+      <button class="word-modal-close-btn" id="wordDetailsModalClose" title="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <h3 class="word-modal-word" id="wordModalName">
+        <!-- Word populated dynamically -->
+      </h3>
+      <div id="wordModalBadges" class="word-modal-badges">
+        <!-- Badges populated dynamically -->
+      </div>
+      
+      <div class="word-modal-section">
+        <div class="word-modal-section-title">Meaning</div>
+        <p class="word-modal-section-body" id="wordModalMeaning"></p>
+      </div>
+
+      <div class="word-modal-section" id="wordModalSynonymsSection">
+        <div class="word-modal-section-title">Synonyms</div>
+        <p class="word-modal-section-body" id="wordModalSynonyms"></p>
+      </div>
+
+      <div class="word-modal-section" id="wordModalExampleSection">
+        <div class="word-modal-section-title">Example</div>
+        <p class="word-modal-example" id="wordModalExample"></p>
+      </div>
+
+      <button class="word-modal-speak-btn" id="wordModalSpeakBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+        Listen to Pronunciation
+      </button>
+    </div>
+  </div>
 
 <script id="word-data" type="application/json">[
   {"word": "abolish", "pos": "v", "level": "C1", "meaning": "To officially end a law, rule, or system.", "synonyms": "stop, end, cancel", "example": "The school wants to abolish homework on weekends."},
@@ -1850,6 +2038,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
 
   /* ---------------- navigation ---------------- */
   function showView(name){
+    hideWordMeaningModal();
     [viewHome, viewStudy, viewHistory, viewMatch, viewGrammar, viewSpeaking].forEach(function(v){ if(v) v.classList.remove('active'); });
     if(name==='home'){
       viewHome.classList.add('active'); renderHome(); scheduleReminder(true);
@@ -5029,6 +5218,59 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     return WORDS.find(function(e){ return e.word.toLowerCase() === word.toLowerCase(); });
   }
 
+  var currentModalWord = null;
+
+  function showWordMeaningModal(word) {
+    var e = findWordEntry(word);
+    if (!e) {
+      console.warn("Word details not found for: " + word);
+      return;
+    }
+    
+    currentModalWord = e;
+    
+    // Populate modal name & badges
+    $('wordModalName').textContent = e.word;
+    
+    var badgesHtml = '';
+    if (e.pos) {
+      badgesHtml += '<span class="word-modal-badge pos">' + e.pos + '</span>';
+    }
+    if (e.level) {
+      badgesHtml += '<span class="word-modal-badge level">' + e.level + '</span>';
+    }
+    $('wordModalBadges').innerHTML = badgesHtml;
+    
+    // Populate meaning
+    $('wordModalMeaning').textContent = e.meaning || 'No definition available.';
+    
+    // Synonyms
+    var synSec = $('wordModalSynonymsSection');
+    if (e.synonyms) {
+      synSec.style.display = 'block';
+      $('wordModalSynonyms').textContent = e.synonyms;
+    } else {
+      synSec.style.display = 'none';
+    }
+    
+    // Example
+    var exSec = $('wordModalExampleSection');
+    if (e.example) {
+      exSec.style.display = 'block';
+      $('wordModalExample').textContent = e.example;
+    } else {
+      exSec.style.display = 'none';
+    }
+    
+    // Show backdrop
+    $('wordDetailsModal').classList.add('active');
+  }
+
+  function hideWordMeaningModal() {
+    $('wordDetailsModal').classList.remove('active');
+    currentModalWord = null;
+  }
+
   function generateTextForWords(w1, w2, w3) {
     var e1 = findWordEntry(w1);
     var e2 = findWordEntry(w2);
@@ -5112,7 +5354,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     currentSpeakingChallengeWords.forEach(function(w){
       var e = findWordEntry(w);
       var pos = e && e.pos ? ' <span style="font-size:9px;opacity:0.6;font-style:italic;">' + e.pos + '</span>' : '';
-      pillsHtml += '<span class="tag" style="background: var(--bg-1); border: 1px solid var(--border); color: var(--ink); padding: 5px 12px; border-radius: 20px; font-weight: 600; font-size: 12px;">' + w + pos + '</span>';
+      pillsHtml += '<span class="tag clickable-speaking-word" data-word="' + w + '" style="background: var(--bg-1); border: 1px solid var(--border); color: var(--ink); padding: 5px 12px; border-radius: 20px; font-weight: 600; font-size: 12px; cursor: pointer;">' + w + pos + '</span>';
     });
     $('speakingWordsPills').innerHTML = pillsHtml;
     
@@ -5120,7 +5362,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     var textToShow = currentSpeakingChallengeText;
     currentSpeakingChallengeWords.forEach(function(w){
       var regex = new RegExp('\\b(' + w + 's?|' + w + 'd?|' + w + 'ed?|' + w + 'ing?)\\b', 'gi');
-      textToShow = textToShow.replace(regex, '<b style="color: var(--success); text-decoration: underline; text-underline-offset: 4px;">$1</b>');
+      textToShow = textToShow.replace(regex, '<b class="clickable-speaking-word" data-word="' + w + '" style="color: var(--success); text-decoration: underline; text-underline-offset: 4px; cursor: pointer;">$1</b>');
     });
     $('speakingTargetText').innerHTML = textToShow;
     
@@ -5504,6 +5746,33 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     bindTap($('btnPlayTargetTTS'), function(){
       if (currentSpeakingChallengeText) {
         speakFallback(currentSpeakingChallengeText);
+      }
+    });
+
+    // Word details modal bindings
+    bindTap($('wordModalSpeakBtn'), function(){
+      if (currentModalWord) {
+        speak(currentModalWord.word, currentModalWord.audio);
+      }
+    });
+    bindTap($('wordDetailsModalClose'), hideWordMeaningModal);
+    bindTap($('wordDetailsModal'), function(ev){
+      if (ev.target === $('wordDetailsModal')) {
+        hideWordMeaningModal();
+      }
+    });
+    bindTap($('speakingTargetText'), function(ev){
+      var target = ev.target.closest('.clickable-speaking-word');
+      if (target) {
+        var word = target.getAttribute('data-word');
+        showWordMeaningModal(word);
+      }
+    });
+    bindTap($('speakingWordsPills'), function(ev){
+      var target = ev.target.closest('.clickable-speaking-word');
+      if (target) {
+        var word = target.getAttribute('data-word');
+        showWordMeaningModal(word);
       }
     });
     bindTap($('cardGrammar'), function(){ showView('grammar'); });
