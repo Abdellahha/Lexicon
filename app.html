@@ -771,7 +771,7 @@ body {
         <!-- Dual Percentage Meters -->
         <div class="dual-meters" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; border-bottom: 1px dashed var(--border); padding-bottom: 16px;">
           <!-- Meter 1: Daily Goal -->
-          <div style="display: flex; align-items: center; gap: 14px;">
+          <div id="dailyGoalMeter" style="display: flex; align-items: center; gap: 14px;">
             <div style="position: relative; width: 68px; height: 68px; display: flex; align-items: center; justify-content: center;">
               <svg class="ring-svg" width="68" height="68" viewBox="0 0 68 68" style="transform: rotate(-90deg); overflow: visible;">
                 <circle class="ring-track" cx="34" cy="34" r="30" style="stroke: var(--bg-1); fill: none; stroke-width: 5;"></circle>
@@ -788,7 +788,7 @@ body {
           </div>
           
           <!-- Meter 2: Entire 5000 Words -->
-          <div style="display: flex; align-items: center; gap: 14px; border-left: 1px solid var(--border); padding-left: 16px;" class="oxford-meter-container">
+          <div id="oxfordMeter" style="display: flex; align-items: center; gap: 14px; border-left: 1px solid var(--border); padding-left: 16px;" class="oxford-meter-container">
             <div style="position: relative; width: 68px; height: 68px; display: flex; align-items: center; justify-content: center;">
               <svg class="ring-svg" width="68" height="68" viewBox="0 0 68 68" style="transform: rotate(-90deg); overflow: visible;">
                 <circle class="ring-track" cx="34" cy="34" r="30" style="stroke: var(--bg-1); fill: none; stroke-width: 5;"></circle>
@@ -884,7 +884,7 @@ body {
       <div class="session-meta">
         <span>Score <b id="studyScore">0</b></span>
         <span>Streak <b id="studyStreak">0</b></span>
-        <span><b id="studyCount">0</b>/50</span>
+        <span><b id="studyCount">0</b>/<span id="studyTotal">10</span></span>
       </div>
     </div>
     <div class="progress-track"><div class="progress-fill" id="studyProgressFill" style="width:0%"></div></div>
@@ -1628,6 +1628,22 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     var wordLevelLabel = userEnglishLevel === 'all' ? getLevelFromWordsCount(countTotal) : 'Level ' + userEnglishLevel;
     $('levelText').textContent = wordLevelLabel + ' (Lvl ' + levelFromScore(Progress.score) + ')';
 
+    // Toggle Daily Goal Meter depending on 12:00 PM threshold
+    var isPastNoon = (new Date().getHours() >= 12);
+    var dailyGoalMeterEl = $('dailyGoalMeter');
+    var oxfordMeterEl = $('oxfordMeter');
+    if (dailyGoalMeterEl && oxfordMeterEl) {
+      if (isPastNoon) {
+        dailyGoalMeterEl.style.display = 'none';
+        oxfordMeterEl.style.setProperty('border-left', 'none', 'important');
+        oxfordMeterEl.style.setProperty('padding-left', '0', 'important');
+      } else {
+        dailyGoalMeterEl.style.display = 'flex';
+        oxfordMeterEl.style.removeProperty('border-left');
+        oxfordMeterEl.style.removeProperty('padding-left');
+      }
+    }
+
     // Update Daily Goal Meter
     var todayCount = wordsLearnedTodayCount();
     var dailyPct = Math.min(100, Math.round((todayCount / userWordsPerDay) * 100));
@@ -2132,8 +2148,13 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   function updateStudyHeader(){
     $('studyScore').textContent = Progress.score;
     $('studyStreak').textContent = Progress.streak;
-    $('studyCount').textContent = learnedCountTotal();
-    $('studyProgressFill').style.width = Math.round((learnedCountForCurrentPack()/TOTAL)*100) + '%';
+    var todayCount = wordsLearnedTodayCount();
+    $('studyCount').textContent = todayCount;
+    if ($('studyTotal')) {
+      $('studyTotal').textContent = userWordsPerDay;
+    }
+    var pct = Math.min(100, Math.round((todayCount / userWordsPerDay) * 100));
+    $('studyProgressFill').style.width = pct + '%';
   }
 
   async function startStudy(){
