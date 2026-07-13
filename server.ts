@@ -299,6 +299,37 @@ Keep your overall feedback friendly, professional, and highly encouraging. Retur
     }
   });
 
+  // API Route to generate a speaking paragraph containing exactly 3 target vocabulary words and following one main idea/topic
+  app.post("/api/generate-speaking-text", async (req, res) => {
+    try {
+      const { words } = req.body;
+      if (!Array.isArray(words) || words.length < 3) {
+        return res.status(400).json({ error: "Please provide exactly 3 words." });
+      }
+
+      const ai = getGeminiClient();
+      if (!ai) {
+        return res.json({ text: null });
+      }
+
+      const prompt = `Write a short, engaging, and highly coherent story or paragraph (exactly 2 to 3 sentences, maximum 45 words) that follows ONE clear main idea or topic and incorporates these three English vocabulary words: "${words[0]}", "${words[1]}", and "${words[2]}".
+The vocabulary words MUST be used in their correct forms (or simple variations like plurals/past tense) and flow completely naturally.
+Do not include any introductory or concluding chatter. Return ONLY the plain text paragraph.`;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-3.5-flash",
+        contents: prompt,
+      });
+
+      const responseText = response.text ? response.text.trim() : "";
+      res.json({ text: responseText });
+
+    } catch (err: any) {
+      console.error("Error generating coherent speaking text:", err);
+      res.json({ text: null });
+    }
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
