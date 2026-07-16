@@ -1427,6 +1427,22 @@ body {
     </div>
   </div>
 
+  <!-- Custom Alert/Confirm Dialog Modal -->
+  <div id="customDialogModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 20000; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 20px;">
+    <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; max-width: 400px; width: 100%; box-shadow: var(--shadow); overflow: hidden;">
+      <div style="padding: 20px 24px 14px; border-bottom: 1px solid var(--border);">
+        <h3 id="customDialogTitle" style="font-family: var(--font-display); font-size: 17px; font-weight: 700; color: var(--ink); margin: 0;">Confirm</h3>
+      </div>
+      <div style="padding: 24px; font-size: 14px; color: var(--ink); line-height: 1.5;" id="customDialogMessage">
+        Are you sure?
+      </div>
+      <div style="padding: 16px 24px; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border); background: var(--bg-1);" id="customDialogActions">
+        <button id="customDialogCancelBtn" class="btn-ghost" style="padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--ink);">Cancel</button>
+        <button id="customDialogConfirmBtn" class="btn-solid" style="padding: 8px 18px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; background: var(--ink); color: var(--bg); border: none;">Confirm</button>
+      </div>
+    </div>
+  </div>
+
 <script id="word-data" type="application/json">[
   {"word": "abolish", "pos": "v", "level": "C1", "meaning": "To officially end a law, rule, or system.", "synonyms": "stop, end, cancel", "example": "The school wants to abolish homework on weekends."},
   {"word": "absorb", "pos": "v", "level": "B2", "meaning": "To take in liquid, gas, or another substance.", "synonyms": "take in, soak up, drink in", "example": "Plants absorb water from the ground."},
@@ -2085,6 +2101,49 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
 
   /* ---------------- dom refs ---------------- */
   var $ = function(id){ return document.getElementById(id); };
+
+  function showCustomConfirm(title, message, onConfirm, onCancel) {
+    $('customDialogTitle').textContent = title;
+    $('customDialogMessage').innerHTML = message;
+    
+    var cancelBtn = $('customDialogCancelBtn');
+    var confirmBtn = $('customDialogConfirmBtn');
+    
+    cancelBtn.style.display = 'block';
+    cancelBtn.textContent = 'Cancel';
+    confirmBtn.textContent = 'Confirm';
+    
+    cancelBtn.onclick = function() {
+      $('customDialogModal').style.display = 'none';
+      if (onCancel) onCancel();
+    };
+    
+    confirmBtn.onclick = function() {
+      $('customDialogModal').style.display = 'none';
+      if (onConfirm) onConfirm();
+    };
+    
+    $('customDialogModal').style.display = 'flex';
+  }
+
+  function showCustomAlert(title, message, onOk) {
+    $('customDialogTitle').textContent = title;
+    $('customDialogMessage').innerHTML = message;
+    
+    var cancelBtn = $('customDialogCancelBtn');
+    var confirmBtn = $('customDialogConfirmBtn');
+    
+    cancelBtn.style.display = 'none';
+    confirmBtn.textContent = 'OK';
+    
+    confirmBtn.onclick = function() {
+      $('customDialogModal').style.display = 'none';
+      if (onOk) onOk();
+    };
+    
+    $('customDialogModal').style.display = 'flex';
+  }
+
   var viewHome = $('view-home'), viewStudy = $('view-study'), viewHistory = $('view-history'), viewMatch = $('view-match'), viewGrammar = $('view-grammar'), viewSpeaking = $('view-speaking');
   var stage = $('stage');
 
@@ -2936,22 +2995,32 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     var remainingInLevel = TOTAL - learnedCountForCurrentPack();
     if (remainingInLevel <= 0) {
       var levelName = (userEnglishLevel === 'all' ? 'All Levels' : 'Level ' + userEnglishLevel);
-      var reset = confirm("You've learned all " + TOTAL + " words for " + levelName + "!\n\nWould you like to reset your progress for " + levelName + " so you can learn and practice them again?");
-      if (reset) {
-        // Reset progress for this level's words
-        for (var i = 0; i < WORDS.length; i++) {
-          delete Progress.learned[WORDS[i].word];
+      showCustomConfirm(
+        "Reset Progress", 
+        "You've learned all " + TOTAL + " words for " + levelName + "!<br><br>Would you like to reset your progress so you can learn and practice them again?", 
+        async function() {
+          // Reset progress for this level's words
+          for (var i = 0; i < WORDS.length; i++) {
+            delete Progress.learned[WORDS[i].word];
+          }
+          Progress.index = 0;
+          await saveProgress();
+          renderHome();
+          showCustomAlert(
+            "Progress Reset", 
+            "Progress for " + levelName + " has been reset! You can now start learning these words again.",
+            function() {
+              startStudy();
+            }
+          );
+        }, 
+        function() {
+          $('settingsLevel').value = userEnglishLevel;
+          $('settingsWordsPerDay').value = userWordsPerDay;
+          $('settingsModal').style.display = 'flex';
         }
-        Progress.index = 0;
-        await saveProgress();
-        renderHome();
-        alert("Progress for " + levelName + " has been reset! You can now start learning these words again.");
-      } else {
-        $('settingsLevel').value = userEnglishLevel;
-        $('settingsWordsPerDay').value = userWordsPerDay;
-        $('settingsModal').style.display = 'flex';
-        return;
-      }
+      );
+      return;
     }
 
     // Check if daily goal already reached
@@ -3310,12 +3379,38 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   }
 
   function renderAllComplete(){
+    var levelName = (userEnglishLevel === 'all' ? 'All Levels' : 'Level ' + userEnglishLevel);
     stage.innerHTML =
       '<div class="checkpoint-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2 4 6v6c0 5 3.4 8.5 8 10 4.6-1.5 8-5 8-10V6l-8-4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></div>' +
       '<div class="checkpoint-title">You\'ve learned all ' + TOTAL + ' words</div>' +
       '<div class="checkpoint-sub">That\'s the full curated list of simple essential words for your level. Incredible work.</div>' +
-      '<div class="checkpoint-actions"><button class="btn-solid" id="btnHome3">Back home</button></div>';
+      '<div class="checkpoint-actions" style="flex-direction:column; gap:12px; width:100%; max-width:280px; margin:0 auto; display:flex;">' +
+        '<button class="btn-solid" id="btnHome3" style="width:100%;">Back home</button>' +
+        '<button class="btn-ghost" id="btnResetProgressDirect" style="width:100%; border:1px solid var(--border); color:var(--ink); font-weight:600; padding:12px 24px; border-radius:8px; cursor:pointer; background:transparent;">Reset ' + levelName + ' Progress</button>' +
+      '</div>';
     bindTap($('btnHome3'), function(){ showView('home'); });
+    bindTap($('btnResetProgressDirect'), function(){
+      showCustomConfirm(
+        "Reset Progress", 
+        "Would you like to reset your progress for " + levelName + " so you can learn and practice them again?", 
+        async function() {
+          // Reset progress for this level's words
+          for (var i = 0; i < WORDS.length; i++) {
+            delete Progress.learned[WORDS[i].word];
+          }
+          Progress.index = 0;
+          await saveProgress();
+          showCustomAlert(
+            "Progress Reset", 
+            "Progress for " + levelName + " has been reset! You can now start learning these words again.",
+            function() {
+              renderHome();
+              showView('home');
+            }
+          );
+        }
+      );
+    });
   }
 
   /* ---------------- grammar module ---------------- */
@@ -6042,7 +6137,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     
     recognition = initSpeechRecognition();
     if (!recognition) {
-      alert("Speech Recognition is not fully supported in this browser. Please use Google Chrome, Safari, or Microsoft Edge for microphone practice.");
+      showCustomAlert("Speech Recognition Unsupported", "Speech Recognition is not fully supported in this browser. Please use Google Chrome, Safari, or Microsoft Edge for microphone practice.");
       return;
     }
     
@@ -6077,7 +6172,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     recognition.onerror = function(event) {
       console.error('Speech recognition error:', event.error);
       if (event.error === 'not-allowed') {
-        alert("Microphone permission was denied. Please allow microphone access in your browser settings to practice reading.");
+        showCustomAlert("Microphone Blocked", "Microphone permission was denied. Please allow microphone access in your browser settings to practice reading.");
         stopSpeakingRecording();
       }
     };
@@ -6497,7 +6592,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
         $('settingsModal').style.display = 'none';
       } catch(e) {
         console.error('Failed to save settings:', e);
-        alert('Could not save settings. Please try again.');
+        showCustomAlert("Error", "Could not save settings. Please try again.");
       } finally {
         saveBtn.disabled = false;
         saveBtn.textContent = 'Save Changes';
@@ -6653,15 +6748,16 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     var userPill = $('userPill');
     if(userText) userText.textContent = currentUser.displayName || currentUser.email.split('@')[0];
     if(userPill) {
-      bindTap(userPill, async function(){
+      bindTap(userPill, function(){
         closeSidebar();
-        if(!confirm('Are you sure you want to log out?')) return;
-        try {
-          await signOut(auth);
-          window.location.href = 'index.html';
-        } catch(e) {
-          console.error('Logout error:', e);
-        }
+        showCustomConfirm("Logout", "Are you sure you want to log out?", async function(){
+          try {
+            await signOut(auth);
+            window.location.href = 'index.html';
+          } catch(e) {
+            console.error('Logout error:', e);
+          }
+        });
       });
     }
 
