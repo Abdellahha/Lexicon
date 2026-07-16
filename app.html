@@ -2965,6 +2965,41 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     practiceMode: false
   };
 
+  function checkAndAutoProgress() {
+    if (!userEnglishLevel || userEnglishLevel === 'all') return false;
+    
+    var remainingInLevel = TOTAL - learnedCountForCurrentPack();
+    if (remainingInLevel <= 0) {
+      var levelSequence = ['A1', 'A2', 'B1', 'B2', 'C1'];
+      var currentIndex = levelSequence.indexOf(userEnglishLevel);
+      if (currentIndex !== -1 && currentIndex < levelSequence.length - 1) {
+        var nextLevel = levelSequence[currentIndex + 1];
+        var completedLevel = userEnglishLevel;
+        
+        userEnglishLevel = nextLevel;
+        
+        if (ALL_WORDS_LIST && ALL_WORDS_LIST.length > 0) {
+          WORDS = ALL_WORDS_LIST.filter(function(w){ return w.level === userEnglishLevel; });
+          TOTAL = WORDS.length;
+          Progress.index = 0;
+        }
+        
+        saveProgress().catch(function(e){ console.error('Failed to save progress', e); });
+        
+        showCustomAlert(
+          "Level Completed! 🎉",
+          "Congratulations! You have successfully learned all words for <b>Level " + completedLevel + "</b>.<br><br>You are now being automatically advanced to <b>Level " + nextLevel + "</b>!",
+          function() {
+            renderHome();
+            showView('home');
+          }
+        );
+        return true;
+      }
+    }
+    return false;
+  }
+
   function nextEntry(){
     if (session.repassingSkipped) {
       if (session.skippedIndex < session.skippedEntries.length) {
@@ -2992,6 +3027,11 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   }
 
   async function startStudy(){
+    // Check for auto-progression first
+    if (checkAndAutoProgress()) {
+      return;
+    }
+
     var remainingInLevel = TOTAL - learnedCountForCurrentPack();
     if (remainingInLevel <= 0) {
       var levelName = (userEnglishLevel === 'all' ? 'All Levels' : 'Level ' + userEnglishLevel);
@@ -3058,6 +3098,10 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       }
       if (!session.repassingSkipped && session.skippedEntries && session.skippedEntries.length > 0) {
         startSkippedReview();
+        return;
+      }
+      // Check for auto-progression first
+      if (checkAndAutoProgress()) {
         return;
       }
       renderAllComplete(); 
