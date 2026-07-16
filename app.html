@@ -1125,6 +1125,26 @@ body {
           <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" style="opacity: 0.3;"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
       </div>
+
+      <!-- French Cards -->
+      <div class="card active-card" id="cardFrenchVocabulary" style="display: none;">
+        <div class="card-index">01 · French Vocab</div>
+        <div class="card-title">Learn French Vocabulary</div>
+        <div class="card-desc">Master French vocabulary from levels A1 to C1, complete with meanings and synonyms in French, and English/Arabic translations.</div>
+        <div class="card-foot">
+          <div class="card-progress-bar"><div class="card-progress-fill" id="frenchVocabProgressFill" style="width:0%"></div></div>
+          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+      <div class="card active-card" id="cardFrenchReading" style="display: none;">
+        <div class="card-index">02 · French Reading</div>
+        <div class="card-title">French Reading Practice</div>
+        <div class="card-desc">Read interactive French texts. Click any word to instantly translate, pronounce, and save learned vocabulary.</div>
+        <div class="card-foot">
+          <div class="card-progress-bar"><div class="card-progress-fill" id="frenchReadingProgressFill" style="width:0%"></div></div>
+          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
     </div>
 
     <!-- Hidden elements for backward compatibility/JS safety -->
@@ -1345,7 +1365,151 @@ body {
     </div>
   </div>
 
-  <!-- Settings Modal Overlay -->
+  <!-- LANGUAGE SELECTION GATE VIEW -->
+  <div class="view" id="view-language-select" style="padding: 40px 16px; text-align: center; max-width: 640px; margin: 0 auto;">
+    <div style="font-family: var(--font-display); font-size: clamp(32px, 8vw, 44px); font-weight: 800; font-style: italic; line-height: 1.1; margin-bottom: 12px; color: var(--ink);">
+      Choose Your Path
+    </div>
+    <p style="font-size: 14px; color: var(--ink-dim); line-height: 1.6; max-width: 480px; margin: 0 auto 36px;">
+      Welcome to Lexicon. To begin, select the language you would like to master today. You can change this selection at any time.
+    </p>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; margin-bottom: 24px;">
+      <!-- English Card -->
+      <button class="recent-row" id="btnSelectEnglish" style="flex-direction: column; align-items: flex-start; gap: 14px; padding: 24px; cursor: pointer; text-align: left; height: 100%; border-radius: 12px; border: 1.5px solid var(--border); background: var(--bg-card); display: flex;">
+        <div style="font-size: 32px; line-height: 1;">🇬🇧</div>
+        <div>
+          <div style="font-family: var(--font-display); font-size: 20px; font-weight: 700; font-style: italic; color: var(--ink);">English Language</div>
+          <p style="font-size: 12px; color: var(--ink-dim); line-height: 1.5; margin: 6px 0 0 0;">
+            Master 5,000+ Oxford words, practice speaking with AI feedback, study grammar in context, and build streaks.
+          </p>
+        </div>
+        <div class="practice-btn" style="width: 100%; text-align: center; margin-top: auto; padding: 10px;">Select English</div>
+      </button>
+
+      <!-- French Card -->
+      <button class="recent-row" id="btnSelectFrench" style="flex-direction: column; align-items: flex-start; gap: 14px; padding: 24px; cursor: pointer; text-align: left; height: 100%; border-radius: 12px; border: 1.5px solid var(--border); background: var(--bg-card); display: flex;">
+        <div style="font-size: 32px; line-height: 1;">🇫🇷</div>
+        <div>
+          <div style="font-family: var(--font-display); font-size: 20px; font-weight: 700; font-style: italic; color: var(--ink);">French Language</div>
+          <p style="font-size: 12px; color: var(--ink-dim); line-height: 1.5; margin: 6px 0 0 0;">
+            Learn French vocabulary A1-C1 with French definitions &amp; synonyms, translate to English or Arabic, and read texts.
+          </p>
+        </div>
+        <div class="practice-btn" style="width: 100%; text-align: center; margin-top: auto; padding: 10px;">Select French</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- FRENCH STUDY VIEW -->
+  <div class="view" id="view-french-study">
+    <div class="study-top">
+      <button class="btn-ghost" id="btnExitFrenchStudy" style="margin: 0; outline: none; border-radius: 6px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Home
+      </button>
+      <div class="session-meta">
+        <span>Score <b id="frenchStudyScore">0</b></span>
+        <span>Streak <b id="frenchStudyStreak">0</b></span>
+        <span>Word <b id="frenchStudyCount">0</b>/<span id="frenchStudyTotal">0</span></span>
+      </div>
+    </div>
+    
+    <!-- Level bar / filter for French study -->
+    <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap;" id="frenchLevelFilterRow">
+      <button class="practice-btn" id="btnFLevelAll" style="padding: 6px 12px; font-size: 11px; background: var(--accent); color: var(--accent-ink);">All Levels</button>
+      <button class="practice-btn" id="btnFLevelA1" style="padding: 6px 12px; font-size: 11px;">A1</button>
+      <button class="practice-btn" id="btnFLevelA2" style="padding: 6px 12px; font-size: 11px;">A2</button>
+      <button class="practice-btn" id="btnFLevelB1" style="padding: 6px 12px; font-size: 11px;">B1</button>
+      <button class="practice-btn" id="btnFLevelB2" style="padding: 6px 12px; font-size: 11px;">B2</button>
+      <button class="practice-btn" id="btnFLevelC1" style="padding: 6px 12px; font-size: 11px;">C1</button>
+    </div>
+
+    <div class="stage" id="frenchStage" style="min-height: auto; align-items: stretch; display: block; max-width: 580px; margin: 0 auto;">
+      <!-- Container for the active French study card -->
+      <div id="frenchCardContainer">
+        <!-- populated dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- FRENCH READING VIEW -->
+  <div class="view" id="view-french-reading">
+    <!-- State 1: Reading Text Selection -->
+    <div id="french-reading-list-screen">
+      <div class="study-top">
+        <button class="btn-ghost" id="btnExitFrenchReading" style="margin: 0; outline: none; border-radius: 6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Home
+        </button>
+      </div>
+      
+      <div class="hero" style="margin-bottom: 24px; display: block; background: transparent; padding: 24px 0 0; text-align: left; box-shadow: none;">
+        <div class="hero-title" style="font-size: clamp(28px, 6vw, 36px); line-height: 1.2; font-family: var(--font-display); font-weight: 800; font-style: italic; margin-bottom: 8px;">French Reading <span style="color: var(--ink-faint); font-weight: 400;">by Texts</span></div>
+        <p class="hero-sub" style="font-size: 14px; color: var(--ink-dim); line-height: 1.6; max-width: 60ch; margin: 0;">Improve your comprehension by reading French passages. Tap any word to instantly reveal its translation in English or Arabic, and build your personalized learned vocabulary.</p>
+      </div>
+
+      <div class="section-label">Available Texts</div>
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px;" id="frenchTextsGrid">
+        <!-- texts dynamically rendered -->
+      </div>
+
+      <!-- Saved Learned Words Section inside Reading dashboard -->
+      <div class="section-label" style="display: flex; justify-content: space-between; align-items: center; margin-top: 32px;">
+        <span>My Learned French Words (<b id="frenchLearnedCountText">0</b>)</span>
+        <button class="practice-btn" id="btnClearFrenchLearned" style="font-size: 10px; padding: 4px 8px; font-family: var(--font-mono); border: 1px solid var(--error); color: var(--error); background: transparent; display: none;">Clear All</button>
+      </div>
+      <div style="margin-top: 12px;" id="frenchLearnedWordsSection">
+        <div id="frenchLearnedWordsList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px;">
+          <!-- Learned words list -->
+        </div>
+        <div id="frenchLearnedWordsEmpty" style="color: var(--ink-faint); font-size: 13px; font-family: var(--font-mono); text-align: center; padding: 24px; background: var(--bg-card); border: 1px dashed var(--border); border-radius: 8px;">
+          No French words saved yet. Click on any word in the reading texts or practice vocabulary to add them here!
+        </div>
+      </div>
+    </div>
+
+    <!-- State 2: Active Reading Passage Screen -->
+    <div id="french-reading-passage-screen" style="display: none;">
+      <div class="study-top" style="margin-bottom: 24px;">
+        <button class="btn-ghost" id="btnExitFrenchReadingPassage" style="margin: 0; outline: none; border-radius: 6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Texts List
+        </button>
+        <div class="session-meta">
+          <span class="tag tag-level" id="readingPassageLevel" style="margin:0;">A1</span>
+        </div>
+      </div>
+
+      <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; box-shadow: var(--shadow); margin-top: 16px;">
+        <h3 id="readingPassageTitle" style="font-family: var(--font-display); font-size: 22px; font-weight: 700; font-style: italic; color: var(--ink); margin: 0 0 16px 0;">Title</h3>
+        
+        <!-- Rendered Text Container -->
+        <div id="readingPassageTextBody" style="font-size: 16px; line-height: 1.8; color: var(--ink); text-align: left; user-select: text; margin-bottom: 24px;">
+          <!-- Words will be individually wrapped in span tags -->
+        </div>
+      </div>
+
+      <!-- Quick Translation Tooltip / Action panel -->
+      <div id="readingTranslationPanel" style="display: none; background: var(--bg-card); border: 1.5px solid var(--border); border-radius: 10px; padding: 18px; margin-top: 16px; text-align: left; position: relative; max-width: 580px; margin-left: auto; margin-right: auto;">
+        <!-- Top neon glowing indicator for selected word translation -->
+        <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent), #eab308);"></div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+          <div style="font-family: var(--font-display); font-size: 18px; font-weight: 700; font-style: italic; color: var(--ink);" id="translationPanelWord">Word</div>
+          <span style="font-family: var(--font-mono); font-size: 10px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.05em;" id="translationPanelPos">French</span>
+        </div>
+        <div style="font-size: 14px; color: var(--ink-dim); line-height: 1.5;" id="translationPanelText">Translation text goes here...</div>
+        
+        <div style="margin-top: 14px; display: flex; gap: 10px;">
+          <button class="btn-solid" id="btnAddWordToLearned" style="margin:0; font-size: 12px; padding: 8px 14px;">Add to Learned Vocabulary</button>
+          <button class="btn-ghost" id="btnPronounceReadingWord" style="margin:0; font-size: 12px; padding: 8px 12px; border: 1px solid var(--border); display: flex; align-items: center; gap: 6px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 9v6h4l5 5V4L9 9H5Z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7" stroke="currentColor" stroke-width="1.8"/></svg>
+            Speak
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
   <div id="settingsModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 20px;">
     <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; max-width: 440px; width: 100%; box-shadow: var(--shadow); overflow: hidden;">
       <div style="padding: 24px 24px 18px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
@@ -1381,6 +1545,26 @@ body {
             <option value="30" style="background: var(--bg-card); color: var(--ink);">30 words per day · Insane</option>
           </select>
           <span style="font-size: 11px; color: var(--ink-dim); margin-top: 6px; display: block; line-height: 1.4;">Sets the number of words to learn in each session before hitting your milestone.</span>
+        </div>
+
+        <!-- Learning Language Selection -->
+        <div>
+          <label style="font-family: var(--font-mono); font-size: 10px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; display: block; margin-bottom: 8px;">Learning Language</label>
+          <select id="settingsLearningLanguage" style="width: 100%; background: var(--bg-1); color: var(--ink); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; font-size: 14px; outline: none;">
+            <option value="english" style="background: var(--bg-card); color: var(--ink);">English Language 🇬🇧</option>
+            <option value="french" style="background: var(--bg-card); color: var(--ink);">French Language 🇫🇷</option>
+          </select>
+          <span style="font-size: 11px; color: var(--ink-dim); margin-top: 6px; display: block; line-height: 1.4;">Switch your active language syllabus between English and French.</span>
+        </div>
+
+        <!-- Translation Language Selection -->
+        <div>
+          <label style="font-family: var(--font-mono); font-size: 10px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; display: block; margin-bottom: 8px;">Translation Language</label>
+          <select id="settingsTranslationLanguage" style="width: 100%; background: var(--bg-1); color: var(--ink); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; font-size: 14px; outline: none;">
+            <option value="english" style="background: var(--bg-card); color: var(--ink);">English · l'anglais 🇬🇧</option>
+            <option value="arabic" style="background: var(--bg-card); color: var(--ink);">Arabic · العربية 🇲🇦</option>
+          </select>
+          <span style="font-size: 11px; color: var(--ink-dim); margin-top: 6px; display: block; line-height: 1.4;">The target language used when revealing translations for French and English words.</span>
         </div>
       </div>
       <div style="padding: 16px 24px 24px 24px; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border); background: var(--bg-1);">
@@ -1632,6 +1816,16 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   var TOTAL = 0;
   var CIRC = 2 * Math.PI * 42; // home ring
 
+  /* ---------------- French data ---------------- */
+  var ALL_FRENCH_WORDS_LIST = [];
+  var FRENCH_TEXTS = [];
+  var filteredFrenchWords = [];
+  var activeFrenchIndex = 0;
+  var currentFrenchLevel = 'all';
+  var isTranslationRevealed = false;
+  var userLearningLanguage = null;
+  var userTranslationLanguage = 'english';
+
   /* ---------------- auth state ---------------- */
   var currentUser = null; // set once Firebase confirms the session
 
@@ -1651,6 +1845,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   /* ---------------- progress state ---------------- */
   var Progress = {
     learned: {},      // word -> {meaning, example, pos, level}
+    frenchLearned: {}, // word -> {meaning, level, pos, translation_en, translation_ar, synonyms, learnedAt}
     index: 0,         // pointer into WORDS for next word to study
     score: 0,
     streak: 0
@@ -1688,11 +1883,14 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     if(!data) return;
     var parsed = data.progress || {};
     Progress.learned = parsed.learned || {};
+    Progress.frenchLearned = parsed.frenchLearned || {};
     Progress.index = parsed.index || 0;
     Progress.score = parsed.score || 0;
     Progress.streak = parsed.streak || 0;
     userEnglishLevel = data.englishLevel || 'all';
     userWordsPerDay = parseInt(data.wordsPerDay, 10) || 10;
+    userLearningLanguage = data.learningLanguage || null;
+    userTranslationLanguage = data.translationLanguage || 'english';
   }
 
   function withTimeout(promise, ms){
@@ -2220,6 +2418,12 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   }
 
   function renderHome(){
+    if (userLearningLanguage === 'french') {
+      switchUIForLanguage();
+      updateSidebarStats();
+      return;
+    }
+    switchUIForLanguage(); // Reset UI styling for English if switched
     var countPack = learnedCountForCurrentPack();
     var countTotal = learnedCountTotal();
     var pct = Math.round((countPack/TOTAL)*100);
@@ -2492,12 +2696,644 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     }
   }
 
+  /* ---------------- French learning logic ---------------- */
+  function switchUIForLanguage() {
+    var lang = userLearningLanguage || 'english';
+    
+    // Toggle home cards visibility
+    var cardOxford = $('cardOxford');
+    var cardSpeaking = $('cardSpeaking');
+    var cardGrammar = $('cardGrammar');
+    var cardFrenchVocabulary = $('cardFrenchVocabulary');
+    var cardFrenchReading = $('cardFrenchReading');
+    
+    var aiLevelAdvisorBox = $('aiLevelAdvisorBox');
+    
+    if (lang === 'french') {
+      if (cardOxford) cardOxford.style.display = 'none';
+      if (cardSpeaking) cardSpeaking.style.display = 'none';
+      if (cardGrammar) cardGrammar.style.display = 'none';
+      if (cardFrenchVocabulary) cardFrenchVocabulary.style.display = 'block';
+      if (cardFrenchReading) cardFrenchReading.style.display = 'block';
+      
+      // Hide AI advisor for French
+      if (aiLevelAdvisorBox) aiLevelAdvisorBox.style.display = 'none';
+      
+      // Update top header description
+      var heroTitle = document.querySelector('#view-home .hero-title');
+      var heroSub = document.querySelector('#view-home .hero-sub');
+      if (heroTitle) heroTitle.innerHTML = 'Build your <span class="accent">French</span>,<br>one word at a time.';
+      if (heroSub) heroSub.textContent = 'Study authentic French vocabulary, explore rich interactive texts, and translate to English or Arabic seamlessly.';
+      
+      // French stats
+      var countFrenchLearned = Object.keys(Progress.frenchLearned || {}).length;
+      $('statLearned').textContent = countFrenchLearned;
+      
+      // Adaptation for Oxford Meter and Oxford progress text to show French Vocab progress
+      var countTotal = countFrenchLearned;
+      var fTotal = ALL_FRENCH_WORDS_LIST.length || 50;
+      var fPct = fTotal > 0 ? ((countTotal / fTotal) * 100) : 0;
+      
+      $('oxfordProgressText').textContent = fPct.toFixed(1) + '% Learned';
+      $('oxfordWordsCount').textContent = countTotal + ' of ' + fTotal + ' words';
+      $('oxfordPctTextInner').textContent = fPct.toFixed(0) + '%';
+      
+      var fDashoffset = 188.5 - (188.5 * Math.min(100, fPct) / 100);
+      $('oxfordRingFill').setAttribute('stroke-dashoffset', fDashoffset);
+      
+      // Progress fill of the "Learn French Vocabulary" card
+      var todayCount = wordsFrenchLearnedTodayCount();
+      var dailyPct = Math.min(100, Math.round((todayCount / userWordsPerDay) * 100));
+      var frenchVocabProgressFill = $('frenchVocabProgressFill');
+      if (frenchVocabProgressFill) {
+        frenchVocabProgressFill.style.width = dailyPct + '%';
+      }
+
+      // Progress fill of French Reading card (percentage of texts read/clicked)
+      var frenchReadingProgressFill = $('frenchReadingProgressFill');
+      if (frenchReadingProgressFill) {
+        var completedTexts = countFrenchLearned >= 5 ? 100 : Math.round((countFrenchLearned / 5) * 100);
+        frenchReadingProgressFill.style.width = completedTexts + '%';
+      }
+
+      // Update Daily Goal Meter
+      var dailyGoalPctEl = $('dailyGoalPct');
+      if (dailyGoalPctEl) dailyGoalPctEl.textContent = dailyPct + '%';
+      
+      var dailyRingFillEl = $('dailyRingFill');
+      if (dailyRingFillEl) {
+        var dashoffset = 188.5 - (188.5 * dailyPct / 100);
+        dailyRingFillEl.setAttribute('stroke-dashoffset', dashoffset);
+      }
+      
+      var dailyGoalProgressTextEl = $('dailyGoalProgressText');
+      if (dailyGoalProgressTextEl) {
+        if (todayCount >= userWordsPerDay) {
+          dailyGoalProgressTextEl.innerHTML = dailyPct + '% <span style="color:var(--success); font-weight:700;">Completed! 🎉</span>';
+        } else {
+          dailyGoalProgressTextEl.textContent = dailyPct + '% Completed';
+        }
+      }
+      
+      var dailyGoalWordsCountEl = $('dailyGoalWordsCount');
+      if (dailyGoalWordsCountEl) {
+        dailyGoalWordsCountEl.textContent = todayCount + ' of ' + userWordsPerDay + ' words today';
+      }
+      
+      // Adapting label for Meter 2
+      var oxfordMeterLabel = document.querySelector('#oxfordMeter div div');
+      if (oxfordMeterLabel) oxfordMeterLabel.textContent = 'French Words (' + fTotal + ')';
+      
+      // Adapting level text
+      $('levelText').textContent = 'French (' + (currentFrenchLevel === 'all' ? 'A1–C1' : currentFrenchLevel) + ')';
+      
+      // Adapting level selector visibility: if in French mode, we can change settings labels
+      var levelLabelEl = document.querySelector('#settingsModal label');
+      if (levelLabelEl) levelLabelEl.textContent = 'French Syllabus Level';
+      
+      // Update footer
+      var footerNoteEl = document.querySelector('#view-home .footer-note');
+      if (footerNoteEl) footerNoteEl.textContent = fTotal + ' French words · A1-C1 syllabus with synonyms and translations';
+    } else {
+      // English mode
+      if (cardOxford) cardOxford.style.display = 'block';
+      if (cardSpeaking) cardSpeaking.style.display = 'block';
+      if (cardGrammar) cardGrammar.style.display = 'block';
+      if (cardFrenchVocabulary) cardFrenchVocabulary.style.display = 'none';
+      if (cardFrenchReading) cardFrenchReading.style.display = 'none';
+      
+      // Show AI advisor for English
+      if (aiLevelAdvisorBox) aiLevelAdvisorBox.style.display = '';
+
+      var heroTitle = document.querySelector('#view-home .hero-title');
+      var heroSub = document.querySelector('#view-home .hero-sub');
+      if (heroTitle) heroTitle.innerHTML = 'Build your <span class="accent">vocabulary</span>,<br>one word at a time.';
+      if (heroSub) heroSub.textContent = 'Listen to clear pronunciation, see each word used in a simple sentence, then prove you\'ve got it by typing it from memory.';
+      
+      var oxfordMeterLabel = document.querySelector('#oxfordMeter div div');
+      if (oxfordMeterLabel) oxfordMeterLabel.textContent = 'Entire 5000 Words';
+      
+      // Update Level option values for English
+      var levelLabelEl = document.querySelector('#settingsModal label');
+      if (levelLabelEl) levelLabelEl.textContent = 'English Level';
+    }
+  }
+
+  function wordsFrenchLearnedTodayCount(){
+    var localDate = new Date();
+    var year = localDate.getFullYear();
+    var month = String(localDate.getMonth() + 1).padStart(2, '0');
+    var day = String(localDate.getDate()).padStart(2, '0');
+    var todayStr = year + '-' + month + '-' + day;
+    var count = 0;
+    var learnedObj = Progress.frenchLearned || {};
+    for (var w in learnedObj) {
+      if (learnedObj[w] && learnedObj[w].learnedAt === todayStr) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  function renderFrenchCard() {
+    var totalWords = filteredFrenchWords.length;
+    $('frenchStudyTotal').textContent = totalWords;
+    $('frenchStudyScore').textContent = Progress.score;
+    $('frenchStudyStreak').textContent = Progress.streak;
+    
+    if (totalWords === 0) {
+      $('frenchCardContainer').innerHTML = 
+        '<div style="text-align: center; padding: 40px 20px;">' +
+          '<h4 style="font-family: var(--font-display); font-size: 20px; font-weight: 700; margin-bottom: 8px;">No Words Available</h4>' +
+          '<p style="color: var(--ink-dim); font-size: 14px; margin-bottom: 16px;">Try changing the French Level filter above to see more words.</p>' +
+        '</div>';
+      $('frenchStudyCount').textContent = '0';
+      return;
+    }
+    
+    if (activeFrenchIndex >= totalWords) {
+      $('frenchCardContainer').innerHTML = 
+        '<div style="text-align: center; padding: 40px 20px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow);">' +
+          '<span style="font-size: 40px; display: block; margin-bottom: 12px;">🎉</span>' +
+          '<h4 style="font-family: var(--font-display); font-size: 22px; font-weight: 700; font-style: italic; margin-bottom: 8px; color: var(--ink);">Syllabus Completed!</h4>' +
+          '<p style="color: var(--ink-dim); font-size: 14px; line-height: 1.5; max-width: 320px; margin: 0 auto 20px;">You have studied all French words in this level! Keep reviewing or try a higher difficulty level.</p>' +
+          '<button class="btn-solid" id="btnRestartFrenchStudy" style="margin: 0 auto;">Restart Level</button>' +
+        '</div>';
+      
+      bindTap($('btnRestartFrenchStudy'), function() {
+        activeFrenchIndex = 0;
+        renderFrenchCard();
+      });
+      $('frenchStudyCount').textContent = totalWords;
+      return;
+    }
+    
+    var w = filteredFrenchWords[activeFrenchIndex];
+    $('frenchStudyCount').textContent = activeFrenchIndex + 1;
+    
+    Progress.frenchLearned = Progress.frenchLearned || {};
+    var wordLearned = !!Progress.frenchLearned[w.word];
+    isTranslationRevealed = false;
+    
+    $('frenchCardContainer').innerHTML = 
+      '<div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 32px 24px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 20px; position: relative;">' +
+        '<div style="display: flex; justify-content: space-between; align-items: center;">' +
+          '<div style="display: flex; gap: 6px;">' +
+            '<span class="tag tag-pos">' + w.pos + '</span>' +
+            '<span class="tag tag-level" style="background: rgba(139, 92, 246, 0.08); color: #8b5cf6; border-color: rgba(139, 92, 246, 0.15);">' + w.level + '</span>' +
+          '</div>' +
+          (wordLearned ? '<span style="font-family: var(--font-mono); font-size: 10px; color: var(--success); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Learned</span>' : '') +
+        '</div>' +
+        
+        '<div style="font-family: var(--font-display); font-size: clamp(32px, 8vw, 44px); font-weight: 800; font-style: italic; color: var(--ink); text-align: center; margin: 10px 0;">' + w.word + '</div>' +
+        
+        '<div style="display: flex; justify-content: center; margin-bottom: 4px;">' +
+          '<button class="practice-btn" id="btnPronounceFrenchWord" style="display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 100px;">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 9v6h4l5 5V4L9 9H5Z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7" stroke="currentColor" stroke-width="1.8"/></svg>' +
+            '<span>Écouter</span>' +
+          '</button>' +
+        '</div>' +
+
+        '<div class="meaning-block" style="text-align: left; margin: 0; padding-top: 16px; border-top: 1px solid var(--border-soft);">' +
+          '<div class="meaning-label" style="color: var(--ink-faint);">Signification</div>' +
+          '<div class="meaning-text" style="font-size: 15px; font-weight: 500; margin-top: 4px;">' + w.meaning + '</div>' +
+          
+          (w.synonyms ? '<div style="margin-top: 12px;"><div class="synonyms-text" style="font-size: 13px;"><span class="synonyms-label" style="font-family: var(--font-mono); font-size: 11px;">Synonymes:</span> ' + w.synonyms + '</div></div>' : '') +
+          
+          '<div class="example-text" style="margin-top: 16px; font-style: italic; font-size: 14px; border-left: 2px solid var(--border); padding-left: 10px;">"' + w.example + '"</div>' +
+        '</div>' +
+
+        '<div id="frenchTranslationRevealBox" style="background: var(--bg-1); border: 1px dashed var(--border); border-radius: 8px; padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s;" class="hover-card">' +
+          '<div id="frenchTranslationPlaceholder" style="font-size: 13px; font-family: var(--font-mono); color: var(--ink-dim); display: flex; align-items: center; justify-content: center; gap: 8px;">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 8 6 6 6-6"/></svg>' +
+            'Click to Reveal Translation (' + (userTranslationLanguage === 'arabic' ? 'العربية' : 'English') + ')' +
+          '</div>' +
+          '<div id="frenchTranslationContent" style="display: none; text-align: left;">' +
+            '<div style="font-family: var(--font-mono); font-size: 10px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Translation (' + (userTranslationLanguage === 'arabic' ? 'العربية' : 'English') + ')</div>' +
+            '<div style="font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--ink);' + (userTranslationLanguage === 'arabic' ? ' text-align: right; direction: rtl;' : '') + '">' + 
+              (userTranslationLanguage === 'arabic' ? w.translation_ar : w.translation_en) + 
+            '</div>' +
+            '<div style="font-size: 13px; color: var(--ink-dim); margin-top: 8px;' + (userTranslationLanguage === 'arabic' ? ' text-align: right; direction: rtl; font-style: normal;' : ' font-style: italic;') + '">' + 
+              '"' + (userTranslationLanguage === 'arabic' ? w.example_translation_ar : w.example_translation_en) + '"' + 
+            '</div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div style="display: flex; gap: 12px; margin-top: 8px; width: 100%;">' +
+          '<button class="practice-btn" id="btnPrevFrench" style="flex: 1; justify-content: center; height: 44px; display: flex; align-items: center;">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>' +
+            '<span style="margin-left: 6px;">Back</span>' +
+          '</button>' +
+          '<button class="btn-solid" id="btnMarkFrenchLearned" style="flex: 2; justify-content: center; height: 44px; margin: 0; display: flex; align-items: center; gap: 6px; background: ' + (wordLearned ? 'var(--bg-1)' : 'var(--success)') + '; color: ' + (wordLearned ? 'var(--ink)' : 'var(--accent-ink)') + '; border: ' + (wordLearned ? '1px solid var(--border)' : 'none') + ';">' +
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>' +
+            '<span>' + (wordLearned ? 'Learned ✓' : 'Mark as Learned') + '</span>' +
+          '</button>' +
+          '<button class="practice-btn" id="btnNextFrench" style="flex: 1; justify-content: center; height: 44px; display: flex; align-items: center;">' +
+            '<span style="margin-right: 6px;">Next</span>' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>' +
+          '</button>' +
+        '</div>' +
+      '</div>';
+
+    bindTap($('frenchTranslationRevealBox'), function() {
+      if (!isTranslationRevealed) {
+        isTranslationRevealed = true;
+        $('frenchTranslationPlaceholder').style.display = 'none';
+        $('frenchTranslationContent').style.display = 'block';
+      }
+    });
+
+    bindTap($('btnPronounceFrenchWord'), function() {
+      speakFrench(w.word);
+    });
+
+    bindTap($('btnPrevFrench'), function() {
+      if (activeFrenchIndex > 0) {
+        activeFrenchIndex--;
+        renderFrenchCard();
+      } else {
+        showToast("This is the first word.");
+      }
+    });
+
+    bindTap($('btnNextFrench'), function() {
+      if (activeFrenchIndex < totalWords - 1) {
+        activeFrenchIndex++;
+        renderFrenchCard();
+      } else {
+        showToast("This is the last word.");
+      }
+    });
+
+    bindTap($('btnMarkFrenchLearned'), async function() {
+      if (wordLearned) {
+        if (activeFrenchIndex < totalWords - 1) {
+          activeFrenchIndex++;
+          renderFrenchCard();
+        } else {
+          showToast("End of level!");
+        }
+        return;
+      }
+      
+      Progress.frenchLearned = Progress.frenchLearned || {};
+      
+      var localDate = new Date();
+      var year = localDate.getFullYear();
+      var month = String(localDate.getMonth() + 1).padStart(2, '0');
+      var day = String(localDate.getDate()).padStart(2, '0');
+      var todayStr = year + '-' + month + '-' + day;
+      
+      Progress.frenchLearned[w.word] = {
+        meaning: w.meaning,
+        level: w.level,
+        pos: w.pos,
+        translation_en: w.translation_en,
+        translation_ar: w.translation_ar,
+        synonyms: w.synonyms,
+        learnedAt: todayStr
+      };
+
+      Progress.score += 10;
+      Progress.streak = Progress.streak || 1;
+      
+      showToast("Bien joué ! Word saved to learned vocabulary (+10 pts)");
+      
+      await saveProgress();
+      
+      if (activeFrenchIndex < totalWords - 1) {
+        activeFrenchIndex++;
+        renderFrenchCard();
+      } else {
+        renderFrenchCard(); // Trigger completed view
+      }
+    });
+  }
+
+  function speakFrench(text) {
+    if (!('speechSynthesis' in window)) return;
+    speechSynthesis.cancel();
+    var utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'fr-FR';
+    
+    var voices = speechSynthesis.getVoices();
+    var frVoice = voices.find(function(v) { return v.lang.startsWith('fr'); });
+    if (frVoice) {
+      utterance.voice = frVoice;
+    }
+    speechSynthesis.speak(utterance);
+  }
+
+  function renderFrenchReadingTextsList() {
+    var countLearned = Object.keys(Progress.frenchLearned || {}).length;
+    $('frenchLearnedCountText').textContent = countLearned;
+    
+    var grid = $('frenchTextsGrid');
+    grid.innerHTML = '';
+    
+    FRENCH_TEXTS.forEach(function(text) {
+      var itemEl = document.createElement('div');
+      itemEl.className = 'recent-row';
+      itemEl.style.cursor = 'pointer';
+      itemEl.style.justifyContent = 'space-between';
+      itemEl.style.alignItems = 'center';
+      itemEl.style.display = 'flex';
+      itemEl.style.padding = '16px 20px';
+      itemEl.style.border = '1px solid var(--border)';
+      itemEl.style.borderRadius = '10px';
+      
+      itemEl.innerHTML = 
+        '<div style="flex: 1; min-width: 0; text-align: left;">' +
+          '<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">' +
+            '<span class="tag tag-level" style="background: rgba(139, 92, 246, 0.08); color: #8b5cf6; border-color: rgba(139, 92, 246, 0.15); font-size: 10px; margin:0;">' + text.level + '</span>' +
+            '<span style="font-family: var(--font-display); font-size: 17px; font-weight: 700; font-style: italic; color: var(--ink);">' + text.title + '</span>' +
+          '</div>' +
+          '<p style="font-size: 12.5px; color: var(--ink-dim); line-height: 1.5; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + text.description + '</p>' +
+        '</div>' +
+        '<div class="practice-btn" style="padding: 6px 12px; font-size: 12px; margin-left: 12px; flex-shrink: 0;">Read</div>';
+        
+      bindTap(itemEl, function() {
+        startReadingPassage(text);
+      });
+      grid.appendChild(itemEl);
+    });
+
+    renderFrenchLearnedWordsList();
+  }
+
+  function renderFrenchLearnedWordsList() {
+    var listEl = $('frenchLearnedWordsList');
+    var emptyEl = $('frenchLearnedWordsEmpty');
+    var clearBtn = $('btnClearFrenchLearned');
+    
+    var learnedObj = Progress.frenchLearned || {};
+    var learnedWords = Object.keys(learnedObj).sort();
+    
+    if (learnedWords.length === 0) {
+      listEl.style.display = 'none';
+      emptyEl.style.display = 'block';
+      if (clearBtn) clearBtn.style.display = 'none';
+      return;
+    }
+    
+    listEl.style.display = 'grid';
+    emptyEl.style.display = 'none';
+    if (clearBtn) clearBtn.style.display = 'block';
+    
+    listEl.innerHTML = '';
+    learnedWords.forEach(function(word) {
+      var item = learnedObj[word];
+      var div = document.createElement('div');
+      div.style.background = 'var(--bg-card)';
+      div.style.border = '1px solid var(--border)';
+      div.style.borderRadius = '8px';
+      div.style.padding = '12px';
+      div.style.textalign = 'left';
+      div.style.position = 'relative';
+      div.style.display = 'flex';
+      div.style.flexDirection = 'column';
+      div.style.justifyContent = 'space-between';
+      div.style.minHeight = '90px';
+      
+      var translation = userTranslationLanguage === 'arabic' ? (item.translation_ar || item.translation_en) : (item.translation_en || item.translation_ar);
+      var isArabic = userTranslationLanguage === 'arabic';
+      
+      div.innerHTML = 
+        '<div style="text-align: left;">' +
+          '<div style="font-family: var(--font-display); font-size: 15px; font-weight: 700; font-style: italic; color: var(--ink); margin-bottom: 2px;">' + word + '</div>' +
+          '<div style="font-size: 11px; color: var(--ink-dim); line-height:1.4;' + (isArabic ? ' text-align: right; direction: rtl;' : '') + '">' + translation + '</div>' +
+        '</div>' +
+        '<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">' +
+          '<button class="btn-ghost" title="Pronounce" style="padding: 2px; font-size: 10px; color: var(--ink-faint); cursor: pointer; background:transparent; border:none; display:flex; align-items:center;">' +
+            '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 9v6h4l5 5V4L9 9H5Z" fill="currentColor"/></svg>' +
+          '</button>' +
+          '<button class="btn-ghost" title="Delete" style="padding: 2px; font-size: 10px; color: var(--error); cursor: pointer; background:transparent; border:none; display:flex; align-items:center;">' +
+            '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>' +
+          '</button>' +
+        '</div>';
+        
+      var audioBtn = div.querySelector('button[title="Pronounce"]');
+      if (audioBtn) {
+        bindTap(audioBtn, function(e) {
+          e.stopPropagation();
+          speakFrench(word);
+        });
+      }
+      
+      var deleteBtn = div.querySelector('button[title="Delete"]');
+      if (deleteBtn) {
+        bindTap(deleteBtn, function(e) {
+          e.stopPropagation();
+          showCustomConfirm("Delete Saved Word", 'Are you sure you want to remove "' + word + '" from your saved vocabulary?', async function() {
+            delete Progress.frenchLearned[word];
+            await saveProgress();
+            renderFrenchReadingTextsList();
+          });
+        });
+      }
+      
+      listEl.appendChild(div);
+    });
+  }
+
+  function startReadingPassage(text) {
+    $('french-reading-list-screen').style.display = 'none';
+    $('french-reading-passage-screen').style.display = 'block';
+    
+    $('readingPassageTitle').textContent = text.title;
+    $('readingPassageLevel').textContent = text.level;
+    
+    $('readingTranslationPanel').style.display = 'none';
+    
+    var container = $('readingPassageTextBody');
+    container.innerHTML = '';
+    
+    var rawContent = text.content;
+    var tokens = rawContent.split(/(\s+)/);
+    
+    tokens.forEach(function(token) {
+      if (/^\s+$/.test(token)) {
+        container.appendChild(document.createTextNode(token));
+      } else {
+        var matchWord = token.match(/([a-zA-ZÀ-ÿ\u00C0-\u017F]+'?[a-zA-ZÀ-ÿ\u00C0-\u017F]*)/);
+        
+        if (matchWord) {
+          var cleanWord = matchWord[0].toLowerCase();
+          
+          var span = document.createElement('span');
+          span.className = 'clickable-word';
+          span.textContent = token;
+          span.style.cursor = 'pointer';
+          span.style.padding = '0 2px';
+          span.style.borderRadius = '3px';
+          span.style.transition = 'all 0.2s';
+          span.style.display = 'inline-block';
+          
+          span.onmouseenter = function() {
+            span.style.background = 'var(--accent-soft)';
+            span.style.color = 'var(--accent)';
+          };
+          span.onmouseleave = function() {
+            span.style.background = 'none';
+            span.style.color = 'inherit';
+          };
+          
+          bindTap(span, function() {
+            showWordTranslation(cleanWord, token, text.glossary);
+          });
+          
+          container.appendChild(span);
+        } else {
+          container.appendChild(document.createTextNode(token));
+        }
+      }
+    });
+  }
+
+  async function showWordTranslation(cleanWord, displayText, glossary) {
+    var panel = $('readingTranslationPanel');
+    panel.style.display = 'block';
+    
+    var cleanDisplay = displayText.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']/g, "");
+    $('translationPanelWord').textContent = cleanDisplay;
+    $('translationPanelPos').textContent = 'French';
+    
+    var transLang = userTranslationLanguage === 'arabic' ? 'ar' : 'en';
+    var isAr = (transLang === 'ar');
+    
+    var wordData = glossary[cleanWord];
+    if (!wordData) {
+      var keys = Object.keys(glossary);
+      for (var i = 0; i < keys.length; i++) {
+        var k = keys[i];
+        if (cleanWord.startsWith(k) || k.startsWith(cleanWord)) {
+          wordData = glossary[k];
+          break;
+        }
+      }
+    }
+    
+    if (wordData && wordData[transLang]) {
+      $('translationPanelText').textContent = wordData[transLang];
+      if (isAr) {
+        $('translationPanelText').style.textAlign = 'right';
+        $('translationPanelText').style.direction = 'rtl';
+      } else {
+        $('translationPanelText').style.textAlign = 'left';
+        $('translationPanelText').style.direction = 'ltr';
+      }
+    } else {
+      $('translationPanelText').innerHTML = '<span class="loading-dot" style="display:inline-block; margin-right:6px;"><span></span><span></span><span></span></span> Translating…';
+      $('translationPanelText').style.textAlign = 'left';
+      $('translationPanelText').style.direction = 'ltr';
+      
+      try {
+        var res = await fetch('/api/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text: cleanDisplay,
+            from: 'fr',
+            to: transLang
+          })
+        });
+        if (res.ok) {
+          var data = await res.json();
+          $('translationPanelText').textContent = data.translation;
+          if (isAr) {
+            $('translationPanelText').style.textAlign = 'right';
+            $('translationPanelText').style.direction = 'rtl';
+          }
+        } else {
+          throw new Error('HTTP ' + res.status);
+        }
+      } catch (err) {
+        console.error("Dynamic translation failed:", err);
+        $('translationPanelText').textContent = isAr ? "عذراً، فشلت الترجمة." : "Sorry, translation failed.";
+      }
+    }
+    
+    var addBtn = $('btnAddWordToLearned');
+    Progress.frenchLearned = Progress.frenchLearned || {};
+    var alreadySaved = !!Progress.frenchLearned[cleanDisplay.toLowerCase()];
+    
+    if (alreadySaved) {
+      addBtn.textContent = 'Saved in Vocabulary ✓';
+      addBtn.style.background = 'var(--bg-1)';
+      addBtn.style.color = 'var(--ink)';
+      addBtn.style.border = '1px solid var(--border)';
+      addBtn.disabled = true;
+    } else {
+      addBtn.textContent = 'Add to Learned Vocabulary';
+      addBtn.style.background = 'var(--success)';
+      addBtn.style.color = 'var(--accent-ink)';
+      addBtn.style.border = 'none';
+      addBtn.disabled = false;
+    }
+    
+    addBtn.onclick = async function() {
+      addBtn.disabled = true;
+      addBtn.textContent = 'Saving…';
+      
+      var translationText = $('translationPanelText').textContent;
+      
+      var localDate = new Date();
+      var year = localDate.getFullYear();
+      var month = String(localDate.getMonth() + 1).padStart(2, '0');
+      var day = String(localDate.getDate()).padStart(2, '0');
+      var todayStr = year + '-' + month + '-' + day;
+      
+      Progress.frenchLearned[cleanDisplay.toLowerCase()] = {
+        meaning: 'Learned from reading passage: "' + $('readingPassageTitle').textContent + '"',
+        level: $('readingPassageLevel').textContent,
+        pos: 'Reading',
+        translation_en: isAr ? '' : translationText,
+        translation_ar: isAr ? translationText : '',
+        synonyms: '',
+        learnedAt: todayStr
+      };
+      
+      Progress.score += 5;
+      await saveProgress();
+      
+      addBtn.textContent = 'Saved in Vocabulary ✓';
+      addBtn.style.background = 'var(--bg-1)';
+      addBtn.style.color = 'var(--ink)';
+      addBtn.style.border = '1px solid var(--border)';
+      
+      showToast('"' + cleanDisplay + '" added to your French learned vocabulary (+5 pts)!');
+      
+      var countLearned = Object.keys(Progress.frenchLearned || {}).length;
+      $('frenchLearnedCountText').textContent = countLearned;
+    };
+    
+    bindTap($('btnPronounceReadingWord'), function() {
+      speakFrench(cleanDisplay);
+    });
+  }
+
   /* ---------------- navigation ---------------- */
   function showView(name){
     hideWordMeaningModal();
-    [viewHome, viewStudy, viewHistory, viewMatch, viewGrammar, viewSpeaking].forEach(function(v){ if(v) v.classList.remove('active'); });
+    [viewHome, viewStudy, viewHistory, viewMatch, viewGrammar, viewSpeaking, $('view-language-select'), $('view-french-study'), $('view-french-reading')].forEach(function(v){ if(v) v.classList.remove('active'); });
     if(name==='home'){
       viewHome.classList.add('active'); renderHome(); scheduleReminder(true);
+    } else if(name==='language-select') {
+      var selectView = $('view-language-select');
+      if (selectView) selectView.classList.add('active');
+      reminderLoop = false; dismissReminder();
+    } else if(name==='french-study') {
+      var studyView = $('view-french-study');
+      if (studyView) studyView.classList.add('active');
+      reminderLoop = false; dismissReminder();
+      renderFrenchCard();
+    } else if(name==='french-reading') {
+      var readingView = $('view-french-reading');
+      if (readingView) readingView.classList.add('active');
+      reminderLoop = false; dismissReminder();
+      $('french-reading-passage-screen').style.display = 'none';
+      $('french-reading-list-screen').style.display = 'block';
+      renderFrenchReadingTextsList();
     } else if(name==='history'){
       viewHistory.classList.add('active'); reminderLoop = false; dismissReminder();
       var sInput = $('historySearchInput');
@@ -6577,8 +7413,37 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     }
     TOTAL = WORDS.length;
 
-    renderHome();
-    showView('home');
+    // Load French vocabulary from API
+    try {
+      var resF = await fetch('/api/french-words');
+      if (resF.ok) {
+        ALL_FRENCH_WORDS_LIST = await resF.json();
+      }
+    } catch (err) {
+      console.warn('Failed to fetch French vocabulary from API:', err);
+    }
+
+    // Load French reading texts from API
+    try {
+      var resT = await fetch('/api/french-texts');
+      if (resT.ok) {
+        FRENCH_TEXTS = await resT.json();
+      }
+    } catch (err) {
+      console.warn('Failed to fetch French reading texts from API:', err);
+    }
+
+    // Filter French words based on currentFrenchLevel
+    filterFrenchVocabulary();
+
+    // Route based on whether learningLanguage preference is set
+    if (!userLearningLanguage) {
+      showView('language-select');
+    } else {
+      renderHome();
+      showView('home');
+    }
+
     initReminderSwipe();
     initThemeHandlers();
     startNewDayChecker();
@@ -6587,6 +7452,8 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       closeSidebar();
       $('settingsLevel').value = userEnglishLevel || 'A1';
       $('settingsWordsPerDay').value = String(userWordsPerDay || 10);
+      $('settingsLearningLanguage').value = userLearningLanguage || 'english';
+      $('settingsTranslationLanguage').value = userTranslationLanguage || 'english';
       $('settingsModal').style.display = 'flex';
     });
 
@@ -6607,6 +7474,8 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     bindTap($('saveSettingsBtn'), async function(){
       var newLvl = $('settingsLevel').value;
       var newWordsPerDay = parseInt($('settingsWordsPerDay').value, 10) || 10;
+      var newLang = $('settingsLearningLanguage').value;
+      var newTrans = $('settingsTranslationLanguage').value;
       
       var saveBtn = $('saveSettingsBtn');
       saveBtn.disabled = true;
@@ -6615,11 +7484,15 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       try {
         await update(ref(db, 'users/' + currentUser.uid), {
           englishLevel: newLvl,
-          wordsPerDay: newWordsPerDay
+          wordsPerDay: newWordsPerDay,
+          learningLanguage: newLang,
+          translationLanguage: newTrans
         });
         
         userEnglishLevel = newLvl;
         userWordsPerDay = newWordsPerDay;
+        userLearningLanguage = newLang;
+        userTranslationLanguage = newTrans;
         
         var originalWords = ALL_WORDS_LIST;
         if (userEnglishLevel && userEnglishLevel !== 'all') {
@@ -6629,7 +7502,9 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
         }
         TOTAL = WORDS.length;
         
-        Progress.index = 0;
+        if (userLearningLanguage === 'english') {
+          Progress.index = 0;
+        }
         
         renderHome();
         
@@ -6641,6 +7516,115 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
         saveBtn.disabled = false;
         saveBtn.textContent = 'Save Changes';
       }
+    });
+
+    /* ---------------- French event bindings ---------------- */
+    // Onboarding Gate: Language select choices
+    bindTap($('btnSelectEnglish'), async function() {
+      var btn = $('btnSelectEnglish');
+      btn.disabled = true;
+      try {
+        await update(ref(db, 'users/' + currentUser.uid), {
+          learningLanguage: 'english'
+        });
+        userLearningLanguage = 'english';
+        renderHome();
+        showView('home');
+      } catch (err) {
+        console.error("Failed to select English:", err);
+        showToast("Error updating preference. Please try again.");
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    bindTap($('btnSelectFrench'), async function() {
+      var btn = $('btnSelectFrench');
+      btn.disabled = true;
+      try {
+        await update(ref(db, 'users/' + currentUser.uid), {
+          learningLanguage: 'french'
+        });
+        userLearningLanguage = 'french';
+        renderHome();
+        showView('home');
+      } catch (err) {
+        console.error("Failed to select French:", err);
+        showToast("Error updating preference. Please try again.");
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    // French home cards redirecting to French sections
+    bindTap($('cardFrenchVocabulary'), function() {
+      showView('french-study');
+    });
+
+    bindTap($('cardFrenchReading'), function() {
+      showView('french-reading');
+    });
+
+    // French vocabulary levels filters
+    var frenchLevelBtns = {
+      'all': $('btnFLevelAll'),
+      'A1': $('btnFLevelA1'),
+      'A2': $('btnFLevelA2'),
+      'B1': $('btnFLevelB1'),
+      'B2': $('btnFLevelB2'),
+      'C1': $('btnFLevelC1')
+    };
+
+    function updateFrenchLevelButtons(activeLvl) {
+      for (var lvl in frenchLevelBtns) {
+        var btn = frenchLevelBtns[lvl];
+        if (btn) {
+          if (lvl === activeLvl) {
+            btn.style.background = 'var(--accent)';
+            btn.style.color = 'var(--accent-ink)';
+          } else {
+            btn.style.background = '';
+            btn.style.color = '';
+          }
+        }
+      }
+    }
+
+    Object.keys(frenchLevelBtns).forEach(function(lvl) {
+      var btn = frenchLevelBtns[lvl];
+      if (btn) {
+        bindTap(btn, function() {
+          currentFrenchLevel = lvl;
+          activeFrenchIndex = 0;
+          updateFrenchLevelButtons(lvl);
+          filterFrenchVocabulary();
+          renderFrenchCard();
+        });
+      }
+    });
+
+    // Exit views handlers
+    bindTap($('btnExitFrenchStudy'), function() {
+      showView('home');
+    });
+
+    bindTap($('btnExitFrenchReading'), function() {
+      showView('home');
+    });
+
+    bindTap($('btnExitFrenchReadingPassage'), function() {
+      $('french-reading-passage-screen').style.display = 'none';
+      $('french-reading-list-screen').style.display = 'block';
+      renderFrenchReadingTextsList();
+    });
+
+    bindTap($('btnClearFrenchLearned'), function() {
+      showCustomConfirm("Clear Saved French Words", "Are you sure you want to permanently clear all your saved French vocabulary words?", async function() {
+        Progress.frenchLearned = {};
+        await saveProgress();
+        renderFrenchReadingTextsList();
+        showToast("Cleared French learned words.");
+      });
     });
 
     bindTap($('cardOxford'), startStudy);
@@ -6818,6 +7802,14 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     var appRoot = $('appRoot');
     if(gate) gate.style.display = 'none';
     if(appRoot) appRoot.style.display = '';
+  }
+
+  function filterFrenchVocabulary() {
+    if (currentFrenchLevel && currentFrenchLevel !== 'all') {
+      filteredFrenchWords = ALL_FRENCH_WORDS_LIST.filter(function(w){ return w.level === currentFrenchLevel; });
+    } else {
+      filteredFrenchWords = ALL_FRENCH_WORDS_LIST;
+    }
   }
 
   function boot(){

@@ -54,6 +54,82 @@ async function startServer() {
     }
   });
 
+  // API Route to fetch French vocabulary words database
+  app.get("/api/french-words", (req, res) => {
+    try {
+      const filePath = path.join(process.cwd(), "french-words-data.json");
+      if (fs.existsSync(filePath)) {
+        const content = fs.readFileSync(filePath, "utf8");
+        return res.json(JSON.parse(content));
+      }
+      return res.status(404).json({ error: "French vocabulary file not found" });
+    } catch (err) {
+      console.error("Error reading French words database:", err);
+      return res.status(500).json({ error: "Failed to load French vocabulary" });
+    }
+  });
+
+  // API Route to fetch French reading texts database
+  app.get("/api/french-texts", (req, res) => {
+    try {
+      const filePath = path.join(process.cwd(), "french-texts.json");
+      if (fs.existsSync(filePath)) {
+        const content = fs.readFileSync(filePath, "utf8");
+        return res.json(JSON.parse(content));
+      }
+      return res.status(404).json({ error: "French texts file not found" });
+    } catch (err) {
+      console.error("Error reading French texts database:", err);
+      return res.status(500).json({ error: "Failed to load French texts" });
+    }
+  });
+
+  // API Route to translate text using Gemini (or simple dictionary fallback)
+  app.post("/api/translate", async (req, res) => {
+    try {
+      const { text, from, to } = req.body;
+      if (!text) {
+        return res.status(400).json({ error: "Text is required" });
+      }
+
+      const ai = getGeminiClient();
+      if (!ai) {
+        const cleanText = text.toLowerCase().trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']/g, "");
+        const dictionary: Record<string, Record<string, string>> = {
+          "bonjour": { "en": "hello / good morning", "ar": "مرحبا" },
+          "reconcile": { "ar": "يصالح / يسوي", "fr": "réconcilier" },
+          "abolish": { "ar": "يلغي / ينهي", "fr": "abolir" },
+          "absorb": { "ar": "يمتص", "fr": "absorber" }
+        };
+
+        const result = dictionary[cleanText];
+        let translation = "";
+        if (result && result[to]) {
+          translation = result[to];
+        } else {
+          translation = `[Translation of "${text}" to ${to === "ar" ? "Arabic" : "English"}]`;
+        }
+        return res.json({ translation });
+      }
+
+      const targetLang = to === "ar" ? "Arabic" : to === "fr" ? "French" : "English";
+      const prompt = `You are a professional dictionary and translator. Translate the word or text "${text}" from ${from || "auto-detect"} to ${targetLang}. 
+If it is a single word, provide a clean, concise, 1-3 word translation. 
+Respond with ONLY the plain translated text. Do not write any explanations or punctuation.`;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-3.5-flash",
+        contents: prompt,
+      });
+
+      const translation = response.text ? response.text.trim() : `[Translation: ${text}]`;
+      res.json({ translation });
+    } catch (err) {
+      console.error("Error translating text with Gemini:", err);
+      res.json({ translation: `[Translation failed]` });
+    }
+  });
+
   // API Route for AI level advisor
   app.post("/api/ai-advice", async (req, res) => {
     try {
