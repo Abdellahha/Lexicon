@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
@@ -36,6 +37,21 @@ async function startServer() {
   // API Route for health check
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok" });
+  });
+
+  // API Route to fetch vocabulary words database
+  app.get("/api/words", (req, res) => {
+    try {
+      const filePath = path.join(process.cwd(), "words-data.json");
+      if (fs.existsSync(filePath)) {
+        const content = fs.readFileSync(filePath, "utf8");
+        return res.json(JSON.parse(content));
+      }
+      return res.status(404).json({ error: "Vocabulary file not found" });
+    } catch (err) {
+      console.error("Error reading words database:", err);
+      return res.status(500).json({ error: "Failed to load vocabulary" });
+    }
   });
 
   // API Route for AI level advisor
@@ -150,7 +166,10 @@ Generate your response in the specified JSON schema. Keep the advice friendly, c
         let matchedCount = 0;
         const spokenWordsCopy = [...spokenWords];
         targetWords.forEach((tw) => {
-          const idx = spokenWordsCopy.indexOf(tw);
+          // Lenient matching for sentence structure words
+          const idx = spokenWordsCopy.findIndex(sw => 
+            sw === tw || sw.startsWith(tw) || tw.startsWith(sw)
+          );
           if (idx !== -1) {
             matchedCount++;
             spokenWordsCopy.splice(idx, 1);
@@ -166,7 +185,19 @@ Generate your response in the specified JSON schema. Keep the advice friendly, c
           const normV = vw.toLowerCase().trim();
           let matched = false;
           for (const sw of spokenWords) {
-            if (sw === normV || sw === (normV + 's') || sw === (normV + 'ed') || sw === (normV + 'ing') || sw === (normV + 'd') || (sw.startsWith(normV) && Math.abs(sw.length - normV.length) <= 3)) {
+            const cleanSw = sw.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']/g, "");
+            if (cleanSw === normV || 
+                cleanSw === (normV + 's') || 
+                cleanSw === (normV + 'es') || 
+                cleanSw === (normV + 'ed') || 
+                cleanSw === (normV + 'ing') || 
+                cleanSw === (normV + 'd') || 
+                cleanSw === (normV + 'ly') || 
+                (cleanSw.startsWith(normV) && Math.abs(cleanSw.length - normV.length) <= 3) ||
+                (normV.startsWith(cleanSw) && Math.abs(cleanSw.length - normV.length) <= 3) ||
+                (normV.includes(cleanSw) && cleanSw.length >= 4) ||
+                (cleanSw.includes(normV) && normV.length >= 4)
+            ) {
               matched = true;
               break;
             }
@@ -189,6 +220,10 @@ Generate your response in the specified JSON schema. Keep the advice friendly, c
         const finalScore = (baseRatio * 0.4 + vocabRatio * 0.6) * 10;
         let roundedScore = Math.round(finalScore * 10) / 10;
         if (roundedScore < 0.5 && spokenWords.length > 0) roundedScore = 0.5;
+        // Make fallback scoring generally very lenient
+        if (vocabRatio >= 0.6) {
+          roundedScore = Math.max(roundedScore, 8.5);
+        }
         if (roundedScore > 10) roundedScore = 10;
         const passed = roundedScore >= 5;
 
@@ -206,27 +241,22 @@ Generate your response in the specified JSON schema. Keep the advice friendly, c
         });
       }
 
-      const prompt = `Evaluate an English language learner's speech output for pronunciation and spelling mistakes.
+      const prompt = `Evaluate an English language learner's speech output.
 The user was asked to read the following target sentence aloud:
 "${targetText}"
 
 The target vocabulary words of focus are: ${JSON.stringify(targetWordsArray)}
 
-The speech-to-text engine transcribed their spoken output as:
+The speech-to-text (STT) engine transcribed their spoken output as:
 "${spokenText}"
 
-Evaluate their pronunciation, accuracy, and completeness:
-1. Provide a final score out of 10 (decimal, e.g., 8.5) reflecting their reading performance. A score of 5.0 or above is a Pass.
-2. For any words that were omitted, mispronounced, or misspelled (such as substituting similar sounding words), include them in the "corrections" list. For each correction, show:
-   - "word": the expected vocabulary word
-   - "expected": the correct spelling/word
-   - "spoken": what they actually said/what was transcribed instead
-   - "status": either "mispronounced" or "omitted"
-   - "phonetic": the standard IPA phonetic spelling of the word (e.g., "/ˌkoʊ.ɪnˈsaɪd/")
-   - "guidance": extremely clear, actionable, friendly advice on how to physically pronounce this word (e.g., "Break it into co-in-cide. Focus on the final 'syde' sound.")
-3. In "targetWordsPhonetics", list all the targeted words (${JSON.stringify(targetWordsArray)}) and provide their standard IPA phonetic spellings (e.g., "/ˌkoʊ.ɪnˈsaɪd/").
-
-Keep your overall feedback friendly, professional, and highly encouraging. Return the output in the specified JSON schema format.`;
+CRITICAL EVALUATION RULES:
+1. VOICE RECOGNITION ENGINES ARE IMPERFECT AND UNRELIABLE. You MUST be extremely encouraging, highly lenient, and generous.
+2. DO NOT PENALIZE minor transcription errors, accents, small filler words, or homophone/near-homophone substitutions (such as "except" for "accept", "their" for "there", "and" for "an", "is" vs "it's", plurals vs singulars, etc.).
+3. If the transcribed text is a reasonable acoustic or semantic representation of the target sentence, or if the target words are present in any recognizable phonetic or tense/plural/past form, treat them as fully correct and give a high score (8.5 to 10.0).
+4. Only mark a target word in "corrections" as "mispronounced" or "omitted" if it is completely missing and there is no phonetic equivalent, rhyme, or attempt whatsoever in the transcribed output.
+5. Provide a final score out of 10 (decimal, e.g., 9.5) reflecting their reading performance. A score of 5.0 or above is a Pass.
+6. Return the output in the specified JSON schema format.`;
 
       const response = await ai.models.generateContent({
         model: "gemini-3.5-flash",

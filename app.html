@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="3a558d2181b04dcd18315ec30857a672119264b4" content="3a558d2181b04dcd18315ec30857a672119264b4" />
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Lexicon — Learn Simple English</title>
@@ -1175,7 +1174,7 @@ body {
     <!-- SEARCH & MATCH MEANINGS CONTAINER -->
     <div style="padding: 0 16px; margin: 24px 0 16px; display: flex; align-items: center; gap: 12px; width: 100%; box-sizing: border-box;" id="historySearchContainer">
       <!-- Search Input Wrapper -->
-      <div id="searchWrapper" style="position: relative; display: flex; align-items: center; background: var(--bg-card); border: 1.5px solid var(--border); border-radius: 8px; padding: 2px 8px; flex: 1.5; min-width: 0; transition: flex-grow 0.3s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.2s;">
+      <div id="searchWrapper" style="position: relative; display: flex; align-items: center; background: var(--bg-card); border: 1.5px solid var(--border); border-radius: 8px; padding: 0 12px; height: 44px; flex: 1.5; min-width: 0; box-sizing: border-box; transition: flex-grow 0.3s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.2s;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ink-dim)" stroke-width="2" style="margin-right: 8px; flex-shrink: 0;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         <input type="text" id="historySearchInput" placeholder="Search first, second, or third letters..." style="width: 100%; border: none; background: transparent; color: var(--ink); font-size: 14px; padding: 8px 4px; outline: none; font-family: var(--font-sans);" />
         <button id="btnClearHistorySearch" style="background: none; border: none; color: var(--ink-dim); cursor: pointer; display: none; padding: 4px; flex-shrink: 0;">
@@ -1184,8 +1183,8 @@ body {
       </div>
 
       <!-- Match Meanings Button Wrapper -->
-      <div id="matchWrapper" style="flex: 1.5; min-width: 0; transition: flex-grow 0.3s cubic-bezier(0.22, 1, 0.36, 1);">
-        <button class="btn-solid" id="btnStartMatch" style="width: 100%; justify-content: center; margin: 0; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 8px;">
+      <div id="matchWrapper" style="flex: 1.5; min-width: 0; height: 44px; box-sizing: border-box; transition: flex-grow 0.3s cubic-bezier(0.22, 1, 0.36, 1);">
+        <button class="btn-solid" id="btnStartMatch" style="width: 100%; height: 100%; justify-content: center; margin: 0; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; display: flex; align-items: center; gap: 8px; padding: 0 16px; border-radius: 8px; box-sizing: border-box;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 3 4 4 4-4"/><path d="m16 21-4-4-4 4"/><path d="M12 7v10"/></svg>
           Match meanings
         </button>
@@ -1612,9 +1611,9 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   }, { passive:false });
 
   /* ---------------- data ---------------- */
-  var WORDS = JSON.parse(document.getElementById('word-data').textContent);
-  var ALL_WORDS_LIST = WORDS.slice();
-  var TOTAL = WORDS.length;
+  var WORDS = [];
+  var ALL_WORDS_LIST = [];
+  var TOTAL = 0;
   var CIRC = 2 * Math.PI * 42; // home ring
 
   /* ---------------- auth state ---------------- */
@@ -1748,7 +1747,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     }
 
     // Prepare breakdown
-    var originalWords = JSON.parse(document.getElementById('word-data').textContent);
+    var originalWords = ALL_WORDS_LIST;
     var breakdown = { A1: 0, A2: 0, B1: 0, B2: 0, C1: 0 };
     for (var w in Progress.learned) {
       var entry = originalWords.find(function(e){ return e.word.toLowerCase() === w.toLowerCase(); });
@@ -1845,7 +1844,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       
       userEnglishLevel = newLvl;
       
-      var originalWords = JSON.parse(document.getElementById('word-data').textContent);
+      var originalWords = ALL_WORDS_LIST;
       if (userEnglishLevel && userEnglishLevel !== 'all') {
         WORDS = originalWords.filter(function(w){ return w.level === userEnglishLevel; });
       } else {
@@ -2936,11 +2935,23 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   async function startStudy(){
     var remainingInLevel = TOTAL - learnedCountForCurrentPack();
     if (remainingInLevel <= 0) {
-      alert("You've learned all " + TOTAL + " words for level " + (userEnglishLevel === 'all' ? 'All Levels' : userEnglishLevel) + "!\n\nUse the Preferences menu (click your level pill at the top) to change your level or increase your goal!");
-      $('settingsLevel').value = userEnglishLevel;
-      $('settingsWordsPerDay').value = userWordsPerDay;
-      $('settingsModal').style.display = 'flex';
-      return;
+      var levelName = (userEnglishLevel === 'all' ? 'All Levels' : 'Level ' + userEnglishLevel);
+      var reset = confirm("You've learned all " + TOTAL + " words for " + levelName + "!\n\nWould you like to reset your progress for " + levelName + " so you can learn and practice them again?");
+      if (reset) {
+        // Reset progress for this level's words
+        for (var i = 0; i < WORDS.length; i++) {
+          delete Progress.learned[WORDS[i].word];
+        }
+        Progress.index = 0;
+        await saveProgress();
+        renderHome();
+        alert("Progress for " + levelName + " has been reset! You can now start learning these words again.");
+      } else {
+        $('settingsLevel').value = userEnglishLevel;
+        $('settingsWordsPerDay').value = userWordsPerDay;
+        $('settingsModal').style.display = 'flex';
+        return;
+      }
     }
 
     // Check if daily goal already reached
@@ -5688,7 +5699,95 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
 
   /* ---------------- SPEAKING PRACTICE MODULE ---------------- */
   function findWordEntry(word) {
-    return WORDS.find(function(e){ return e.word.toLowerCase() === word.toLowerCase(); });
+    if (!word) return null;
+    var w = word.toLowerCase().trim();
+    
+    // 1. Direct match
+    var e = ALL_WORDS_LIST.find(function(item){ return item.word.toLowerCase() === w; });
+    if (e) return e;
+
+    // 2. Try removing common suffixes: 's', 'es', 'ed', 'ing', 'ly', 'd'
+    var suffixes = ['s', 'es', 'ed', 'ing', 'ly', 'd'];
+    for (var i = 0; i < suffixes.length; i++) {
+      var suf = suffixes[i];
+      if (w.endsWith(suf) && w.length > suf.length + 1) {
+        var base = w.slice(0, -suf.length);
+        var found = ALL_WORDS_LIST.find(function(item){ return item.word.toLowerCase() === base; });
+        if (found) return found;
+      }
+    }
+    
+    // 3. Try doubling consonant or y->i variations, e.g. 'worried' -> 'worry', 'running' -> 'run'
+    if (w.endsWith('ies')) {
+      var base = w.slice(0, -3) + 'y';
+      var found = ALL_WORDS_LIST.find(function(item){ return item.word.toLowerCase() === base; });
+      if (found) return found;
+    }
+    if (w.endsWith('ied')) {
+      var base = w.slice(0, -3) + 'y';
+      var found = ALL_WORDS_LIST.find(function(item){ return item.word.toLowerCase() === base; });
+      if (found) return found;
+    }
+    if (w.endsWith('ing')) {
+      // double consonant, e.g., running -> run
+      var base = w.slice(0, -3);
+      if (base.length > 3 && base[base.length - 1] === base[base.length - 2]) {
+        var base2 = base.slice(0, -1);
+        var found = ALL_WORDS_LIST.find(function(item){ return item.word.toLowerCase() === base2; });
+        if (found) return found;
+      }
+    }
+    
+    // 4. Try fuzzy substring / startsWith match
+    var foundFuzzy = ALL_WORDS_LIST.find(function(item) {
+      var iw = item.word.toLowerCase();
+      return w.startsWith(iw) && (w.length - iw.length <= 4);
+    });
+    if (foundFuzzy) return foundFuzzy;
+
+    return null;
+  }
+
+  function tokenizeAndMakeClickable(text, targetWords) {
+    if (!text) return '';
+    var wordsLower = (targetWords || []).map(function(w) { return w.toLowerCase().trim(); });
+    
+    var tokens = text.split(/([a-zA-Z0-9'’-]+)/);
+    
+    var html = '';
+    tokens.forEach(function(token) {
+      if (/^[a-zA-Z0-9'’-]+$/.test(token)) {
+        var tokenLower = token.toLowerCase();
+        var matchedTarget = null;
+        for (var i = 0; i < wordsLower.length; i++) {
+          var target = wordsLower[i];
+          if (tokenLower === target || 
+              tokenLower === target + 's' || 
+              tokenLower === target + 'es' || 
+              tokenLower === target + 'd' || 
+              tokenLower === target + 'ed' || 
+              tokenLower === target + 'ing') {
+            matchedTarget = target;
+            break;
+          }
+        }
+        
+        if (matchedTarget) {
+          html += '<b class="clickable-speaking-word" data-word="' + matchedTarget + '" style="color: var(--success); text-decoration: underline; text-underline-offset: 4px; cursor: pointer; font-weight: 700;" title="Target Word: Click to see definition">' + token + '</b>';
+        } else {
+          var entry = findWordEntry(tokenLower);
+          if (entry) {
+            html += '<span class="clickable-speaking-word" data-word="' + entry.word + '" style="cursor: pointer; border-bottom: 1.5px dashed var(--border); transition: color 0.15s, border-color 0.15s;" title="Click to see definition">' + token + '</span>';
+          } else {
+            html += token;
+          }
+        }
+      } else {
+        html += token;
+      }
+    });
+    
+    return html;
   }
 
   var currentModalWord = null;
@@ -5876,12 +5975,8 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       );
     }
     
-    // Highlight target words in the text to read
-    var textToShow = currentSpeakingChallengeText;
-    currentSpeakingChallengeWords.forEach(function(w){
-      var regex = new RegExp('\\b(' + w + 's?|' + w + 'd?|' + w + 'ed?|' + w + 'ing?)\\b', 'gi');
-      textToShow = textToShow.replace(regex, '<b class="clickable-speaking-word" data-word="' + w + '" style="color: var(--success); text-decoration: underline; text-underline-offset: 4px; cursor: pointer;">$1</b>');
-    });
+    // Highlight target and matching words in the text to read
+    var textToShow = tokenizeAndMakeClickable(currentSpeakingChallengeText, currentSpeakingChallengeWords);
     $('speakingTargetText').innerHTML = textToShow;
     
     // Reset state
@@ -6317,8 +6412,25 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       return;
     }
 
+    // Load ALL_WORDS_LIST dynamically from API
+    try {
+      var res = await fetch('/api/words');
+      if (res.ok) {
+        ALL_WORDS_LIST = await res.json();
+      } else {
+        throw new Error('HTTP ' + res.status);
+      }
+    } catch (err) {
+      console.warn('Failed to fetch vocabulary from API, falling back to embedded words:', err);
+      try {
+        ALL_WORDS_LIST = JSON.parse(document.getElementById('word-data').textContent);
+      } catch (ex) {
+        ALL_WORDS_LIST = [];
+      }
+    }
+
     // Filter WORDS based on user's englishLevel
-    var originalWords = JSON.parse(document.getElementById('word-data').textContent);
+    var originalWords = ALL_WORDS_LIST;
     if (userEnglishLevel && userEnglishLevel !== 'all') {
       WORDS = originalWords.filter(function(w){ return w.level === userEnglishLevel; });
     } else {
@@ -6370,7 +6482,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
         userEnglishLevel = newLvl;
         userWordsPerDay = newWordsPerDay;
         
-        var originalWords = JSON.parse(document.getElementById('word-data').textContent);
+        var originalWords = ALL_WORDS_LIST;
         if (userEnglishLevel && userEnglishLevel !== 'all') {
           WORDS = originalWords.filter(function(w){ return w.level === userEnglishLevel; });
         } else {
