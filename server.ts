@@ -436,25 +436,292 @@ Do not include any introductory or concluding chatter. Return ONLY the plain tex
     }
   });
 
+  interface GrammarQuestionFallback {
+    sentence: string;
+    options: string[];
+    answer: number;
+    tip_en: string;
+    tip_ar: string;
+    fullSentence: string;
+    translation_en: string;
+    translation_ar: string;
+    alignedFrench: string;
+    alignedTranslation_en: string;
+    alignedTranslation_ar: string;
+  }
+
+  const FALLBACKS: Record<string, GrammarQuestionFallback[]> = {
+    etre_avoir: [
+      {
+        sentence: "Je ________ très content de te parler ce soir. (I am very happy to talk to you tonight.)",
+        options: ["suis", "es", "est", "sommes"],
+        answer: 0,
+        tip_en: "Use **suis** (present tense of *être*) with **Je** to say 'I am'.",
+        tip_ar: "استخدم **suis** (صيغة المضارع للفعل être) مع **Je** للقول 'أنا أكون'.",
+        fullSentence: "Je suis très content de te parler ce soir.",
+        translation_en: "I am very happy to talk to you tonight.",
+        translation_ar: "أنا متعب جدا الليلة.",
+        alignedFrench: "<subject>Je</subject> <verb>suis</verb> <adverb>très</adverb> <adjective>content</adjective> <adverb>de te parler ce soir</adverb>.",
+        alignedTranslation_en: "<subject>I</subject> <verb>am</verb> <adverb>very</adverb> <adjective>happy</adjective> <adverb>to talk to you tonight</adverb>.",
+        alignedTranslation_ar: "<subject>أنا</subject> <adjective>سعيد</adjective> <adverb>جداً</adverb> <adverb>بالتحدث إليك الليلة</adverb>."
+      },
+      {
+        sentence: "Est-ce que tu ________ le temps de m'aider ? (Do you have time to help me?)",
+        options: ["as", "ai", "a", "avez"],
+        answer: 0,
+        tip_en: "Use **as** (present tense of *avoir*) with **tu** to say 'you have'.",
+        tip_ar: "استخدم **as** (صيغة المضارع للفعل avoir) مع **tu** للقول 'أنت تملك'.",
+        fullSentence: "Est-ce que tu as le temps de m'aider ?",
+        translation_en: "Do you have time to help me?",
+        translation_ar: "هل لديك وقت لمساعدتي؟",
+        alignedFrench: "Est-ce que <subject>tu</subject> <verb>as</verb> <object>le temps</object> <adverb>de m'aider</adverb> ?",
+        alignedTranslation_en: "Do <subject>you</subject> <verb>have</verb> <object>time</object> <adverb>to help me</adverb>?",
+        alignedTranslation_ar: "هل <verb>تملك</verb> <subject>أنت</subject> <object>الوقت</object> <adverb>لمساعدتي</adverb>؟"
+      },
+      {
+        sentence: "Nous ________ faim, on va au restaurant ? (We are hungry, shall we go to the restaurant?)",
+        options: ["avons", "sommes", "ont", "avez"],
+        answer: 0,
+        tip_en: "In French, hunger is expressed using *avoir faim* (literally: to have hunger). Use **avons** with **Nous**.",
+        tip_ar: "في الفرنسية، يتم التعبير عن الجوع باستخدام *avoir faim* (حرفياً: تملك الجوع). استخدم **avons** مع **Nous**.",
+        fullSentence: "Nous avons faim, on va au restaurant ?",
+        translation_en: "We are hungry, shall we go to the restaurant?",
+        translation_ar: "نحن جائعون، هل نذهب إلى المطعم؟",
+        alignedFrench: "<subject>Nous</subject> <verb>avons</verb> <object>faim</object>, <subject>on</subject> <verb>va</verb> <adverb>au restaurant</adverb> ?",
+        alignedTranslation_en: "<subject>We</subject> <verb>are</verb> <adjective>hungry</adjective>, <subject>shall we</subject> <verb>go</verb> <adverb>to the restaurant</adverb>?",
+        alignedTranslation_ar: "<subject>نحن</subject> <verb>نشعر</verb> <adverb>بالجوع</adverb>، هل <verb>نذهب</verb> إلى <object>المطعم</object>؟"
+      },
+      {
+        sentence: "Ils ________ fatigués après le travail. (They are tired after work.)",
+        options: ["sont", "ont", "sommes", "êtes"],
+        answer: 0,
+        tip_en: "Use **sont** (present tense of *être*) with **Ils** to say 'they are'.",
+        tip_ar: "استخدم **sont** مع **Ils** للقول 'هم يكونون'.",
+        fullSentence: "Ils sont fatigués après le travail.",
+        translation_en: "They are tired after work.",
+        translation_ar: "هم متعبون بعد العمل.",
+        alignedFrench: "<subject>Ils</subject> <verb>sont</verb> <adjective>fatigués</adjective> <adverb>après le travail</adverb>.",
+        alignedTranslation_en: "<subject>They</subject> <verb>are</verb> <adjective>tired</adjective> <adverb>after work</adverb>.",
+        alignedTranslation_ar: "<subject>هم</subject> <adjective>متعبون</adjective> <adverb>بعد العمل</adverb>."
+      },
+      {
+        sentence: "Elle ________ une nouvelle voiture rouge. (She has a new red car.)",
+        options: ["a", "est", "as", "ont"],
+        answer: 0,
+        tip_en: "Use **a** (present tense of *avoir*) with **Elle** to say 'she has'.",
+        tip_ar: "استخدم **a** مع **Elle** للقول 'هي تملك'.",
+        fullSentence: "Elle a une nouvelle voiture rouge.",
+        translation_en: "She has a new red car.",
+        translation_ar: "هي تملك سيارة حمراء جديدة.",
+        alignedFrench: "<subject>Elle</subject> <verb>a</verb> <object>une nouvelle voiture rouge</object>.",
+        alignedTranslation_en: "<subject>She</subject> <verb>has</verb> <object>a new red car</object>.",
+        alignedTranslation_ar: "<subject>هي</subject> <verb>تملك</verb> <object>سيارة حمراء جديدة</object>."
+      }
+    ],
+    est_ce_que: [
+      {
+        sentence: "________ tu es disponible demain pour un café ? (Are you available tomorrow for a coffee?)",
+        options: ["Est-ce que", "Qu'est-ce que", "Où est", "Qui est"],
+        answer: 0,
+        tip_en: "Prefix **Est-ce que** to any statement to turn it into a yes/no question.",
+        tip_ar: "أضف **Est-ce que** قبل أي جملة لتحويلها إلى سؤال نعم/لا.",
+        fullSentence: "Est-ce que tu es disponible demain pour un café ?",
+        translation_en: "Are you available tomorrow for a coffee?",
+        translation_ar: "هل أنت متاح غداً لتناول القهوة؟",
+        alignedFrench: "Est-ce que <subject>tu</subject> <verb>es</verb> <adjective>disponible</adjective> <adverb>demain pour un café</adverb> ?",
+        alignedTranslation_en: "Are <subject>you</subject> <adjective>available</adjective> <adverb>tomorrow for a coffee</adverb>?",
+        alignedTranslation_ar: "هل <subject>أنت</subject> <adjective>متاح</adjective> <adverb>غداً لتناول القهوة</adverb>؟"
+      },
+      {
+        sentence: "Où ________ tu habites à Paris ? (Where do you live in Paris?)",
+        options: ["est-ce que", "qu'est-ce que", "est-ce qu'", "est-ce"],
+        answer: 0,
+        tip_en: "Place **est-ce que** right after interrogative words like *Où* (Where) or *Quand* (When).",
+        tip_ar: "ضع **est-ce que** مباشرة بعد أدوات الاستفهام مثل *Où* (أين) أو *Quand* (متى).",
+        fullSentence: "Où est-ce que tu habites à Paris ?",
+        translation_en: "Where do you live in Paris?",
+        translation_ar: "أين تعيش في باريس؟",
+        alignedFrench: "<adverb>Où</adverb> est-ce que <subject>tu</subject> <verb>habites</verb> <adverb>à Paris</adverb> ?",
+        alignedTranslation_en: "<adverb>Where</adverb> do <subject>you</subject> <verb>live</verb> <adverb>in Paris</adverb>?",
+        alignedTranslation_ar: "<adverb>أين</adverb> <verb>تعيش</verb> <subject>أنت</subject> <adverb>في باريس</adverb>؟"
+      },
+      {
+        sentence: "Qu'________ il veut manger ce soir ? (What does he want to eat tonight?)",
+        options: ["est-ce qu'", "est-ce que", "est-ce", "est-ce qui"],
+        answer: 0,
+        tip_en: "Use **qu'** (contraction of *que*) before words starting with a vowel like *il*.",
+        tip_ar: "استخدم **qu'** (اختصار لـ *que*) قبل الكلمات التي تبدأ بحرف متحرك مثل *il*.",
+        fullSentence: "Qu'est-ce qu'il veut manger ce soir ?",
+        translation_en: "What does he want to eat tonight?",
+        translation_ar: "ماذا يريد أن يأكل الليلة؟",
+        alignedFrench: "Qu'est-ce qu'<subject>il</subject> <verb>veut manger</verb> <adverb>ce soir</adverb> ?",
+        alignedTranslation_en: "What does <subject>he</subject> <verb>want to eat</verb> <adverb>tonight</adverb>?",
+        alignedTranslation_ar: "ماذا <verb>يريد</verb> <subject>هو</subject> أن <verb>يأكل</verb> <adverb>الليلة</adverb>؟"
+      },
+      {
+        sentence: "Pourquoi ________ tu ne réponds pas à mes messages ? (Why are you not answering my messages?)",
+        options: ["est-ce que", "qu'est-ce que", "est-ce qu'", "est-ce"],
+        answer: 0,
+        tip_en: "Place **est-ce que** after interrogative words like *Pourquoi* (Why).",
+        tip_ar: "ضع **est-ce que** بعد كلمات الاستفهام مثل *Pourquoi* (لماذا).",
+        fullSentence: "Pourquoi est-ce que tu ne réponds pas à mes messages ?",
+        translation_en: "Why are you not answering my messages?",
+        translation_ar: "لماذا لا تجيب على رسائلي؟",
+        alignedFrench: "<adverb>Pourquoi</adverb> est-ce que <subject>tu</subject> ne <verb>réponds pas</verb> <object>à mes messages</object> ?",
+        alignedTranslation_en: "<adverb>Why</adverb> are <subject>you</subject> not <verb>answering</verb> <object>my messages</object>?",
+        alignedTranslation_ar: "<adverb>لماذا</adverb> لا <verb>تجيب</verb> <subject>أنت</subject> على <object>رسائلي</object>؟"
+      }
+    ],
+    futur_proche: [
+      {
+        sentence: "Je ________ t'envoyer un message quand j'arrive. (I am going to send you a message when I arrive.)",
+        options: ["vais", "vas", "va", "allez"],
+        answer: 0,
+        tip_en: "Use the conjugated form of *aller* + infinitive. For *Je*, use **vais**.",
+        tip_ar: "استخدم الصيغة المصرفة للفعل *aller* مع المصدر. مع *Je*، استخدم **vais**.",
+        fullSentence: "Je vais t'envoyer un message quand j'arrive.",
+        translation_en: "I am going to send you a message when I arrive.",
+        translation_ar: "سأرسل لك رسالة عندما أصل.",
+        alignedFrench: "<subject>Je</subject> <verb>vais t'envoyer</verb> <object>un message</object> <adverb>quand j'arrive</adverb>.",
+        alignedTranslation_en: "<subject>I</subject> <verb>am going to send you</verb> <object>a message</object> <adverb>when I arrive</adverb>.",
+        alignedTranslation_ar: "<subject>أنا</subject> <verb>سأرسل</verb> <object>لك رسالة</object> <adverb>عندما أصل</adverb>."
+      },
+      {
+        sentence: "Qu'est-ce que vous ________ faire ce week-end ? (What are you going to do this weekend?)",
+        options: ["allez", "vont", "allons", "vas"],
+        answer: 0,
+        tip_en: "The conjugated form of *aller* matching the pronoun *vous* is **allez**.",
+        tip_ar: "الصيغة المصرفة للفعل *aller* التي تطابق الضمير *vous* هي **allez**.",
+        fullSentence: "Qu'est-ce que vous allez faire ce week-end ?",
+        translation_en: "What are you going to do this weekend?",
+        translation_ar: "ماذا ستفعل في نهاية هذا الأسبوع؟",
+        alignedFrench: "Qu'est-ce que <subject>vous</subject> <verb>allez faire</verb> <adverb>ce week-end</adverb> ?",
+        alignedTranslation_en: "What are <subject>you</subject> <verb>going to do</verb> <adverb>this weekend</adverb>?",
+        alignedTranslation_ar: "ماذا <verb>ستفعل</verb> <subject>أنت</subject> <adverb>في نهاية هذا الأسبوع</adverb>؟"
+      },
+      {
+        sentence: "On va ________ un verre ce soir, tu viens ? (We are going to have a drink tonight, coming?)",
+        options: ["prendre", "prends", "prenons", "prenez"],
+        answer: 0,
+        tip_en: "In the Futur Proche (aller + verb), the second verb is always in its unchanged **infinitive** form: **prendre**.",
+        tip_ar: "في زمن المستقبل القريب (aller + الفعل)، يكون الفعل الثاني دائماً في صيغته المصدرية غير المتغيرة: **prendre**.",
+        fullSentence: "On va prendre un verre ce soir, tu viens ?",
+        translation_en: "We are going to have a drink tonight, coming?",
+        translation_ar: "سوف نتناول مشروباً الليلة، هل ستأتي؟",
+        alignedFrench: "<subject>On</subject> <verb>va prendre</verb> <object>un verre</object> <adverb>ce soir</adverb> ?",
+        alignedTranslation_en: "<subject>We</subject> <verb>are going to have</verb> <object>a drink</object> <adverb>tonight</adverb>?",
+        alignedTranslation_ar: "<subject>نحن</subject> <verb>سوف نتناول</verb> <object>مشروباً</object> <adverb>الليلة</adverb>؟"
+      },
+      {
+        sentence: "Nous allons ________ un film intéressant ce soir. (We are going to watch an interesting movie tonight.)",
+        options: ["regarder", "regarde", "regardons", "regardez"],
+        answer: 0,
+        tip_en: "In the Futur Proche, the action verb must be in the **infinitive** form: **regarder**.",
+        tip_ar: "في المستقبل القريب، يجب أن يكون فعل الحركة في الصيغة المصدرية: **regarder**.",
+        fullSentence: "Nous allons regarder un film intéressant ce soir.",
+        translation_en: "We are going to watch an interesting movie tonight.",
+        translation_ar: "سوف نشاهد فيلماً شيقاً الليلة.",
+        alignedFrench: "<subject>Nous</subject> <verb>allons regarder</verb> <object>un film intéressant</object> <adverb>ce soir</adverb>.",
+        alignedTranslation_en: "<subject>We</subject> <verb>are going to watch</verb> <object>an interesting movie</object> <adverb>tonight</adverb>.",
+        alignedTranslation_ar: "<subject>نحن</subject> <verb>سوف نشاهد</verb> <object>فيلماً شيقاً</object> <adverb>الليلة</adverb>."
+      }
+    ],
+    negation: [
+      {
+        sentence: "Je ________ comprends pas ce message. (I don't understand this message.)",
+        options: ["ne", "pas", "non", "rien"],
+        answer: 0,
+        tip_en: "The classic negation wraps around the verb like a sandwich: **ne** + verb + **pas**.",
+        tip_ar: "النفى الكلاسيكي يحيط بالفعل مثل الساندوتش: **ne** + الفعل + **pas**.",
+        fullSentence: "Je ne comprends pas ce message.",
+        translation_en: "I do not understand this message.",
+        translation_ar: "أنا لا أفهم هذه الرسالة.",
+        alignedFrench: "<subject>Je</subject> <verb>ne comprends pas</verb> <object>ce message</object>.",
+        alignedTranslation_en: "<subject>I</subject> <verb>do not understand</verb> <object>this message</object>.",
+        alignedTranslation_ar: "<subject>أنا</subject> لا <verb>أفهم</verb> هذه <object>الرسالة</object>."
+      },
+      {
+        sentence: "Il ________'aime pas le café noir. (He doesn't like black coffee.)",
+        options: ["n", "ne", "pas", "de"],
+        answer: 0,
+        tip_en: "Contract **ne** to **n'** before verbs starting with a vowel, like *aimer*.",
+        tip_ar: "قم باختصار **ne** إلى **n'** قبل الأفعال التي تبدأ بحرف متحرك، مثل *aimer*.",
+        fullSentence: "Il n'aime pas le café noir.",
+        translation_en: "He does not like black coffee.",
+        translation_ar: "هو لا يحب القهوة السوداء.",
+        alignedFrench: "<subject>Il</subject> <verb>n'aime pas</verb> <object>le café noir</object>.",
+        alignedTranslation_en: "<subject>He</subject> <verb>does not like</verb> <object>black coffee</object>.",
+        alignedTranslation_ar: "<subject>هو</subject> لا <verb>يحب</verb> <object>القهوة السوداء</object>."
+      },
+      {
+        sentence: "Désolé, je ne ________ pas venir demain. (Sorry, I cannot come tomorrow.)",
+        options: ["peux", "peux pas", "pouvez", "peut"],
+        answer: 0,
+        tip_en: "Place the conjugated verb (**peux**) in the middle of the *ne... pas* sandwich.",
+        tip_ar: "ضع الفعل المصرف (**peux**) في منتصف ساندوتش النفي *ne... pas*.",
+        fullSentence: "Désolé, je ne peux pas venir demain.",
+        translation_en: "Sorry, I cannot come tomorrow.",
+        translation_ar: "عذراً، لا يمكنني المجيء غداً.",
+        alignedFrench: "Désolé, <subject>je</subject> ne <verb>peux pas venir</verb> <adverb>demain</adverb>.",
+        alignedTranslation_en: "Sorry, <subject>I</subject> <verb>cannot come</verb> <adverb>tomorrow</adverb>.",
+        alignedTranslation_ar: "عذراً، لا <verb>يمكنني المجيء</verb> <subject>أنا</subject> <adverb>غداً</adverb>."
+      }
+    ]
+  };
+
+  function getFrenchGrammarFallback(topicId: string, targetLang: string, historyList: string[]) {
+    const topicKey = (topicId && FALLBACKS[topicId]) ? topicId : "etre_avoir";
+    const list = FALLBACKS[topicKey];
+    let filtered = list.filter(item => !historyList.includes(item.fullSentence));
+    if (filtered.length === 0) {
+      filtered = list;
+    }
+    const selected = filtered[Math.floor(Math.random() * filtered.length)];
+    const isArabic = targetLang.toLowerCase() === "arabic";
+    return {
+      sentence: selected.sentence,
+      options: selected.options,
+      answer: selected.answer,
+      tip: isArabic ? selected.tip_ar : selected.tip_en,
+      fullSentence: selected.fullSentence,
+      translation: isArabic ? selected.translation_ar : selected.translation_en,
+      alignedFrench: selected.alignedFrench,
+      alignedTranslation: isArabic ? selected.alignedTranslation_ar : selected.alignedTranslation_en
+    };
+  }
+
   // API Route to generate a French grammar cloze exercise with dynamic colored alignment
   app.post("/api/generate-french-grammar-exercise", async (req, res) => {
-    try {
-      const { topicId, topicTitle, translationLanguage } = req.body;
-      const targetLang = (translationLanguage || "english").toLowerCase() === "arabic" ? "Arabic" : "English";
+    const { topicId, topicTitle, translationLanguage, history } = req.body;
+    const targetLang = (translationLanguage || "english").toLowerCase() === "arabic" ? "Arabic" : "English";
+    const historyList = Array.isArray(history) ? history : [];
 
+    try {
       const ai = getGeminiClient();
       if (!ai) {
-        // Fallback question if Gemini is not available
-        return res.json({
-          sentence: "Je ________ très fatigué ce soir. (I am very tired tonight.)",
-          options: ["suis", "es", "est", "sommes"],
-          answer: 0,
-          tip: targetLang === "Arabic" ? "استخدم <b>suis</b> (صيغة المضارع للفعل être) مع <b>Je</b> للقول 'أنا أكون'." : "Use <b>suis</b> (present tense of être) with <b>Je</b> to say 'I am'.",
-          fullSentence: "Je suis très fatigué ce soir.",
-          translation: targetLang === "Arabic" ? "أنا متعب جدا الليلة." : "I am very tired tonight.",
-          alignedFrench: "<subject>Je</subject> <verb>suis</verb> <adverb>très</adverb> <adjective>fatigué</adjective> <adverb>ce soir</adverb>.",
-          alignedTranslation: targetLang === "Arabic" ? "<subject>أنا</subject> <adjective>متعب</adjective> <adverb>جداً</adverb> <adverb>الليلة</adverb>." : "<subject>I</subject> <verb>am</verb> <adverb>very</adverb> <adjective>tired</adjective> <adverb>tonight</adverb>."
-        });
+        console.log(`Gemini API client not configured or unavailable. Utilizing topic-specific fallbacks for topic "${topicId}".`);
+        const fallback = getFrenchGrammarFallback(topicId, targetLang, historyList);
+        return res.json(fallback);
+      }
+
+      // Add dynamic prompt modifiers to encourage highly randomized vocabulary contexts
+      const randomScenarios = [
+        "texting a friend about dinner/lunch",
+        "running late for work or an appointment",
+        "making weekend plans or booking a train/hotel",
+        "buying groceries or asking a shopkeeper",
+        "discussing a favorite movie, book, or hobby",
+        "complimenting a colleague or family member",
+        "asking for directions or giving advice",
+        "writing a professional short email"
+      ];
+      const selectedScenario = randomScenarios[Math.floor(Math.random() * randomScenarios.length)];
+
+      let historyInstruction = "";
+      if (historyList.length > 0) {
+        historyInstruction = `CRITICAL: You MUST NOT generate any of the following previously used sentences (or close variations of them):
+${historyList.map(h => `- "${h}"`).join("\n")}
+Please choose different vocabulary, verbs, subjects, and adjectives to guarantee the user gets a unique exercise.`;
       }
 
       const prompt = `You are an expert French language educator. Your goal is to generate a single high-quality, authentic, conversational French grammar cloze multiple-choice exercise.
@@ -463,9 +730,12 @@ Topic ID: "${topicId}"
 Topic Title: "${topicTitle}"
 
 Translation Language: ${targetLang}
+Contextual Scenario to utilize for vocabulary: ${selectedScenario}
+
+${historyInstruction}
 
 CRITICAL RULES FOR GENERATION:
-1. Generate a natural, conversational, or text-message styled French sentence.
+1. Generate a natural, conversational, or text-message styled French sentence. Make sure it is realistic and utilizes everyday modern vocabulary.
 2. Replace exactly ONE key element (the targeted grammar word for this topic) with the blank "________".
 3. Provide exactly 4 options, with only one correct option and three plausible distractors.
 4. Specify the correct option index (0-3).
@@ -540,19 +810,9 @@ CRITICAL RULES FOR GENERATION:
       res.json(result);
 
     } catch (err: any) {
-      console.error("Error generating French grammar exercise with Gemini:", err);
-      // Failover fallback
-      const targetLang = (req.body.translationLanguage || "english").toLowerCase() === "arabic" ? "Arabic" : "English";
-      res.json({
-        sentence: "Je ________ très fatigué ce soir. (I am very tired tonight.)",
-        options: ["suis", "es", "est", "sommes"],
-        answer: 0,
-        tip: targetLang === "Arabic" ? "استخدم <b>suis</b> مع <b>Je</b> للقول 'أنا أكون'." : "Use <b>suis</b> with <b>Je</b> to say 'I am'.",
-        fullSentence: "Je suis très fatigué ce soir.",
-        translation: targetLang === "Arabic" ? "أنا متعب جدا الليلة." : "I am very tired tonight.",
-        alignedFrench: "<subject>Je</subject> <verb>suis</verb> <adverb>très</adverb> <adjective>fatigué</adjective> <adverb>ce soir</adverb>.",
-        alignedTranslation: targetLang === "Arabic" ? "<subject>أنا</subject> <adjective>متعب</adjective> <adverb>جداً</adverb> <adverb>الليلة</adverb>." : "<subject>I</subject> <verb>am</verb> <adverb>very</adverb> <adjective>tired</adjective> <adverb>tonight</adverb>."
-      });
+      console.error("Error generating French grammar exercise with Gemini, falling back to topic-specific fallback:", err);
+      const fallback = getFrenchGrammarFallback(topicId, targetLang, historyList);
+      res.json(fallback);
     }
   });
 
