@@ -1165,6 +1165,15 @@ body {
           <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
       </div>
+      <div class="card active-card" id="cardFrenchGrammar" style="display: none;">
+        <div class="card-index">03 · French Grammar</div>
+        <div class="card-title">French Grammar Lessons</div>
+        <div class="card-desc">Learn crucial grammar rules you need for daily speaking and text messaging with interactive builders.</div>
+        <div class="card-foot">
+          <div class="card-progress-bar"><div class="card-progress-fill" id="frenchGrammarProgressFill" style="width:0%"></div></div>
+          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
     </div>
 
     <!-- Hidden elements for backward compatibility/JS safety -->
@@ -1520,6 +1529,67 @@ body {
       </div>
     </div>
   </div>
+
+  <!-- FRENCH GRAMMAR VIEW -->
+  <div class="view" id="view-french-grammar">
+    <!-- State 1: Topics list -->
+    <div id="french-grammar-topics-screen">
+      <div class="study-top">
+        <button class="btn-ghost" id="btnFrenchGrammarBack" style="margin: 0; outline: none; border-radius: 6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Home
+        </button>
+        <div class="session-meta">
+          <span>Grammar Score <b id="frenchGrammarScore">0</b></span>
+        </div>
+      </div>
+      <div class="hero" style="margin-bottom: 24px; display: block; background: transparent; padding: 24px 0 0; text-align: left; box-shadow: none;">
+        <div class="hero-title" style="font-size: clamp(28px, 6vw, 36px); line-height: 1.2; font-family: var(--font-display); font-weight: 800; font-style: italic; margin-bottom: 8px;">French Grammar <span style="color: var(--ink-faint); font-weight: 400;">for texting & talking</span></div>
+        <p class="hero-sub" style="font-size: 14px; color: var(--ink-dim); line-height: 1.6; max-width: 60ch; margin: 0;">Learn crucial French structures for texting and speaking with others through active sentence building lessons.</p>
+      </div>
+      <div class="section-label">Crucial Lessons</div>
+      <div class="grammar-topic-grid" id="frenchGrammarTopicGrid">
+        <!-- topics dynamically rendered -->
+      </div>
+    </div>
+
+    <!-- State 1.5: Lesson Detail/Study screen -->
+    <div id="french-grammar-lesson-detail-screen" style="display:none;">
+      <div class="study-top" style="margin-bottom: 20px;">
+        <button class="btn-ghost" id="btnFrenchGrammarLessonBack" style="margin: 0; outline: none; border-radius: 6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Lessons
+        </button>
+        <div class="session-meta">
+          <span>Lesson Guide</span>
+        </div>
+      </div>
+
+      <div id="frenchGrammarLessonContent" style="display: flex; flex-direction: column; gap: 24px;">
+        <!-- Dynamically rendered lesson guide contents -->
+      </div>
+    </div>
+
+    <!-- State 2: Practice screen -->
+    <div id="french-grammar-practice-screen" style="display:none;">
+      <div class="study-top">
+        <button class="btn-ghost" id="btnFrenchGrammarPracticeBack">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Lessons
+        </button>
+        <div class="session-meta">
+          <span id="frenchGrammarPracticeProgress">Sentence 1/3</span>
+          <span>Score <b id="frenchGrammarSessionScore">0</b></span>
+        </div>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="frenchGrammarPracticeProgressFill" style="width:0%"></div></div>
+
+      <div class="stage" id="frenchGrammarStage" style="min-height:auto; padding: 36px 30px; margin-bottom:20px; text-align: left; align-items: stretch; display: flex; flex-direction: column;">
+        <!-- Question, options, and tip rendered here -->
+      </div>
+    </div>
+  </div>
+
   <div id="settingsModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 20px;">
     <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; max-width: 440px; width: 100%; box-shadow: var(--shadow); overflow: hidden;">
       <div style="padding: 24px 24px 18px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
@@ -2732,6 +2802,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     var cardGrammar = $('cardGrammar');
     var cardFrenchVocabulary = $('cardFrenchVocabulary');
     var cardFrenchReading = $('cardFrenchReading');
+    var cardFrenchGrammar = $('cardFrenchGrammar');
     
     var aiLevelAdvisorBox = $('aiLevelAdvisorBox');
     
@@ -2741,6 +2812,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       if (cardGrammar) cardGrammar.style.display = 'none';
       if (cardFrenchVocabulary) cardFrenchVocabulary.style.display = 'block';
       if (cardFrenchReading) cardFrenchReading.style.display = 'block';
+      if (cardFrenchGrammar) cardFrenchGrammar.style.display = 'block';
       
       // Hide AI advisor for French
       if (aiLevelAdvisorBox) aiLevelAdvisorBox.style.display = 'none';
@@ -2780,6 +2852,23 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       if (frenchReadingProgressFill) {
         var completedTexts = countFrenchLearned >= 5 ? 100 : Math.round((countFrenchLearned / 5) * 100);
         frenchReadingProgressFill.style.width = completedTexts + '%';
+      }
+
+      // Progress fill of French Grammar card
+      Progress.frenchGrammar = Progress.frenchGrammar || {};
+      var completedFrenchGrammarCount = 0;
+      for (var tId in Progress.frenchGrammar) {
+        var topicAnswers = Progress.frenchGrammar[tId] || {};
+        for (var qIdx in topicAnswers) {
+          if (topicAnswers[qIdx]) {
+            completedFrenchGrammarCount++;
+          }
+        }
+      }
+      var frenchGrammarPct = Math.round((completedFrenchGrammarCount / 18) * 100);
+      var frenchGrammarProgressFill = $('frenchGrammarProgressFill');
+      if (frenchGrammarProgressFill) {
+        frenchGrammarProgressFill.style.width = frenchGrammarPct + '%';
       }
 
       // Update Daily Goal Meter
@@ -2827,6 +2916,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       if (cardGrammar) cardGrammar.style.display = 'block';
       if (cardFrenchVocabulary) cardFrenchVocabulary.style.display = 'none';
       if (cardFrenchReading) cardFrenchReading.style.display = 'none';
+      if (cardFrenchGrammar) cardFrenchGrammar.style.display = 'none';
       
       // Show AI advisor for English
       if (aiLevelAdvisorBox) aiLevelAdvisorBox.style.display = '';
@@ -3181,6 +3271,614 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     }
   }
 
+  /* ---------------- FRENCH GRAMMAR MODULE ---------------- */
+  var ALL_FRENCH_GRAMMAR_TOPICS = [
+    {
+      id: "etre_avoir",
+      title: "Être & Avoir (To Be & To Have)",
+      desc: "Master the twin engines of French. Say who you are, how you feel, and what you have.",
+      lessonGuide: {
+        intro: "To hold any simple French conversation or write basic messages, you must first master the two vital auxiliary verbs: <b>être</b> (to be) and <b>avoir</b> (to have). These form the backbone of expressing identity, feelings, and possession.",
+        blueprint: "Subject + Verb [être / avoir] + Adjective / Noun + [Time Expression]",
+        rules: [
+          { label: "Subject & Verb Order", text: "Just like in English, the verb directly follows the subject: <i>Je suis...</i> (I am), <i>Tu as...</i> (You have)." },
+          { label: "Objects & Adjectives", text: "Place adjectives and nouns immediately after the verb. <i>Je suis là</i> (I am here), <i>J'ai un ami</i> (I have a friend)." },
+          { label: "Expressing Hunger/Age", text: "<b>CRUCIAL:</b> French uses <i>avoir</i> (to have) instead of <i>être</i> (to be) to express hunger, thirst, or age. Say <i>J'ai faim</i> (literally: I have hunger) or <i>J'ai 20 ans</i> (literally: I have 20 years). Using <i>être</i> here is incorrect!" },
+          { label: "Time Placement", text: "Time indicators like <i>maintenant</i> (now) or <i>ce soir</i> (tonight) usually go at the absolute end of your sentence, or sometimes at the very beginning to add emphasis." }
+        ],
+        examples: [
+          { f: "Je suis très content de te parler ce soir.", e: "I am very happy to talk to you tonight.", why: "Using <i>être</i> (suis) with the subject 'Je'. The time indicator 'ce soir' goes at the end." },
+          { f: "Est-ce que tu as le temps de m'aider ?", e: "Do you have time to help me?", why: "Using <i>avoir</i> (as) with the pronoun 'tu' to say 'you have'." },
+          { f: "Nous avons faim, on va au restaurant ?", e: "We are hungry, shall we go to the restaurant?", why: "Using <i>avoir</i> (avons) because French states hunger as 'having hunger'." }
+        ]
+      },
+      questions: [
+        {
+          sentence: "Salut ! Je ________ très content de te parler ce soir ! (Hi! I am very happy to talk to you tonight!)",
+          options: ["suis", "es", "est", "sommes"],
+          answer: 0,
+          tip: "Use **suis** (present tense of *être*) with **Je** to say 'I am'."
+        },
+        {
+          sentence: "Est-ce que tu ________ le temps de m'aider par SMS ? (Do you have time to help me via text?)",
+          options: ["as", "ai", "a", "avez"],
+          answer: 0,
+          tip: "Use **as** (present tense of *avoir*) with **tu** to say 'you have'."
+        },
+        {
+          sentence: "Nous ________ faim, on va au restaurant ? (We are hungry, shall we go to the restaurant?)",
+          options: ["avons", "sommes", "ont", "avez"],
+          answer: 0,
+          tip: "In French, expressing hunger uses **avoir faim** (to have hunger). Use **avons** with **Nous**."
+        }
+      ]
+    },
+    {
+      id: "est_ce_que",
+      title: "Asking Questions (Est-ce que...)",
+      desc: "The easiest way to ask questions in speaking and texting without complex inversions.",
+      lessonGuide: {
+        intro: "In conversational French or fast text messages, you do not need to do complex verb-subject inversions (like <i>Viens-tu ?</i>). Instead, placing the magic prefix <b>Est-ce que</b> at the start of any positive statement instantly turns it into a question!",
+        blueprint: "[Interrogative Word] + Est-ce que + Subject + Verb + Object ?",
+        rules: [
+          { label: "Yes/No Questions", text: "Simply add <i>Est-ce que</i> before a standard sentence. For example: <i>Tu es libre</i> (You are free) becomes <i>Est-ce que tu es libre ?</i> (Are you free?)." },
+          { label: "Question Words Placement", text: "Put words like <i>Où</i> (Where), <i>Quand</i> (When), <i>Pourquoi</i> (Why), or <i>Comment</i> (How) <b>before</b> <i>est-ce que</i>. For example: <i>Où est-ce que tu habites ?</i> (Where do you live?)." },
+          { label: "The Vowel Contraction", text: "If the word after <i>est-ce que</i> starts with a vowel (like <i>il</i>, <i>elle</i>, or <i>on</i>), it MUST contract to <b>est-ce qu'</b>. For example: <i>est-ce qu'on commence ?</i> (are we starting?)." }
+        ],
+        examples: [
+          { f: "Est-ce que tu es disponible demain pour un café ?", e: "Are you available tomorrow for a coffee?", why: "Just prefixing <i>Est-ce que</i> to the statement 'tu es disponible...'. It's natural and friendly!" },
+          { f: "Où est-ce que tu habites à Paris ?", e: "Where do you live in Paris?", why: "The question word <i>Où</i> (Where) is placed at the absolute beginning, followed by <i>est-ce que</i>." },
+          { f: "Qu'est-ce qu'il veut manger ce soir ?", e: "What does he want to eat tonight?", why: "The question word <i>Que</i> (What) contracts with <i>est-ce que</i> to form <i>Qu'est-ce que</i>, which further contracts to <i>Qu'est-ce qu'</i> before <i>il</i>." }
+        ]
+      },
+      questions: [
+        {
+          sentence: "________ tu es disponible demain pour un café ? (Are you available tomorrow for a coffee?)",
+          options: ["Est-ce que", "Qu'est-ce que", "Où est", "Qui est"],
+          answer: 0,
+          tip: "Simply prefix **Est-ce que** to any statement to turn it into a yes/no question!"
+        },
+        {
+          sentence: "Où ________ tu habites à Paris ? (Where do you live in Paris?)",
+          options: ["est-ce que", "qu'est-ce que", "est-ce qu'", "est-ce"],
+          answer: 0,
+          tip: "Place **est-ce que** right after interrogative words like *Où* (Where), *Quand* (When), or *Pourquoi* (Why)."
+        },
+        {
+          sentence: "Qu'________ il veut manger ce soir ? (What does he want to eat tonight?)",
+          options: ["est-ce qu'", "est-ce que", "est-ce", "est-ce qui"],
+          answer: 0,
+          tip: "**Que** contracts to **qu'** when preceding a pronoun starting with a vowel, like *il*, *elle*, or *on*."
+        }
+      ]
+    },
+    {
+      id: "futur_proche",
+      title: "Immediate Future (Futur Proche)",
+      desc: "Express what you are going to do next. Perfect for texting about upcoming plans.",
+      lessonGuide: {
+        intro: "To text or tell someone what you are <i>going to do</i> next, French uses the <b>Futur Proche</b> (Immediate Future). It is extremely simple because you only need to conjugate one helper verb: <b>aller</b> (to go).",
+        blueprint: "Subject + Verb [aller] (conjugated) + Main Verb (infinitive) + [Object] + [Time]",
+        rules: [
+          { label: "The Double Verb Structure", text: "You combine two verbs: the helper verb <i>aller</i> conjugated in the present tense, followed immediately by the main action verb in its base, unchanged <b>infinitive</b> form (e.g. <i>manger</i>, <i>appeler</i>, <i>envoyer</i>)." },
+          { label: "What gets conjugated?", text: "<b>Only</b> the verb <i>aller</i> changes depending on the subject: <i>Je vais</i> (I go), <i>Tu vas</i> (You go), <i>Nous allons</i> (We go), <i>Vous allez</i> (You go - formal/plural), <i>On va</i> (We/One goes)." },
+          { label: "Placing Time Expressions", text: "Always place the target verb of action in the middle, and push any time expressions like <i>bientôt</i> (soon), <i>demain</i> (tomorrow), or <i>ce soir</i> (tonight) to the very end." }
+        ],
+        examples: [
+          { f: "Je vais t'envoyer un message quand j'arrive.", e: "I am going to send you a message when I arrive.", why: "Helper <i>vais</i> (aller) + infinitive action <i>envoyer</i>. Note the object pronoun <i>t'</i> (you) sits before the infinitive!" },
+          { f: "Qu'est-ce que vous allez faire ce week-end ?", e: "What are you going to do this weekend?", why: "Using <i>allez</i> (matching 'vous') + infinitive <i>faire</i> (to do). The weekend time indicator goes last." },
+          { f: "On va prendre un verre ce soir, tu viens ?", e: "We are going to have a drink tonight, coming?", why: "Using casual pronoun 'On' + <i>va</i> + infinitive <i>prendre</i>." }
+        ]
+      },
+      questions: [
+        {
+          sentence: "Je ________ t'envoyer un message quand j'arrive. (I am going to send you a message when I arrive.)",
+          options: ["vais", "vas", "va", "allez"],
+          answer: 0,
+          tip: "Use the conjugated form of *aller* (to go) + infinitive. For *Je*, use **vais**."
+        },
+        {
+          sentence: "Qu'est-ce que vous ________ faire ce week-end ? (What are you going to do this weekend?)",
+          options: ["allez", "vont", "allons", "vas"],
+          answer: 0,
+          tip: "The conjugated form of *aller* matching the pronoun *vous* is **allez**."
+        },
+        {
+          sentence: "On va ________ un verre ce soir, tu viens ? (We are going to have a drink tonight, coming?)",
+          options: ["prendre", "prends", "prenons", "prenez"],
+          answer: 0,
+          tip: "In the Futur Proche (*aller + verb*), the second verb is always in its unchanged **infinitive** form: **prendre**."
+        }
+      ]
+    },
+    {
+      id: "negation",
+      title: "Negation (Ne... pas)",
+      desc: "Learn how to say no, or express that you do not understand or cannot do something.",
+      lessonGuide: {
+        intro: "In French, saying 'not' or expressing a negative statement uses a two-part wrap-around system called <b>ne... pas</b>. This represents the classic negation sandwich of French grammar.",
+        blueprint: "Subject + ne [n'] + Verb (conjugated) + pas + [Object]",
+        rules: [
+          { label: "The Negation Sandwich", text: "Think of <i>ne</i> and <i>pas</i> as two slices of bread, and the conjugated verb as the delicious filling. <i>ne</i> goes BEFORE the verb; <i>pas</i> goes immediately AFTER the verb." },
+          { label: "Vowel Contraction", text: "If the verb starts with a vowel (A, E, I, O, U, Y) or a silent H, <i>ne</i> contracts to <b>n'</b>. Example: <i>Je n'aime pas</i> (I do not like) instead of <i>Je ne aime pas</i>." },
+          { label: "Casual Texting Secret", text: "<b>NATIVE SHORTCUT:</b> In daily spoken French and casual texting, French speakers almost <b>always drop the 'ne'</b>! They will text: <i>Je comprends pas</i> or <i>Je peux pas venir</i>. While you must learn standard writing, dropping 'ne' is the key to sounding local when texting peers!" }
+        ],
+        examples: [
+          { f: "Je ne comprends pas ce message.", e: "I do not understand this message.", why: "Standard negation: <i>ne</i> + verb <i>comprends</i> + <i>pas</i> wrapping the verb." },
+          { f: "Il n'aime pas le café noir.", e: "He does not like black coffee.", why: "Verb <i>aime</i> starts with a vowel, so <i>ne</i> contracts to <i>n'</i>." },
+          { f: "Désolé, je ne peux pas venir demain.", e: "Sorry, I cannot come tomorrow.", why: "Verb <i>peux</i> sits between <i>ne</i> and <i>pas</i>. The time indicator 'demain' sits at the end." }
+        ]
+      },
+      questions: [
+        {
+          sentence: "Je ________ comprends pas ce message. (I don't understand this message.)",
+          options: ["ne", "pas", "non", "rien"],
+          answer: 0,
+          tip: "The classic negation wraps around the verb like a sandwich: **ne** + verb + **pas**."
+        },
+        {
+          sentence: "Il ________'aime pas le café noir. (He doesn't like black coffee.)",
+          options: ["n", "ne", "pas", "de"],
+          answer: 0,
+          tip: "Contract **ne** to **n'** before verbs starting with a vowel, like *aimer*."
+        },
+        {
+          sentence: "Désolé, je ne ________ pas venir demain. (Sorry, I cannot come tomorrow.)",
+          options: ["peux", "peux pas", "pouvez", "peut"],
+          answer: 0,
+          tip: "Place the conjugated verb (**peux**) in the middle of the *ne... pas* sandwich."
+        }
+      ]
+    },
+    {
+      id: "politeness",
+      title: "Polite Texting & Requests",
+      desc: "Learn how to ask for things politely and reply to messages with charm.",
+      lessonGuide: {
+        intro: "When you contact someone in French (like ordering food, booking a taxi, or asking a peer for help), direct commands like <i>Je veux...</i> (I want...) sound harsh. You must soften them using polite forms.",
+        blueprint: "Je voudrais + Noun / Verb (infinitive) + s'il te plaît [s'il vous plaît]",
+        rules: [
+          { label: "Je Voudrais (I Would Like)", text: "Instead of saying <i>Je veux</i> (I want), always use the conditional form <b>Je voudrais</b>. It is universally polite and elegant." },
+          { label: "Politeness Location", text: "Place <i>s'il te plaît</i> (informal, used with friends/peers) or <i>s'il vous plaît</i> (formal/polite) at the absolute end of your request sentence." },
+          { label: "Object Pronoun Placement", text: "If you ask someone to do an action to you (e.g., 'help me' or 'send me'), the pronoun <b>m'</b> or <b>me</b> goes <b>before</b> the action verb. Say: <i>Tu peux m'aider ?</i> (Can you help me?) - NOT <i>Tu peux aider moi ?</i>." },
+          { label: "How to say 'You're welcome'", text: "In texting and casual chatting, the easiest way to reply to <i>Merci</i> is <b>De rien</b> (literally: of nothing / it's nothing)." }
+        ],
+        examples: [
+          { f: "Bonjour, je voudrais commander une pizza, s'il vous plaît.", e: "Hello, I would like to order a pizza, please.", why: "Using polite conditional <i>Je voudrais</i> and formal <i>s'il vous plaît</i> at the end of the request." },
+          { f: "Tu peux m'envoyer l'adresse, s'il te plaît ?", e: "Can you send me the address, please?", why: "Casual request using <i>Tu peux</i>, pronoun <i>m'</i> before verb <i>envoyer</i>, and casual <i>s'il te plaît</i>." },
+          { f: "Merci beaucoup pour ton aide ! — De rien !", e: "Thank you so much for your help! — You're welcome!", why: "<i>De rien</i> is the most authentic, casual way to text 'you're welcome'." }
+        ]
+      },
+      questions: [
+        {
+          sentence: "Bonjour, je ________ commander une pizza, s'il vous plaît. (Hello, I would like to order a pizza, please.)",
+          options: ["voudrais", "veux", "voulais", "voudrait"],
+          answer: 0,
+          tip: "Use conditional **Je voudrais** ('I would like') instead of direct *Je veux* ('I want') to sound polite!"
+        },
+        {
+          sentence: "Tu peux m'envoyer l'adresse, s'il ________ plaît ? (Can you send me the address, please? - informal)",
+          options: ["te", "vous", "se", "t'"],
+          answer: 0,
+          tip: "For casual texting with friends/peers, use informal **s'il te plaît**. For formal, use *s'il vous plaît*."
+        },
+        {
+          sentence: "Merci beaucoup pour ton aide ! — De ________ ! (Thank you so much for your help! - You're welcome!)",
+          options: ["rien", "s'il te plaît", "merci", "pas"],
+          answer: 0,
+          tip: "**De rien** is the most common casual way to say 'You're welcome' in texting and speaking."
+        }
+      ]
+    },
+    {
+      id: "likes_dislikes",
+      title: "Likes & Dislikes (Aimer & Adorer)",
+      desc: "Share your preferences, hobbies, and tastes when chatting with friends.",
+      lessonGuide: {
+        intro: "Expressing likes and dislikes is standard for texting and getting to know other people. French has a few strict rules on how and where you place modifying adverbs and articles in these sentences.",
+        blueprint: "Subject + Verb [aimer / adorer] + Adverb [beaucoup / bien] + [le / la / les] + Noun",
+        rules: [
+          { label: "Must Include Noun Articles", text: "In English, you say 'I like Italian food' (no article). But in French, you <b>must</b> include a definite article (<i>le</i>, <i>la</i>, <i>les</i>) before the noun you like. Say: <i>J'aime <b>la</b> cuisine italienne</i>." },
+          { label: "Double Verb Rule", text: "If you like performing an action (e.g. dancing, traveling, listening), the second verb stays in its raw <b>infinitive</b> form. Example: <i>J'aime voyager</i> (I like to travel)." },
+          { label: "The Adverb Position", text: "<b>CRUCIAL DIFFERENCE:</b> In English, we put 'a lot' or 'very much' at the end of the sentence (e.g., 'I like this music a lot'). In French, modifiers like <b>beaucoup</b> (a lot) or <b>bien</b> (well) must sit <b>directly after the verb</b>, before the noun or object!" }
+        ],
+        examples: [
+          { f: "J'aime beaucoup écouter de la musique française.", e: "I really like listening to French music.", why: "The adverb <i>beaucoup</i> is placed directly after the verb <i>aime</i>. The second verb <i>écouter</i> is in the infinitive." },
+          { f: "Elle adore la cuisine italienne, c'est sa préférée.", e: "She loves Italian food, it's her favorite.", why: "Note the required definite article <i>la</i> before <i>cuisine</i>. You cannot omit it in French!" },
+          { f: "Est-ce que tu aimes voyager pendant les vacances ?", e: "Do you like to travel during holidays?", why: "Using <i>aimes</i> conjugated for 'tu', followed immediately by the infinitive <i>voyager</i>." }
+        ]
+      },
+      questions: [
+        {
+          sentence: "J'aime beaucoup ________ de la musique française. (I really like listening to French music.)",
+          options: ["écouter", "écoute", "écoutons", "écoutez"],
+          answer: 0,
+          tip: "When two verbs follow each other directly, the second verb must be in its **infinitive** form: **écouter**."
+        },
+        {
+          sentence: "Elle ________ la cuisine italienne, c'est sa préférée. (She loves Italian food, it's her favorite.)",
+          options: ["adore", "adores", "adorons", "adorez"],
+          answer: 0,
+          tip: "The present tense form of the verb *adorer* for *elle* (she) is **adore**."
+        },
+        {
+          sentence: "Est-ce que tu ________ voyager pendant les vacances ? (Do you like to travel during holidays?)",
+          options: ["aimes", "aime", "aimons", "aimez"],
+          answer: 0,
+          tip: "The present conjugation of *aimer* matching the pronoun *tu* always ends in **-es** -> **aimes**."
+        }
+      ]
+    }
+  ];
+
+  var frenchGrammarSession = null;
+
+  function renderFrenchGrammarTopics() {
+    Progress.frenchGrammar = Progress.frenchGrammar || {};
+    var container = $('frenchGrammarTopicGrid');
+    if (!container) return;
+
+    var totalGlobalScore = 0;
+    var topicsHtml = ALL_FRENCH_GRAMMAR_TOPICS.map(function(topic, index) {
+      var topicAnswers = Progress.frenchGrammar[topic.id] || {};
+      var completedCount = 0;
+      var numQuestions = topic.questions.length;
+      for (var qIdx = 0; qIdx < numQuestions; qIdx++) {
+        if (topicAnswers[qIdx]) completedCount++;
+      }
+      totalGlobalScore += (completedCount * 10);
+
+      var isCompleted = completedCount === numQuestions;
+      var pct = Math.round((completedCount / numQuestions) * 100);
+
+      var statusBadge = '';
+      if (isCompleted) {
+        statusBadge = '<span class="grammar-badge completed">✓ Mastered</span>';
+      } else if (completedCount > 0) {
+        statusBadge = '<span class="grammar-badge">' + completedCount + '/' + numQuestions + ' Solved</span>';
+      } else {
+        statusBadge = '<span class="grammar-badge" style="color:var(--ink-faint);">Not started</span>';
+      }
+
+      var displayIndex = (index + 1) < 10 ? '0' + (index + 1) : '' + (index + 1);
+
+      return '<div class="grammar-topic-card" data-topic-id="' + topic.id + '">' +
+        '<div>' +
+          '<div class="grammar-topic-index">Lesson ' + displayIndex + '</div>' +
+          '<div class="grammar-topic-title">' + escapeHtml(topic.title) + '</div>' +
+          '<div class="grammar-topic-desc">' + escapeHtml(topic.desc) + '</div>' +
+        '</div>' +
+        '<div class="grammar-topic-foot">' +
+          '<div class="card-progress-bar" style="max-width:120px;"><div class="card-progress-fill" style="width:' + pct + '%"></div></div>' +
+          statusBadge +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    container.innerHTML = topicsHtml;
+    $('frenchGrammarScore').textContent = totalGlobalScore;
+
+    // bind clicks on cards
+    var cards = container.querySelectorAll('.grammar-topic-card');
+    Array.prototype.forEach.call(cards, function(card) {
+      bindTap(card, function() {
+        var topicId = card.getAttribute('data-topic-id');
+        showFrenchGrammarLessonDetail(topicId);
+      });
+    });
+  }
+
+  function showFrenchGrammarLessonDetail(topicId) {
+    var topic = ALL_FRENCH_GRAMMAR_TOPICS.find(function(t) { return t.id === topicId; });
+    if (!topic || !topic.lessonGuide) return;
+
+    var guide = topic.lessonGuide;
+    var detailScreen = $('french-grammar-lesson-detail-screen');
+    var topicsScreen = $('french-grammar-topics-screen');
+    var practiceScreen = $('french-grammar-practice-screen');
+
+    if (topicsScreen) topicsScreen.style.display = 'none';
+    if (practiceScreen) practiceScreen.style.display = 'none';
+    if (detailScreen) detailScreen.style.display = 'block';
+
+    var contentEl = $('frenchGrammarLessonContent');
+    if (!contentEl) return;
+
+    var rulesHtml = guide.rules.map(function(r) {
+      return '<div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; box-shadow: var(--shadow-sm); display:flex; flex-direction:column; gap:6px;">' +
+        '<div style="display:flex; align-items:center; gap:8px;">' +
+          '<span style="display:inline-block; width:8px; height:8px; background:var(--accent); border-radius:50%;"></span>' +
+          '<b style="font-family: var(--font-display); font-size:14px; color:var(--ink); font-weight:700;">' + escapeHtml(r.label) + '</b>' +
+        '</div>' +
+        '<div style="font-size:13.5px; color:var(--ink-dim); line-height:1.6; padding-left:16px;">' + r.text + '</div>' +
+      '</div>';
+    }).join('');
+
+    var examplesHtml = guide.examples.map(function(ex) {
+      var speakId = 'btnSpeakEx_' + topicId + '_' + ex.f.substring(0, 5).replace(/[^a-zA-Z0-9]/g, '');
+      return '<div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; box-shadow: var(--shadow-sm); display:flex; flex-direction:column; gap:10px; position:relative;">' +
+        '<div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">' +
+          '<div style="font-size:16px; font-weight:700; color:var(--ink); line-height:1.5; font-family: var(--font-body);">' + escapeHtml(ex.f) + '</div>' +
+          '<button class="btn-ghost" id="' + speakId + '" style="padding:6px; margin:0; min-height:auto; display:flex; align-items:center; justify-content:center; border-radius:6px; background: rgba(var(--accent-rgb), 0.08); color: var(--accent);" title="Speak aloud">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 9v6h4l5 5V4L9 9H5Z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7" stroke="currentColor" stroke-width="1.8"/></svg>' +
+          '</button>' +
+        '</div>' +
+        '<div style="border-top: 1px solid var(--border); padding-top:10px;">' +
+          '<div style="font-size:13.5px; color:var(--accent); font-weight:600; font-family: var(--font-body); margin-bottom:4px;">English: ' + escapeHtml(ex.e) + '</div>' +
+          '<div style="font-size:12.5px; color:var(--ink-faint); line-height:1.5;">💡 ' + ex.why + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    contentEl.innerHTML = 
+      '<div class="hero" style="margin-bottom: 0px; display: block; background: transparent; padding: 0px; text-align: left; box-shadow: none;">' +
+        '<div style="font-family: var(--font-mono); font-size:11px; color:var(--accent); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:6px; font-weight:600;">ACTIVE LEARNING LESSON</div>' +
+        '<div class="hero-title" style="font-size: clamp(24px, 5vw, 32px); line-height: 1.2; font-family: var(--font-display); font-weight: 800; margin-bottom: 12px; color: var(--ink);">' + escapeHtml(topic.title) + '</div>' +
+        '<p style="font-size: 14.5px; color: var(--ink-dim); line-height: 1.6; max-width: 65ch; margin: 0;">' + guide.intro + '</p>' +
+      '</div>' +
+
+      '<!-- BLUEPRINT -->' +
+      '<div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; text-align: center; box-shadow: var(--shadow-sm);">' +
+        '<div style="font-family: var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-faint); margin-bottom:8px;">Sentence Structure Blueprint</div>' +
+        '<div style="font-size:clamp(15px, 4vw, 17px); font-weight:700; color:var(--accent); font-family:var(--font-mono); line-height:1.4;">' + escapeHtml(guide.blueprint) + '</div>' +
+      '</div>' +
+
+      '<!-- WORD ORDER RULES -->' +
+      '<div>' +
+        '<div class="section-label" style="margin-bottom:12px; font-size:12px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-faint);">Word Order &amp; Placement rules</div>' +
+        '<div style="display:flex; flex-direction:column; gap:12px;">' +
+          rulesHtml +
+        '</div>' +
+      '</div>' +
+
+      '<!-- EXAMPLES -->' +
+      '<div>' +
+        '<div class="section-label" style="margin-bottom:12px; font-size:12px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-faint);">Real-world Conversational Examples</div>' +
+        '<div style="display:flex; flex-direction:column; gap:12px;">' +
+          examplesHtml +
+        '</div>' +
+      '</div>' +
+
+      '<!-- ACTION CTA -->' +
+      '<div style="text-align: center; margin-top: 12px; margin-bottom: 30px;">' +
+        '<button class="btn-solid" id="btnStartGrammarQuiz" style="width:100%; justify-content:center; padding: 14px 24px; font-size:15px; font-weight:600; border-radius:8px;">' +
+          'Test Yourself: Start Practice Exercises' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:8px;"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>' +
+        '</button>' +
+      '</div>';
+
+    // Bind Speak buttons for examples
+    guide.examples.forEach(function(ex) {
+      var idStr = 'btnSpeakEx_' + topicId + '_' + ex.f.substring(0, 5).replace(/[^a-zA-Z0-9]/g, '');
+      var btn = $(idStr);
+      if (btn) {
+        bindTap(btn, function(e) {
+          e.stopPropagation();
+          speakFrench(ex.f);
+        });
+      }
+    });
+
+    // Bind Start Quiz button
+    var startBtn = $('btnStartGrammarQuiz');
+    if (startBtn) {
+      bindTap(startBtn, function() {
+        startFrenchGrammarPractice(topicId);
+      });
+    }
+  }
+
+  function startFrenchGrammarPractice(topicId) {
+    var topic = ALL_FRENCH_GRAMMAR_TOPICS.find(function(t) { return t.id === topicId; });
+    if (!topic) return;
+
+    Progress.frenchGrammar = Progress.frenchGrammar || {};
+    Progress.frenchGrammar[topicId] = Progress.frenchGrammar[topicId] || {};
+
+    frenchGrammarSession = {
+      topicId: topicId,
+      title: topic.title,
+      questions: topic.questions,
+      currentIdx: 0,
+      correctAttempts: 0
+    };
+
+    $('french-grammar-topics-screen').style.display = 'none';
+    $('french-grammar-practice-screen').style.display = 'block';
+    
+    renderFrenchGrammarQuestion();
+  }
+
+  function renderFrenchGrammarQuestion() {
+    var session = frenchGrammarSession;
+    var qIdx = session.currentIdx;
+    var question = session.questions[qIdx];
+    var numQ = session.questions.length;
+    
+    $('frenchGrammarPracticeProgress').textContent = 'Sentence ' + (qIdx + 1) + ' of ' + numQ;
+    var pct = Math.round((qIdx / numQ) * 100);
+    $('frenchGrammarPracticeProgressFill').style.width = pct + '%';
+    
+    // Calculate total score of this specific topic session
+    var topicAnswers = Progress.frenchGrammar[session.topicId] || {};
+    var sessionScore = 0;
+    for (var i = 0; i < numQ; i++) {
+      if (topicAnswers[i]) sessionScore += 10;
+    }
+    $('frenchGrammarSessionScore').textContent = sessionScore;
+
+    var stageEl = $('frenchGrammarStage');
+    if (!stageEl) return;
+
+    // Replace ________ with an elegant underlined blank container
+    var sentenceFormatted = question.sentence.replace(/________/g, '<span style="border-bottom: 2px dashed var(--accent); color: var(--accent); padding: 0 12px; font-weight: 700; font-family: var(--font-body);">&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span>');
+
+    // Shuffle options dynamically so they are mixed as A, B, C, D
+    var originalOptions = question.options;
+    var correctOptionText = originalOptions[question.answer];
+    var indices = originalOptions.map(function(_, i) { return i; });
+    for (var idxI = indices.length - 1; idxI > 0; idxI--) {
+      var idxJ = Math.floor(Math.random() * (idxI + 1));
+      var tempIdx = indices[idxI];
+      indices[idxI] = indices[idxJ];
+      indices[idxJ] = tempIdx;
+    }
+    var shuffledOptions = indices.map(function(idx) { return originalOptions[idx]; });
+    var newAnswerIdx = shuffledOptions.indexOf(correctOptionText);
+
+    var optionsHtml = shuffledOptions.map(function(opt, idx) {
+      var letter = String.fromCharCode(65 + idx); // A, B, C, D
+      return '<button class="grammar-option-btn" data-idx="' + idx + '" type="button">' +
+        '<div class="grammar-option-circle">' + letter + '</div>' +
+        '<span>' + escapeHtml(opt) + '</span>' +
+      '</button>';
+    }).join('');
+
+    stageEl.innerHTML = 
+      '<div style="font-family: var(--font-mono); font-size:11px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:12px;">Construct the French sentence</div>' +
+      '<div class="cloze-sentence" style="font-size: clamp(16px, 4.5vw, 20px); font-family: var(--font-body); color: var(--ink); line-height: 1.6; margin-bottom: 24px; text-align: left; font-weight:500;">' + sentenceFormatted + '</div>' +
+      '<div style="display: flex; flex-direction: column; gap: 10px;" id="frenchGrammarOptionsCol">' +
+        optionsHtml +
+      '</div>' +
+      '<div id="frenchGrammarFeedbackBox" style="display:none;"></div>' +
+      '<div style="display:none; margin-top:24px; justify-content: flex-end;" id="frenchGrammarActionRow">' +
+        '<button class="btn-solid" id="btnFrenchGrammarNext">Next Sentence</button>' +
+      '</div>';
+
+    var optionBtns = stageEl.querySelectorAll('.grammar-option-btn');
+    var feedbackBox = stageEl.querySelector('#frenchGrammarFeedbackBox');
+    var actionRow = stageEl.querySelector('#frenchGrammarActionRow');
+    var hasAnswered = false;
+
+    Array.prototype.forEach.call(optionBtns, function(btn) {
+      bindTap(btn, function() {
+        if (hasAnswered) return;
+        hasAnswered = true;
+
+        var selectedIdx = parseInt(btn.getAttribute('data-idx'), 10);
+        var isCorrect = selectedIdx === newAnswerIdx;
+
+        // Disable all option buttons and highlight correct/incorrect
+        Array.prototype.forEach.call(optionBtns, function(b) {
+          b.disabled = true;
+          var bIdx = parseInt(b.getAttribute('data-idx'), 10);
+          if (bIdx === newAnswerIdx) {
+            b.classList.add('correct');
+          }
+        });
+
+        if (isCorrect) {
+          btn.classList.add('correct');
+          session.correctAttempts++;
+          
+          // Mark as solved
+          Progress.frenchGrammar[session.topicId][qIdx] = true;
+          // Increment actual global user score!
+          Progress.score += 10;
+          Progress.streak++;
+          
+          // Read aloud the finished sentence!
+          var completeSentence = question.sentence.replace(/________/g, correctOptionText);
+          speakFrench(completeSentence);
+          
+          saveProgress();
+        } else {
+          btn.classList.add('incorrect');
+          Progress.streak = 0;
+          saveProgress();
+        }
+
+        // Render explanation tip beautifully
+        var explanationMarkdown = question.tip;
+        var htmlTip = explanationMarkdown.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        htmlTip = htmlTip.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+        feedbackBox.innerHTML = 
+          '<div class="grammar-tip-box" style="animation: fadeIn 0.3s ease-out;">' +
+            '<div class="grammar-tip-title">Grammar Tip &amp; Context</div>' +
+            '<div class="grammar-tip-text" style="font-size:13.5px; line-height:1.6; color:var(--ink-dim);">' + htmlTip + '</div>' +
+          '</div>';
+        feedbackBox.style.display = 'block';
+        actionRow.style.display = 'flex';
+      });
+    });
+
+    bindTap(stageEl.querySelector('#btnFrenchGrammarNext'), function() {
+      session.currentIdx++;
+      if (session.currentIdx < numQ) {
+        renderFrenchGrammarQuestion();
+      } else {
+        renderFrenchGrammarTopicComplete();
+      }
+    });
+  }
+
+  function renderFrenchGrammarTopicComplete() {
+    var session = frenchGrammarSession;
+    var completedCount = session.correctAttempts;
+    var totalQuestions = session.questions.length;
+    var pctCorrect = Math.round((completedCount / totalQuestions) * 100);
+    
+    var isFullySolvedNow = true;
+    var topicAnswers = Progress.frenchGrammar[session.topicId] || {};
+    for (var i = 0; i < totalQuestions; i++) {
+      if (!topicAnswers[i]) isFullySolvedNow = false;
+    }
+
+    var isGoodScore = pctCorrect >= 80;
+
+    var iconBg = isGoodScore ? 'rgba(76,175,80,0.1)' : 'rgba(255,152,0,0.1)';
+    var iconColor = isGoodScore ? '#4CAF50' : '#FF9800';
+    var iconSvg = isGoodScore ? 
+      '<svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/></svg>' :
+      '<svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+
+    var title = isGoodScore ? 'Excellent Travail ! 🎉' : 'Lesson Finished';
+    var desc = 'You scored <b>' + pctCorrect + '%</b> on <b>' + escapeHtml(session.title) + '</b>.<br>' +
+      (isGoodScore ? 'You have a great grasp of this daily texting concept.' : 'Keep practicing to get a perfect score and master the lesson!');
+
+    var stageEl = $('frenchGrammarStage');
+    stageEl.innerHTML = 
+      '<div class="match-complete" style="text-align: center; width:100%;">' +
+        '<div class="checkpoint-icon" style="background:' + iconBg + '; color:' + iconColor + '; margin: 0 auto 18px;">' + iconSvg + '</div>' +
+        '<div class="checkpoint-title" style="font-size:24px; margin-bottom:8px;">' + title + '</div>' +
+        '<div class="checkpoint-sub" style="font-size:14px; max-width: 50ch; margin: 0 auto 20px;">' + desc + '</div>' +
+        '<div class="checkpoint-stats" style="margin-bottom:24px;">' +
+          '<div class="cstat"><b>' + completedCount + '/' + totalQuestions + '</b><span>Correct</span></div>' +
+          '<div class="cstat"><b>+' + (completedCount * 10) + '</b><span>Score gained</span></div>' +
+          '<div class="cstat"><b>Lvl ' + levelFromScore(Progress.score) + '</b><span>Current level</span></div>' +
+        '</div>' +
+        '<div class="checkpoint-actions" style="justify-content:center; gap: 12px; display:flex;">' +
+          '<button class="btn-solid" id="btnFrenchGrammarFinishDone">View Lessons</button>' +
+          '<button class="btn-ghost" id="btnFrenchGrammarRetryTopic">Try Again</button>' +
+        '</div>' +
+      '</div>';
+
+    bindTap($('btnFrenchGrammarFinishDone'), function() {
+      exitFrenchGrammarPractice();
+    });
+
+    bindTap($('btnFrenchGrammarRetryTopic'), function() {
+      Progress.frenchGrammar[session.topicId] = {};
+      saveProgress();
+      startFrenchGrammarPractice(session.topicId);
+    });
+  }
+
+  function exitFrenchGrammarPractice() {
+    if('speechSynthesis' in window) speechSynthesis.cancel();
+    var sessionTopicId = frenchGrammarSession ? frenchGrammarSession.topicId : null;
+    frenchGrammarSession = null;
+    $('french-grammar-practice-screen').style.display = 'none';
+    if (sessionTopicId) {
+      showFrenchGrammarLessonDetail(sessionTopicId);
+    } else {
+      $('french-grammar-lesson-detail-screen').style.display = 'none';
+      $('french-grammar-topics-screen').style.display = 'block';
+      renderFrenchGrammarTopics();
+    }
+  }
+
   function speakFrench(text) {
     if (!('speechSynthesis' in window)) return;
     speechSynthesis.cancel();
@@ -3486,7 +4184,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   /* ---------------- navigation ---------------- */
   function showView(name){
     hideWordMeaningModal();
-    [viewHome, viewStudy, viewHistory, viewMatch, viewGrammar, viewSpeaking, $('view-language-select'), $('view-french-study'), $('view-french-reading')].forEach(function(v){ if(v) v.classList.remove('active'); });
+    [viewHome, viewStudy, viewHistory, viewMatch, viewGrammar, viewSpeaking, $('view-language-select'), $('view-french-study'), $('view-french-reading'), $('view-french-grammar')].forEach(function(v){ if(v) v.classList.remove('active'); });
     if(name==='home'){
       viewHome.classList.add('active'); renderHome(); scheduleReminder(true);
     } else if(name==='language-select') {
@@ -3506,6 +4204,14 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       $('french-reading-passage-screen').style.display = 'none';
       $('french-reading-list-screen').style.display = 'block';
       renderFrenchReadingTextsList();
+    } else if(name==='french-grammar') {
+      var frenchGrammarView = $('view-french-grammar');
+      if (frenchGrammarView) frenchGrammarView.classList.add('active');
+      reminderLoop = false; dismissReminder();
+      $('french-grammar-practice-screen').style.display = 'none';
+      $('french-grammar-lesson-detail-screen').style.display = 'none';
+      $('french-grammar-topics-screen').style.display = 'block';
+      renderFrenchGrammarTopics();
     } else if(name==='history'){
       viewHistory.classList.add('active'); reminderLoop = false; dismissReminder();
       var sInput = $('historySearchInput');
@@ -7623,6 +8329,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     bindTap($('levelPill'), function(){
       closeSidebar();
       $('settingsLevel').value = userEnglishLevel || 'A1';
+      $('settingsFrenchLevel').value = currentFrenchLevel || 'all';
       $('settingsWordsPerDay').value = String(userWordsPerDay || 10);
       $('settingsLearningLanguage').value = userLearningLanguage || 'english';
       $('settingsTranslationLanguage').value = userTranslationLanguage || 'english';
@@ -7645,6 +8352,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
 
     bindTap($('saveSettingsBtn'), async function(){
       var newLvl = $('settingsLevel').value;
+      var newFrenchLvl = $('settingsFrenchLevel').value;
       var newWordsPerDay = parseInt($('settingsWordsPerDay').value, 10) || 10;
       var newLang = $('settingsLearningLanguage').value;
       var newTrans = $('settingsTranslationLanguage').value;
@@ -7656,12 +8364,14 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       try {
         await update(ref(db, 'users/' + currentUser.uid), {
           englishLevel: newLvl,
+          frenchLevel: newFrenchLvl,
           wordsPerDay: newWordsPerDay,
           learningLanguage: newLang,
           translationLanguage: newTrans
         });
         
         userEnglishLevel = newLvl;
+        currentFrenchLevel = newFrenchLvl;
         userWordsPerDay = newWordsPerDay;
         userLearningLanguage = newLang;
         userTranslationLanguage = newTrans;
@@ -7674,8 +8384,12 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
         }
         TOTAL = WORDS.length;
         
+        filterFrenchVocabulary();
+        
         if (userLearningLanguage === 'english') {
           Progress.index = 0;
+        } else {
+          activeFrenchIndex = 0;
         }
         
         renderHome();
@@ -7735,6 +8449,24 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
 
     bindTap($('cardFrenchReading'), function() {
       showView('french-reading');
+    });
+
+    bindTap($('cardFrenchGrammar'), function() {
+      showView('french-grammar');
+    });
+
+    bindTap($('btnFrenchGrammarBack'), function() {
+      showView('home');
+    });
+
+    bindTap($('btnFrenchGrammarLessonBack'), function() {
+      $('french-grammar-lesson-detail-screen').style.display = 'none';
+      $('french-grammar-topics-screen').style.display = 'block';
+      renderFrenchGrammarTopics();
+    });
+
+    bindTap($('btnFrenchGrammarPracticeBack'), function() {
+      exitFrenchGrammarPractice();
     });
 
     // French vocabulary levels filters
