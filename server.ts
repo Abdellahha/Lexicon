@@ -436,6 +436,126 @@ Do not include any introductory or concluding chatter. Return ONLY the plain tex
     }
   });
 
+  // API Route to generate a French grammar cloze exercise with dynamic colored alignment
+  app.post("/api/generate-french-grammar-exercise", async (req, res) => {
+    try {
+      const { topicId, topicTitle, translationLanguage } = req.body;
+      const targetLang = (translationLanguage || "english").toLowerCase() === "arabic" ? "Arabic" : "English";
+
+      const ai = getGeminiClient();
+      if (!ai) {
+        // Fallback question if Gemini is not available
+        return res.json({
+          sentence: "Je ________ très fatigué ce soir. (I am very tired tonight.)",
+          options: ["suis", "es", "est", "sommes"],
+          answer: 0,
+          tip: targetLang === "Arabic" ? "استخدم <b>suis</b> (صيغة المضارع للفعل être) مع <b>Je</b> للقول 'أنا أكون'." : "Use <b>suis</b> (present tense of être) with <b>Je</b> to say 'I am'.",
+          fullSentence: "Je suis très fatigué ce soir.",
+          translation: targetLang === "Arabic" ? "أنا متعب جدا الليلة." : "I am very tired tonight.",
+          alignedFrench: "<subject>Je</subject> <verb>suis</verb> <adverb>très</adverb> <adjective>fatigué</adjective> <adverb>ce soir</adverb>.",
+          alignedTranslation: targetLang === "Arabic" ? "<subject>أنا</subject> <adjective>متعب</adjective> <adverb>جداً</adverb> <adverb>الليلة</adverb>." : "<subject>I</subject> <verb>am</verb> <adverb>very</adverb> <adjective>tired</adjective> <adverb>tonight</adverb>."
+        });
+      }
+
+      const prompt = `You are an expert French language educator. Your goal is to generate a single high-quality, authentic, conversational French grammar cloze multiple-choice exercise.
+The exercise MUST focus on practicing the following grammar topic:
+Topic ID: "${topicId}"
+Topic Title: "${topicTitle}"
+
+Translation Language: ${targetLang}
+
+CRITICAL RULES FOR GENERATION:
+1. Generate a natural, conversational, or text-message styled French sentence.
+2. Replace exactly ONE key element (the targeted grammar word for this topic) with the blank "________".
+3. Provide exactly 4 options, with only one correct option and three plausible distractors.
+4. Specify the correct option index (0-3).
+5. Provide a clear, friendly grammar tip/explanation (written in ${targetLang}) explaining the rule.
+6. Provide the complete French sentence (with blank filled) and its natural translation in ${targetLang}.
+7. Generate aligned representations ("alignedFrench" and "alignedTranslation") by wrapping corresponding grammatical parts in these tags:
+   - <subject>...</subject> for subjects or subject pronouns (e.g., Je, Tu, Il, Nous, I, You, He, We, أنا, أنت, هو, نحن)
+   - <verb>...</verb> for conjugated verbs or auxiliary verbs (e.g., suis, as, va, comprends, am, have, going to, understand, أكون, تملك, يذهب, أفهم)
+   - <object>...</object> for direct/indirect objects or main nouns (e.g., message, pizza, café, adresse, message, pizza, coffee, address, رسالة, بيتزا, قهوة, عنوان)
+   - <adjective>...</adjective> for adjectives (e.g., content, disponible, libre, happy, available, free, سعيد, متاح, متفرغ)
+   - <adverb>...</adverb> for adverbs, prepositions, or time expressions (e.g., ce soir, demain, très, beaucoup, tonight, tomorrow, very, a lot, الليلة, غداً, جداً, كثيراً)
+   Ensure the tags correspond precisely between the French sentence and its ${targetLang} translation to enable direct word-order comparison! Always close all opened tags correctly.`;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-3.5-flash",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              sentence: {
+                type: Type.STRING,
+                description: "The French sentence with exactly one '________' representing the missing target element. Example: 'Je ________ fatigué ce soir.'"
+              },
+              options: {
+                type: Type.ARRAY,
+                items: { type: Type.STRING },
+                description: "Exactly 4 options to fill the blank. All must be plausible French words, but only one is correct."
+              },
+              answer: {
+                type: Type.INTEGER,
+                description: "The 0-based index of the correct option in the options array."
+              },
+              tip: {
+                type: Type.STRING,
+                description: "A short, elegant grammar tip or context explaining why the correct option is right. Write it in the preferred translation language."
+              },
+              fullSentence: {
+                type: Type.STRING,
+                description: "The full French sentence with the correct option filled in."
+              },
+              translation: {
+                type: Type.STRING,
+                description: "The natural translation of the full French sentence in the target language (English or Arabic)."
+              },
+              alignedFrench: {
+                type: Type.STRING,
+                description: "The complete French sentence wrapped in tags: <subject>, <verb>, <object>, <adjective>, <adverb>."
+              },
+              alignedTranslation: {
+                type: Type.STRING,
+                description: "The target translation sentence with the corresponding core components wrapped in the exact same tags."
+              }
+            },
+            required: [
+              "sentence",
+              "options",
+              "answer",
+              "tip",
+              "fullSentence",
+              "translation",
+              "alignedFrench",
+              "alignedTranslation"
+            ]
+          }
+        }
+      });
+
+      const responseText = response.text || "{}";
+      const result = JSON.parse(responseText.trim());
+      res.json(result);
+
+    } catch (err: any) {
+      console.error("Error generating French grammar exercise with Gemini:", err);
+      // Failover fallback
+      const targetLang = (req.body.translationLanguage || "english").toLowerCase() === "arabic" ? "Arabic" : "English";
+      res.json({
+        sentence: "Je ________ très fatigué ce soir. (I am very tired tonight.)",
+        options: ["suis", "es", "est", "sommes"],
+        answer: 0,
+        tip: targetLang === "Arabic" ? "استخدم <b>suis</b> مع <b>Je</b> للقول 'أنا أكون'." : "Use <b>suis</b> with <b>Je</b> to say 'I am'.",
+        fullSentence: "Je suis très fatigué ce soir.",
+        translation: targetLang === "Arabic" ? "أنا متعب جدا الليلة." : "I am very tired tonight.",
+        alignedFrench: "<subject>Je</subject> <verb>suis</verb> <adverb>très</adverb> <adjective>fatigué</adjective> <adverb>ce soir</adverb>.",
+        alignedTranslation: targetLang === "Arabic" ? "<subject>أنا</subject> <adjective>متعب</adjective> <adverb>جداً</adverb> <adverb>الليلة</adverb>." : "<subject>I</subject> <verb>am</verb> <adverb>very</adverb> <adjective>tired</adjective> <adverb>tonight</adverb>."
+      });
+    }
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({

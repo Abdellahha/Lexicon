@@ -891,6 +891,24 @@ body {
   background: var(--bg-2);
   border-color: var(--ink);
 }
+
+/* Custom AI Grammar styles */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.mode-select-btn {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mode-select-btn:hover {
+  border-color: var(--accent) !important;
+  transform: translateY(-1px);
+}
+.mode-select-btn.active {
+  border-color: var(--accent) !important;
+  background: rgba(28, 28, 28, 0.04) !important;
+  box-shadow: 0 0 0 2px rgba(28, 28, 28, 0.1);
+}
 </style>
 </head>
 <body>
@@ -3512,6 +3530,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   ];
 
   var frenchGrammarSession = null;
+  var currentGrammarPracticeMode = 'static'; // 'static' or 'ai'
 
   function renderFrenchGrammarTopics() {
     Progress.frenchGrammar = Progress.frenchGrammar || {};
@@ -3639,6 +3658,35 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
         '</div>' +
       '</div>' +
 
+      '<!-- PRACTICE MODE SELECTOR -->' +
+      '<div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 14px; text-align: left; margin-top: 10px;">' +
+        '<div style="font-family: var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-faint);">Choose Practice Mode</div>' +
+        '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">' +
+          '<button id="btnModeStatic" class="mode-select-btn active" style="padding: 14px; border-radius: 8px; border: 1.5px solid var(--accent); background: var(--bg-card); cursor: pointer; text-align: left; display: flex; flex-direction: column; gap: 4px; transition: all 0.2s;">' +
+            '<span style="font-weight: 700; font-size: 14px; color: var(--ink);">Standard Quiz</span>' +
+            '<span style="font-size: 11px; color: var(--ink-dim);">3 focused static exercises</span>' +
+          '</button>' +
+          '<button id="btnModeAI" class="mode-select-btn" style="padding: 14px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--bg-card); cursor: pointer; text-align: left; display: flex; flex-direction: column; gap: 4px; transition: all 0.2s;">' +
+            '<span style="font-weight: 700; font-size: 14px; color: var(--ink); display: flex; align-items: center; gap: 6px;">AI Unlimited ✨</span>' +
+            '<span style="font-size: 11px; color: var(--ink-dim);">Infinite AI-generated practice</span>' +
+          '</button>' +
+        '</div>' +
+        
+        '<!-- TRANSLATION PREFERENCE FOR AI -->' +
+        '<div id="aiPracticeSettings" style="display: none; border-top: 1px solid var(--border); padding-top: 14px; flex-direction: column; gap: 10px; animation: fadeIn 0.2s ease-out;">' +
+          '<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">' +
+            '<span style="font-size: 13px; color: var(--ink-dim); font-weight: 500;">Translation Preference:</span>' +
+            '<span style="font-size: 13px; font-weight: 700; color: var(--accent); text-transform: capitalize; display: flex; align-items: center; gap: 6px;">' + 
+              (userTranslationLanguage === 'arabic' ? 'Arabic · العربية 🇲🇦' : 'English 🇬🇧') + 
+            '</span>' +
+          '</div>' +
+          '<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">' +
+            '<span style="font-size: 13px; color: var(--ink-dim); font-weight: 500;">Syntax Color Alignment:</span>' +
+            '<span style="font-size: 11px; background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 2px 8px; border-radius: 20px; font-weight: 600;">Active Alignment</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+
       '<!-- ACTION CTA -->' +
       '<div style="text-align: center; margin-top: 12px; margin-bottom: 30px;">' +
         '<button class="btn-solid" id="btnStartGrammarQuiz" style="width:100%; justify-content:center; padding: 14px 24px; font-size:15px; font-weight:600; border-radius:8px;">' +
@@ -3659,6 +3707,34 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       }
     });
 
+    // Reset practice mode to static by default when opening a new lesson detail
+    currentGrammarPracticeMode = 'static';
+
+    // Bind Mode Selection toggles
+    var btnModeStatic = $('btnModeStatic');
+    var btnModeAI = $('btnModeAI');
+    var aiSettingsPanel = $('aiPracticeSettings');
+
+    if (btnModeStatic && btnModeAI) {
+      bindTap(btnModeStatic, function() {
+        currentGrammarPracticeMode = 'static';
+        btnModeStatic.classList.add('active');
+        btnModeAI.classList.remove('active');
+        btnModeStatic.style.borderColor = 'var(--accent)';
+        btnModeAI.style.borderColor = 'var(--border)';
+        if (aiSettingsPanel) aiSettingsPanel.style.display = 'none';
+      });
+
+      bindTap(btnModeAI, function() {
+        currentGrammarPracticeMode = 'ai';
+        btnModeAI.classList.add('active');
+        btnModeStatic.classList.remove('active');
+        btnModeAI.style.borderColor = 'var(--accent)';
+        btnModeStatic.style.borderColor = 'var(--border)';
+        if (aiSettingsPanel) aiSettingsPanel.style.display = 'flex';
+      });
+    }
+
     // Bind Start Quiz button
     var startBtn = $('btnStartGrammarQuiz');
     if (startBtn) {
@@ -3666,6 +3742,36 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
         startFrenchGrammarPractice(topicId);
       });
     }
+  }
+
+  function countFrenchWords(text) {
+    if (!text) return 0;
+    var frenchPart = text.split('(')[0].trim();
+    frenchPart = frenchPart.replace(/<[^>]*>/g, '');
+    var clean = frenchPart.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, ' ');
+    var words = clean.split(/\s+/).filter(function(w) { return w.length > 0; });
+    return words.length;
+  }
+
+  function formatAlignedHtml(text) {
+    if (!text) return '';
+    var res = text;
+    res = res.replace(/<subject>/gi, '<span style="color: #3b82f6; font-weight: 700; border-bottom: 2px solid rgba(59, 130, 246, 0.4); padding-bottom: 2px; margin-right: 2px; margin-left: 2px; display: inline-block;" title="Subject / Pronoun">');
+    res = res.replace(/<\/subject>/gi, '</span>');
+    
+    res = res.replace(/<verb>/gi, '<span style="color: #10b981; font-weight: 700; border-bottom: 2px solid rgba(16, 185, 129, 0.4); padding-bottom: 2px; margin-right: 2px; margin-left: 2px; display: inline-block;" title="Verb">');
+    res = res.replace(/<\/verb>/gi, '</span>');
+    
+    res = res.replace(/<object>/gi, '<span style="color: #8b5cf6; font-weight: 700; border-bottom: 2px solid rgba(139, 92, 246, 0.4); padding-bottom: 2px; margin-right: 2px; margin-left: 2px; display: inline-block;" title="Object / Noun">');
+    res = res.replace(/<\/object>/gi, '</span>');
+    
+    res = res.replace(/<adjective>/gi, '<span style="color: #ec4899; font-weight: 700; border-bottom: 2px solid rgba(236, 72, 153, 0.4); padding-bottom: 2px; margin-right: 2px; margin-left: 2px; display: inline-block;" title="Adjective">');
+    res = res.replace(/<\/adjective>/gi, '</span>');
+    
+    res = res.replace(/<adverb>/gi, '<span style="color: #f59e0b; font-weight: 700; border-bottom: 2px solid rgba(245, 158, 11, 0.4); padding-bottom: 2px; margin-right: 2px; margin-left: 2px; display: inline-block;" title="Adverb / Preposition / Time">');
+    res = res.replace(/<\/adverb>/gi, '</span>');
+    
+    return res;
   }
 
   function startFrenchGrammarPractice(topicId) {
@@ -3678,9 +3784,12 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     frenchGrammarSession = {
       topicId: topicId,
       title: topic.title,
-      questions: topic.questions,
+      questions: currentGrammarPracticeMode === 'ai' ? [] : topic.questions,
       currentIdx: 0,
-      correctAttempts: 0
+      correctAttempts: 0,
+      practicedWordsCount: 0,
+      isAI: currentGrammarPracticeMode === 'ai',
+      milestoneReached: false
     };
 
     $('french-grammar-topics-screen').style.display = 'none';
@@ -3689,26 +3798,76 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     renderFrenchGrammarQuestion();
   }
 
-  function renderFrenchGrammarQuestion() {
+  async function renderFrenchGrammarQuestion() {
     var session = frenchGrammarSession;
     var qIdx = session.currentIdx;
-    var question = session.questions[qIdx];
-    var numQ = session.questions.length;
     
-    $('frenchGrammarPracticeProgress').textContent = 'Sentence ' + (qIdx + 1) + ' of ' + numQ;
+    // Update progress text with the total practiced words count!
+    $('frenchGrammarPracticeProgress').textContent = 'Practiced: ' + (session.practicedWordsCount || 0) + ' words';
+    
+    var numQ = session.isAI ? 5 : session.questions.length;
     var pct = Math.round((qIdx / numQ) * 100);
+    if (pct > 100) pct = 100;
     $('frenchGrammarPracticeProgressFill').style.width = pct + '%';
     
     // Calculate total score of this specific topic session
-    var topicAnswers = Progress.frenchGrammar[session.topicId] || {};
-    var sessionScore = 0;
-    for (var i = 0; i < numQ; i++) {
-      if (topicAnswers[i]) sessionScore += 10;
+    var sessionScore = session.isAI ? (session.correctAttempts * 10) : 0;
+    if (!session.isAI) {
+      var topicAnswers = Progress.frenchGrammar[session.topicId] || {};
+      for (var i = 0; i < numQ; i++) {
+        if (topicAnswers[i]) sessionScore += 10;
+      }
     }
     $('frenchGrammarSessionScore').textContent = sessionScore;
 
     var stageEl = $('frenchGrammarStage');
     if (!stageEl) return;
+
+    var question;
+    if (session.isAI) {
+      if (session.questions[qIdx]) {
+        question = session.questions[qIdx];
+      } else {
+        // Show loading state
+        stageEl.innerHTML = 
+          '<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 60px 20px; gap: 16px; text-align:center;">' +
+            '<div style="border: 3px solid rgba(var(--accent-rgb), 0.1); border-top: 3px solid var(--accent); border-radius: 50%; width: 36px; height: 36px; animation: spin 1s linear infinite;"></div>' +
+            '<div style="font-weight: 700; color: var(--ink); font-family: var(--font-display); font-size: 16px;">Generating Dynamic AI Exercise...</div>' +
+            '<div style="font-size: 13px; color: var(--ink-dim); max-width: 40ch; line-height:1.5;">Gemini is tailoring an authentic conversational exercise for the lesson "' + escapeHtml(session.title) + '".</div>' +
+          '</div>';
+        
+        try {
+          var response = await fetch('/api/generate-french-grammar-exercise', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              topicId: session.topicId,
+              topicTitle: session.title,
+              translationLanguage: userTranslationLanguage
+            })
+          });
+          if (!response.ok) throw new Error('API failed');
+          question = await response.json();
+          session.questions[qIdx] = question;
+        } catch (err) {
+          console.error('Error fetching AI grammar question:', err);
+          // Fallback question
+          question = {
+            sentence: "Je ________ très fatigué ce soir. (I am very tired tonight.)",
+            options: ["suis", "es", "est", "sommes"],
+            answer: 0,
+            tip: userTranslationLanguage === 'arabic' ? "استخدم <b>suis</b> مع <b>Je</b> للقول 'أنا أكون'." : "Use <b>suis</b> with <b>Je</b> to say 'I am'.",
+            fullSentence: "Je suis très fatigué ce soir.",
+            translation: userTranslationLanguage === 'arabic' ? "أنا متعب جدا الليلة." : "I am very tired tonight.",
+            alignedFrench: "<subject>Je</subject> <verb>suis</verb> <adverb>très</adverb> <adjective>fatigué</adjective> <adverb>ce soir</adverb>.",
+            alignedTranslation: userTranslationLanguage === 'arabic' ? "<subject>أنا</subject> <adjective>متعب</adjective> <adverb>جداً</adverb> <adverb>الليلة</adverb>." : "<subject>I</subject> <verb>am</verb> <adverb>very</adverb> <adjective>tired</adjective> <adverb>tonight</adverb>."
+          };
+          session.questions[qIdx] = question;
+        }
+      }
+    } else {
+      question = session.questions[qIdx];
+    }
 
     // Replace ________ with an elegant underlined blank container
     var sentenceFormatted = question.sentence.replace(/________/g, '<span style="border-bottom: 2px dashed var(--accent); color: var(--accent); padding: 0 12px; font-weight: 700; font-family: var(--font-body);">&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span>');
@@ -3734,9 +3893,16 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       '</button>';
     }).join('');
 
+    // If there is a preferred translation, display it nicely as a secondary cue on the question card
+    var questionTranslationHtml = '';
+    if (session.isAI && question.translation) {
+      questionTranslationHtml = '<div style="font-size:13.5px; color:var(--ink-dim); margin-top: -12px; margin-bottom: 24px;' + (userTranslationLanguage === 'arabic' ? ' text-align:right; direction:rtl;' : '') + '">💡 ' + escapeHtml(question.translation) + '</div>';
+    }
+
     stageEl.innerHTML = 
       '<div style="font-family: var(--font-mono); font-size:11px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:12px;">Construct the French sentence</div>' +
       '<div class="cloze-sentence" style="font-size: clamp(16px, 4.5vw, 20px); font-family: var(--font-body); color: var(--ink); line-height: 1.6; margin-bottom: 24px; text-align: left; font-weight:500;">' + sentenceFormatted + '</div>' +
+      questionTranslationHtml +
       '<div style="display: flex; flex-direction: column; gap: 10px;" id="frenchGrammarOptionsCol">' +
         optionsHtml +
       '</div>' +
@@ -3767,18 +3933,27 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
           }
         });
 
+        var completeSentence = question.fullSentence || question.sentence.replace(/________/g, correctOptionText);
+        var wordsInSentence = countFrenchWords(completeSentence);
+        session.practicedWordsCount = (session.practicedWordsCount || 0) + wordsInSentence;
+        
+        // Update words practiced display immediately
+        $('frenchGrammarPracticeProgress').textContent = 'Practiced: ' + session.practicedWordsCount + ' words';
+
         if (isCorrect) {
           btn.classList.add('correct');
           session.correctAttempts++;
           
-          // Mark as solved
-          Progress.frenchGrammar[session.topicId][qIdx] = true;
+          if (!session.isAI) {
+            // Mark as solved only for static mode
+            Progress.frenchGrammar[session.topicId][qIdx] = true;
+          }
+          
           // Increment actual global user score!
           Progress.score += 10;
           Progress.streak++;
           
           // Read aloud the finished sentence!
-          var completeSentence = question.sentence.replace(/________/g, correctOptionText);
           speakFrench(completeSentence);
           
           saveProgress();
@@ -3793,11 +3968,45 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
         var htmlTip = explanationMarkdown.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
         htmlTip = htmlTip.replace(/`([^`]+)`/g, '<code>$1</code>');
 
+        var alignmentBoxHtml = '';
+        if (session.isAI && question.alignedFrench && question.alignedTranslation) {
+          alignmentBoxHtml = 
+            '<div style="margin-top:16px; border:1px solid rgba(var(--accent-rgb), 0.15); background:rgba(var(--accent-rgb), 0.02); border-radius:12px; padding:18px 20px; text-align:left;">' +
+              '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">' +
+                '<span style="font-family: var(--font-display); font-size:14px; font-weight:700; color:var(--ink);">Word Alignment &amp; Grammar Colors</span>' +
+                '<span style="font-size:9.5px; background:var(--accent); color:#fff; padding:2px 6px; border-radius:4px; font-weight:700; font-family:var(--font-mono);">SYNTAX MATCH</span>' +
+              '</div>' +
+              
+              '<div style="display:flex; flex-direction:column; gap:12px; margin-bottom:14px;">' +
+                '<div>' +
+                  '<div style="font-family: var(--font-mono); font-size:10px; color:var(--ink-faint); text-transform:uppercase; margin-bottom:4px; letter-spacing:0.04em;">French Sentence Structure</div>' +
+                  '<div style="font-size:15.5px; line-height:1.6; font-family:var(--font-body); color:var(--ink);">' + formatAlignedHtml(question.alignedFrench) + '</div>' +
+                '</div>' +
+                
+                '<div style="border-top:1px dashed var(--border); padding-top:10px;">' +
+                  '<div style="font-family: var(--font-mono); font-size:10px; color:var(--ink-faint); text-transform:uppercase; margin-bottom:4px; letter-spacing:0.04em;">' + (userTranslationLanguage === 'arabic' ? 'Arabic' : 'English') + ' Translation Alignment</div>' +
+                  '<div style="font-size:15px; line-height:1.6; font-family:var(--font-body); color:var(--ink);' + (userTranslationLanguage === 'arabic' ? ' text-align:right; direction:rtl;' : '') + '">' + formatAlignedHtml(question.alignedTranslation) + '</div>' +
+                '</div>' +
+              '</div>' +
+              
+              '<!-- COLOR LEGEND KEY -->' +
+              '<div style="display:flex; flex-wrap:wrap; gap:8px 12px; border-top:1px solid var(--border); padding-top:12px; font-size:11px; font-family:var(--font-mono);">' +
+                '<div style="display:flex; align-items:center; gap:5px;"><span style="display:inline-block; width:8px; height:8px; background:#3b82f6; border-radius:2px;"></span><span style="color:var(--ink-dim);">Subject</span></div>' +
+                '<div style="display:flex; align-items:center; gap:5px;"><span style="display:inline-block; width:8px; height:8px; background:#10b981; border-radius:2px;"></span><span style="color:var(--ink-dim);">Verb</span></div>' +
+                '<div style="display:flex; align-items:center; gap:5px;"><span style="display:inline-block; width:8px; height:8px; background:#8b5cf6; border-radius:2px;"></span><span style="color:var(--ink-dim);">Object</span></div>' +
+                '<div style="display:flex; align-items:center; gap:5px;"><span style="display:inline-block; width:8px; height:8px; background:#ec4899; border-radius:2px;"></span><span style="color:var(--ink-dim);">Adjective</span></div>' +
+                '<div style="display:flex; align-items:center; gap:5px;"><span style="display:inline-block; width:8px; height:8px; background:#f59e0b; border-radius:2px;"></span><span style="color:var(--ink-dim);">Adverb/Time</span></div>' +
+              '</div>' +
+            '</div>';
+        }
+
         feedbackBox.innerHTML = 
-          '<div class="grammar-tip-box" style="animation: fadeIn 0.3s ease-out;">' +
+          '<div class="grammar-tip-box" style="animation: fadeIn 0.3s ease-out; margin-top: 20px;">' +
             '<div class="grammar-tip-title">Grammar Tip &amp; Context</div>' +
             '<div class="grammar-tip-text" style="font-size:13.5px; line-height:1.6; color:var(--ink-dim);">' + htmlTip + '</div>' +
-          '</div>';
+          '</div>' +
+          alignmentBoxHtml;
+
         feedbackBox.style.display = 'block';
         actionRow.style.display = 'flex';
       });
@@ -3805,10 +4014,19 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
 
     bindTap(stageEl.querySelector('#btnFrenchGrammarNext'), function() {
       session.currentIdx++;
-      if (session.currentIdx < numQ) {
-        renderFrenchGrammarQuestion();
+      if (session.isAI) {
+        if (session.currentIdx === 5 && !session.milestoneReached) {
+          session.milestoneReached = true;
+          renderFrenchGrammarTopicComplete();
+        } else {
+          renderFrenchGrammarQuestion();
+        }
       } else {
-        renderFrenchGrammarTopicComplete();
+        if (session.currentIdx < numQ) {
+          renderFrenchGrammarQuestion();
+        } else {
+          renderFrenchGrammarTopicComplete();
+        }
       }
     });
   }
@@ -3816,14 +4034,8 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   function renderFrenchGrammarTopicComplete() {
     var session = frenchGrammarSession;
     var completedCount = session.correctAttempts;
-    var totalQuestions = session.questions.length;
-    var pctCorrect = Math.round((completedCount / totalQuestions) * 100);
-    
-    var isFullySolvedNow = true;
-    var topicAnswers = Progress.frenchGrammar[session.topicId] || {};
-    for (var i = 0; i < totalQuestions; i++) {
-      if (!topicAnswers[i]) isFullySolvedNow = false;
-    }
+    var totalQuestions = session.isAI ? session.questions.length : session.questions.length;
+    var pctCorrect = totalQuestions > 0 ? Math.round((completedCount / totalQuestions) * 100) : 100;
 
     var isGoodScore = pctCorrect >= 80;
 
@@ -3833,9 +4045,18 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       '<svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/></svg>' :
       '<svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 
-    var title = isGoodScore ? 'Excellent Travail ! 🎉' : 'Lesson Finished';
-    var desc = 'You scored <b>' + pctCorrect + '%</b> on <b>' + escapeHtml(session.title) + '</b>.<br>' +
+    var title = session.isAI ? 'AI Milestone Reached ! 🌟' : (isGoodScore ? 'Excellent Travail ! 🎉' : 'Lesson Finished');
+    var desc = session.isAI ?
+      'Amazing job! You have practiced <b>' + session.practicedWordsCount + ' French words</b> across ' + totalQuestions + ' dynamically tailored conversational sentences!' :
+      'You scored <b>' + pctCorrect + '%</b> on <b>' + escapeHtml(session.title) + '</b>.<br>' +
       (isGoodScore ? 'You have a great grasp of this daily texting concept.' : 'Keep practicing to get a perfect score and master the lesson!');
+
+    var secondaryActionBtn = '';
+    if (session.isAI) {
+      secondaryActionBtn = '<button class="btn-ghost" id="btnFrenchGrammarKeepGoing" style="font-weight:600; display:flex; align-items:center; gap:6px;">Keep Practicing ✨</button>';
+    } else {
+      secondaryActionBtn = '<button class="btn-ghost" id="btnFrenchGrammarRetryTopic">Try Again</button>';
+    }
 
     var stageEl = $('frenchGrammarStage');
     stageEl.innerHTML = 
@@ -3844,13 +4065,13 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
         '<div class="checkpoint-title" style="font-size:24px; margin-bottom:8px;">' + title + '</div>' +
         '<div class="checkpoint-sub" style="font-size:14px; max-width: 50ch; margin: 0 auto 20px;">' + desc + '</div>' +
         '<div class="checkpoint-stats" style="margin-bottom:24px;">' +
+          '<div class="cstat"><b>' + session.practicedWordsCount + '</b><span>Words Practiced</span></div>' +
           '<div class="cstat"><b>' + completedCount + '/' + totalQuestions + '</b><span>Correct</span></div>' +
-          '<div class="cstat"><b>+' + (completedCount * 10) + '</b><span>Score gained</span></div>' +
           '<div class="cstat"><b>Lvl ' + levelFromScore(Progress.score) + '</b><span>Current level</span></div>' +
         '</div>' +
         '<div class="checkpoint-actions" style="justify-content:center; gap: 12px; display:flex;">' +
           '<button class="btn-solid" id="btnFrenchGrammarFinishDone">View Lessons</button>' +
-          '<button class="btn-ghost" id="btnFrenchGrammarRetryTopic">Try Again</button>' +
+          secondaryActionBtn +
         '</div>' +
       '</div>';
 
@@ -3858,11 +4079,20 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       exitFrenchGrammarPractice();
     });
 
-    bindTap($('btnFrenchGrammarRetryTopic'), function() {
-      Progress.frenchGrammar[session.topicId] = {};
-      saveProgress();
-      startFrenchGrammarPractice(session.topicId);
-    });
+    if (session.isAI) {
+      var keepGoingBtn = $('btnFrenchGrammarKeepGoing');
+      if (keepGoingBtn) {
+        bindTap(keepGoingBtn, function() {
+          renderFrenchGrammarQuestion();
+        });
+      }
+    } else {
+      bindTap($('btnFrenchGrammarRetryTopic'), function() {
+        Progress.frenchGrammar[session.topicId] = {};
+        saveProgress();
+        startFrenchGrammarPractice(session.topicId);
+      });
+    }
   }
 
   function exitFrenchGrammarPractice() {
