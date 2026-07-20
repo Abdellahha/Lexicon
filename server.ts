@@ -672,7 +672,11 @@ Do not include any introductory or concluding chatter. Return ONLY the plain tex
   function getFrenchGrammarFallback(topicId: string, targetLang: string, historyList: string[]) {
     const topicKey = (topicId && FALLBACKS[topicId]) ? topicId : "etre_avoir";
     const list = FALLBACKS[topicKey];
-    let filtered = list.filter(item => !historyList.includes(item.fullSentence));
+    const cleanHistory = historyList.map(h => h.toLowerCase().replace(/[^a-z0-9]/g, ""));
+    let filtered = list.filter(item => {
+      const cleanFull = item.fullSentence.toLowerCase().replace(/[^a-z0-9]/g, "");
+      return !cleanHistory.includes(cleanFull);
+    });
     if (filtered.length === 0) {
       filtered = list;
     }
@@ -735,9 +739,9 @@ Contextual Scenario to utilize for vocabulary: ${selectedScenario}
 ${historyInstruction}
 
 CRITICAL RULES FOR GENERATION:
-1. Generate a natural, conversational, or text-message styled French sentence. Make sure it is realistic and utilizes everyday modern vocabulary.
+1. Generate a completely unique, natural, conversational, or text-message styled French sentence. Avoid common patterns. Use extremely diverse subjects (names like Marc, Chloe, etc., or plural pronouns), nouns, and verbs to ensure zero repetition.
 2. Replace exactly ONE key element (the targeted grammar word for this topic) with the blank "________".
-3. Provide exactly 4 options, with only one correct option and three plausible distractors.
+3. Provide exactly 4 options, with only one correct option and three plausible distractors. Ensure they are correct according to the specific context.
 4. Specify the correct option index (0-3).
 5. Provide a clear, friendly grammar tip/explanation (written in ${targetLang}) explaining the rule.
 6. Provide the complete French sentence (with blank filled) and its natural translation in ${targetLang}.
@@ -753,6 +757,7 @@ CRITICAL RULES FOR GENERATION:
         model: "gemini-3.5-flash",
         contents: prompt,
         config: {
+          temperature: 0.85,
           responseMimeType: "application/json",
           responseSchema: {
             type: Type.OBJECT,

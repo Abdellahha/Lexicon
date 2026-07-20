@@ -3935,11 +3935,9 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     
     if (frenchGrammarSession.isAI) {
       prefetchFrenchGrammarQuestion(0);
-      prefetchFrenchGrammarQuestion(1);
     } else {
-      // Prefetch next questions starting from the end of the static array (index 3)
+      // Prefetch next question starting from the end of the static array (index 3)
       prefetchFrenchGrammarQuestion(frenchGrammarSession.questions.length);
-      prefetchFrenchGrammarQuestion(frenchGrammarSession.questions.length + 1);
     }
     
     renderFrenchGrammarQuestion();
@@ -3952,8 +3950,8 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     // Update progress text with the total practiced words count!
     $('frenchGrammarPracticeProgress').textContent = 'Practiced: ' + (session.practicedWordsCount || 0) + ' words';
     
-    var numQ = session.isAI ? 5 : 50;
-    var pct = Math.round((qIdx / numQ) * 100);
+    var numQ = 50;
+    var pct = session.isAI ? ((qIdx % 10) * 10) : Math.round((qIdx / numQ) * 100);
     if (pct > 100) pct = 100;
     $('frenchGrammarPracticeProgressFill').style.width = pct + '%';
     
@@ -3974,7 +3972,6 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     if (session.questions[qIdx]) {
       question = session.questions[qIdx];
       prefetchFrenchGrammarQuestion(qIdx + 1);
-      prefetchFrenchGrammarQuestion(qIdx + 2);
     } else {
       // Show loading state
       stageEl.innerHTML = 
@@ -3985,8 +3982,6 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
         '</div>';
       
       prefetchFrenchGrammarQuestion(qIdx);
-      prefetchFrenchGrammarQuestion(qIdx + 1);
-      prefetchFrenchGrammarQuestion(qIdx + 2);
       return;
     }
 
@@ -4136,12 +4131,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     bindTap(stageEl.querySelector('#btnFrenchGrammarNext'), function() {
       session.currentIdx++;
       if (session.isAI) {
-        if (session.currentIdx === 5 && !session.milestoneReached) {
-          session.milestoneReached = true;
-          renderFrenchGrammarTopicComplete();
-        } else {
-          renderFrenchGrammarQuestion();
-        }
+        renderFrenchGrammarQuestion();
       } else {
         if (session.currentIdx < numQ) {
           renderFrenchGrammarQuestion();
