@@ -3837,13 +3837,15 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
           '</div>';
         
         try {
+          var historySentences = session.questions.filter(Boolean).map(function(q) { return q.fullSentence; });
           var response = await fetch('/api/generate-french-grammar-exercise', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               topicId: session.topicId,
               topicTitle: session.title,
-              translationLanguage: userTranslationLanguage
+              translationLanguage: userTranslationLanguage,
+              history: historySentences
             })
           });
           if (!response.ok) throw new Error('API failed');
@@ -3851,17 +3853,23 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
           session.questions[qIdx] = question;
         } catch (err) {
           console.error('Error fetching AI grammar question:', err);
-          // Fallback question
-          question = {
-            sentence: "Je ________ très fatigué ce soir. (I am very tired tonight.)",
-            options: ["suis", "es", "est", "sommes"],
-            answer: 0,
-            tip: userTranslationLanguage === 'arabic' ? "استخدم <b>suis</b> مع <b>Je</b> للقول 'أنا أكون'." : "Use <b>suis</b> with <b>Je</b> to say 'I am'.",
-            fullSentence: "Je suis très fatigué ce soir.",
-            translation: userTranslationLanguage === 'arabic' ? "أنا متعب جدا الليلة." : "I am very tired tonight.",
-            alignedFrench: "<subject>Je</subject> <verb>suis</verb> <adverb>très</adverb> <adjective>fatigué</adjective> <adverb>ce soir</adverb>.",
-            alignedTranslation: userTranslationLanguage === 'arabic' ? "<subject>أنا</subject> <adjective>متعب</adjective> <adverb>جداً</adverb> <adverb>الليلة</adverb>." : "<subject>I</subject> <verb>am</verb> <adverb>very</adverb> <adjective>tired</adjective> <adverb>tonight</adverb>."
-          };
+          // Fallback question based on topic questions if available
+          var topic = ALL_FRENCH_GRAMMAR_TOPICS.find(function(t) { return t.id === session.topicId; });
+          if (topic && topic.questions && topic.questions.length > 0) {
+            var randQ = topic.questions[Math.floor(Math.random() * topic.questions.length)];
+            question = JSON.parse(JSON.stringify(randQ));
+          } else {
+            question = {
+              sentence: "Je ________ très fatigué ce soir. (I am very tired tonight.)",
+              options: ["suis", "es", "est", "sommes"],
+              answer: 0,
+              tip: userTranslationLanguage === 'arabic' ? "استخدم <b>suis</b> مع <b>Je</b> للقول 'أنا أكون'." : "Use <b>suis</b> with <b>Je</b> to say 'I am'.",
+              fullSentence: "Je suis très fatigué ce soir.",
+              translation: userTranslationLanguage === 'arabic' ? "أنا متعب جدا الليلة." : "I am very tired tonight.",
+              alignedFrench: "<subject>Je</subject> <verb>suis</verb> <adverb>très</adverb> <adjective>fatigué</adjective> <adverb>ce soir</adverb>.",
+              alignedTranslation: userTranslationLanguage === 'arabic' ? "<subject>أنا</subject> <adjective>متعب</adjective> <adverb>جداً</adverb> <adverb>الليلة</adverb>." : "<subject>I</subject> <verb>am</verb> <adverb>very</adverb> <adjective>tired</adjective> <adverb>tonight</adverb>."
+            };
+          }
           session.questions[qIdx] = question;
         }
       }
