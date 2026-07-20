@@ -49,6 +49,26 @@ a{color:inherit;}
   *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}
 }
 
+/* ---------- responsive helpers ---------- */
+.lang-select-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  text-align: left;
+}
+.reading-passage-card {
+  padding: 24px;
+}
+@media (max-width: 600px) {
+  .lang-select-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .reading-passage-card {
+    padding: 16px;
+  }
+}
+
 /* ---------- shell ---------- */
 .app{max-width:920px;margin:0 auto;padding:0 24px 80px;position:relative;}
 .topbar{
@@ -1374,7 +1394,7 @@ body {
       Welcome to Lexicon. To begin, select the language you would like to master today. You can change this selection at any time.
     </p>
     
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; margin-bottom: 24px;">
+    <div class="lang-select-grid" style="margin-bottom: 24px;">
       <!-- English Card -->
       <button class="recent-row" id="btnSelectEnglish" style="flex-direction: column; align-items: flex-start; gap: 14px; padding: 24px; cursor: pointer; text-align: left; height: 100%; border-radius: 12px; border: 1.5px solid var(--border); background: var(--bg-card); display: flex;">
         <div style="font-size: 32px; line-height: 1;">🇬🇧</div>
@@ -1414,20 +1434,10 @@ body {
         <span>Word <b id="frenchStudyCount">0</b>/<span id="frenchStudyTotal">0</span></span>
       </div>
     </div>
-    
-    <!-- Level bar / filter for French study -->
-    <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap;" id="frenchLevelFilterRow">
-      <button class="practice-btn" id="btnFLevelAll" style="padding: 6px 12px; font-size: 11px; background: var(--accent); color: var(--accent-ink);">All Levels</button>
-      <button class="practice-btn" id="btnFLevelA1" style="padding: 6px 12px; font-size: 11px;">A1</button>
-      <button class="practice-btn" id="btnFLevelA2" style="padding: 6px 12px; font-size: 11px;">A2</button>
-      <button class="practice-btn" id="btnFLevelB1" style="padding: 6px 12px; font-size: 11px;">B1</button>
-      <button class="practice-btn" id="btnFLevelB2" style="padding: 6px 12px; font-size: 11px;">B2</button>
-      <button class="practice-btn" id="btnFLevelC1" style="padding: 6px 12px; font-size: 11px;">C1</button>
-    </div>
 
-    <div class="stage" id="frenchStage" style="min-height: auto; align-items: stretch; display: block; max-width: 580px; margin: 0 auto;">
+    <div class="stage" id="frenchStage" style="max-width: 580px; margin: 0 auto; width: 100%;">
       <!-- Container for the active French study card -->
-      <div id="frenchCardContainer">
+      <div id="frenchCardContainer" style="width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
         <!-- populated dynamically -->
       </div>
     </div>
@@ -1530,7 +1540,21 @@ body {
             <option value="C1" style="background: var(--bg-card); color: var(--ink);">C1 · Advanced</option>
             <option value="all" style="background: var(--bg-card); color: var(--ink);">All Levels · Mix</option>
           </select>
-          <span style="font-size: 11px; color: var(--ink-dim); margin-top: 6px; display: block; line-height: 1.4;">Adapts the vocabulary pack lists to match this specific difficulty tier.</span>
+          <span style="font-size: 11px; color: var(--ink-dim); margin-top: 6px; display: block; line-height: 1.4;">Adapts the English vocabulary pack lists to match this specific difficulty tier.</span>
+        </div>
+
+        <!-- French Level Selection -->
+        <div>
+          <label style="font-family: var(--font-mono); font-size: 10px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; display: block; margin-bottom: 8px;">French Level</label>
+          <select id="settingsFrenchLevel" style="width: 100%; background: var(--bg-1); color: var(--ink); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; font-size: 14px; outline: none;">
+            <option value="A1" style="background: var(--bg-card); color: var(--ink);">A1 · Beginner</option>
+            <option value="A2" style="background: var(--bg-card); color: var(--ink);">A2 · Elementary</option>
+            <option value="B1" style="background: var(--bg-card); color: var(--ink);">B1 · Intermediate</option>
+            <option value="B2" style="background: var(--bg-card); color: var(--ink);">B2 · Upper Intermediate</option>
+            <option value="C1" style="background: var(--bg-card); color: var(--ink);">C1 · Advanced</option>
+            <option value="all" style="background: var(--bg-card); color: var(--ink);">All Levels · Mix</option>
+          </select>
+          <span style="font-size: 11px; color: var(--ink-dim); margin-top: 6px; display: block; line-height: 1.4;">Adapts the French vocabulary packs to match this specific difficulty tier.</span>
         </div>
         
         <!-- Daily Word Target Selection -->
@@ -1825,6 +1849,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   var isTranslationRevealed = false;
   var userLearningLanguage = null;
   var userTranslationLanguage = 'english';
+  var frenchSession = { phase: 'listen', attempts: 0 };
 
   /* ---------------- auth state ---------------- */
   var currentUser = null; // set once Firebase confirms the session
@@ -1888,6 +1913,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     Progress.score = parsed.score || 0;
     Progress.streak = parsed.streak || 0;
     userEnglishLevel = data.englishLevel || 'all';
+    currentFrenchLevel = data.frenchLevel || 'all';
     userWordsPerDay = parseInt(data.wordsPerDay, 10) || 10;
     userLearningLanguage = data.learningLanguage || null;
     userTranslationLanguage = data.translationLanguage || 'english';
@@ -2835,149 +2861,67 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     return count;
   }
 
-  function renderFrenchCard() {
-    var totalWords = filteredFrenchWords.length;
-    $('frenchStudyTotal').textContent = totalWords;
-    $('frenchStudyScore').textContent = Progress.score;
-    $('frenchStudyStreak').textContent = Progress.streak;
-    
-    if (totalWords === 0) {
-      $('frenchCardContainer').innerHTML = 
-        '<div style="text-align: center; padding: 40px 20px;">' +
-          '<h4 style="font-family: var(--font-display); font-size: 20px; font-weight: 700; margin-bottom: 8px;">No Words Available</h4>' +
-          '<p style="color: var(--ink-dim); font-size: 14px; margin-bottom: 16px;">Try changing the French Level filter above to see more words.</p>' +
-        '</div>';
-      $('frenchStudyCount').textContent = '0';
-      return;
+  function buildFrenchCloze(example, word) {
+    if (!example) return null;
+    var re = new RegExp('\\b' + word.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + '\\w*', 'i');
+    var escaped = escapeHtml(example);
+    if (re.test(escaped)) {
+      return escaped.replace(re, '<span class="cloze-blank">' + '\u2007'.repeat(Math.max(4, word.length)) + '</span>');
     }
-    
-    if (activeFrenchIndex >= totalWords) {
-      $('frenchCardContainer').innerHTML = 
-        '<div style="text-align: center; padding: 40px 20px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow);">' +
-          '<span style="font-size: 40px; display: block; margin-bottom: 12px;">🎉</span>' +
-          '<h4 style="font-family: var(--font-display); font-size: 22px; font-weight: 700; font-style: italic; margin-bottom: 8px; color: var(--ink);">Syllabus Completed!</h4>' +
-          '<p style="color: var(--ink-dim); font-size: 14px; line-height: 1.5; max-width: 320px; margin: 0 auto 20px;">You have studied all French words in this level! Keep reviewing or try a higher difficulty level.</p>' +
-          '<button class="btn-solid" id="btnRestartFrenchStudy" style="margin: 0 auto;">Restart Level</button>' +
-        '</div>';
-      
-      bindTap($('btnRestartFrenchStudy'), function() {
-        activeFrenchIndex = 0;
-        renderFrenchCard();
-      });
-      $('frenchStudyCount').textContent = totalWords;
-      return;
+    var lowerEx = escaped.toLowerCase();
+    var lowerW = word.toLowerCase();
+    var idx = lowerEx.indexOf(lowerW);
+    if (idx !== -1) {
+      return escaped.substring(0, idx) + 
+             '<span class="cloze-blank">' + '\u2007'.repeat(Math.max(4, word.length)) + '</span>' + 
+             escaped.substring(idx + word.length);
     }
-    
+    return escaped;
+  }
+
+  async function checkFrenchAnswer(value) {
     var w = filteredFrenchWords[activeFrenchIndex];
-    $('frenchStudyCount').textContent = activeFrenchIndex + 1;
+    var input = $('typeFrenchInput');
+    var feedback = $('frenchTypeFeedback');
+    if (!input || !feedback) return;
+
+    var target = w.word.toLowerCase().trim();
+    var targetClean = target.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     
+    var given = (value || '').toLowerCase().trim();
+    var givenClean = given.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+    if (given === target) {
+      input.classList.remove('wrong');
+      input.classList.add('correct');
+      feedback.style.color = 'var(--success)';
+      feedback.innerHTML = 'Parfait ! Excellent job.';
+      
+      await handleFrenchWordLearned(w);
+    } else if (givenClean === targetClean) {
+      input.classList.remove('wrong');
+      input.classList.add('correct');
+      feedback.style.color = 'var(--success)';
+      feedback.innerHTML = 'Presque parfait ! Attention aux accents : <b>' + w.word + '</b>';
+      
+      await handleFrenchWordLearned(w);
+    } else {
+      input.classList.add('wrong');
+      feedback.style.color = 'var(--error)';
+      feedback.textContent = 'Keep trying! Check your spelling.';
+      input.focus();
+      
+      setTimeout(function(){
+        input.classList.remove('wrong');
+      }, 400);
+    }
+  }
+
+  async function handleFrenchWordLearned(w) {
     Progress.frenchLearned = Progress.frenchLearned || {};
-    var wordLearned = !!Progress.frenchLearned[w.word];
-    isTranslationRevealed = false;
+    var wordAlreadyLearned = !!Progress.frenchLearned[w.word];
     
-    $('frenchCardContainer').innerHTML = 
-      '<div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 32px 24px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 20px; position: relative;">' +
-        '<div style="display: flex; justify-content: space-between; align-items: center;">' +
-          '<div style="display: flex; gap: 6px;">' +
-            '<span class="tag tag-pos">' + w.pos + '</span>' +
-            '<span class="tag tag-level" style="background: rgba(139, 92, 246, 0.08); color: #8b5cf6; border-color: rgba(139, 92, 246, 0.15);">' + w.level + '</span>' +
-          '</div>' +
-          (wordLearned ? '<span style="font-family: var(--font-mono); font-size: 10px; color: var(--success); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Learned</span>' : '') +
-        '</div>' +
-        
-        '<div style="font-family: var(--font-display); font-size: clamp(32px, 8vw, 44px); font-weight: 800; font-style: italic; color: var(--ink); text-align: center; margin: 10px 0;">' + w.word + '</div>' +
-        
-        '<div style="display: flex; justify-content: center; margin-bottom: 4px;">' +
-          '<button class="practice-btn" id="btnPronounceFrenchWord" style="display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 100px;">' +
-            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 9v6h4l5 5V4L9 9H5Z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7" stroke="currentColor" stroke-width="1.8"/></svg>' +
-            '<span>Écouter</span>' +
-          '</button>' +
-        '</div>' +
-
-        '<div class="meaning-block" style="text-align: left; margin: 0; padding-top: 16px; border-top: 1px solid var(--border-soft);">' +
-          '<div class="meaning-label" style="color: var(--ink-faint);">Signification</div>' +
-          '<div class="meaning-text" style="font-size: 15px; font-weight: 500; margin-top: 4px;">' + w.meaning + '</div>' +
-          
-          (w.synonyms ? '<div style="margin-top: 12px;"><div class="synonyms-text" style="font-size: 13px;"><span class="synonyms-label" style="font-family: var(--font-mono); font-size: 11px;">Synonymes:</span> ' + w.synonyms + '</div></div>' : '') +
-          
-          '<div class="example-text" style="margin-top: 16px; font-style: italic; font-size: 14px; border-left: 2px solid var(--border); padding-left: 10px;">"' + w.example + '"</div>' +
-        '</div>' +
-
-        '<div id="frenchTranslationRevealBox" style="background: var(--bg-1); border: 1px dashed var(--border); border-radius: 8px; padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s;" class="hover-card">' +
-          '<div id="frenchTranslationPlaceholder" style="font-size: 13px; font-family: var(--font-mono); color: var(--ink-dim); display: flex; align-items: center; justify-content: center; gap: 8px;">' +
-            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 8 6 6 6-6"/></svg>' +
-            'Click to Reveal Translation (' + (userTranslationLanguage === 'arabic' ? 'العربية' : 'English') + ')' +
-          '</div>' +
-          '<div id="frenchTranslationContent" style="display: none; text-align: left;">' +
-            '<div style="font-family: var(--font-mono); font-size: 10px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Translation (' + (userTranslationLanguage === 'arabic' ? 'العربية' : 'English') + ')</div>' +
-            '<div style="font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--ink);' + (userTranslationLanguage === 'arabic' ? ' text-align: right; direction: rtl;' : '') + '">' + 
-              (userTranslationLanguage === 'arabic' ? w.translation_ar : w.translation_en) + 
-            '</div>' +
-            '<div style="font-size: 13px; color: var(--ink-dim); margin-top: 8px;' + (userTranslationLanguage === 'arabic' ? ' text-align: right; direction: rtl; font-style: normal;' : ' font-style: italic;') + '">' + 
-              '"' + (userTranslationLanguage === 'arabic' ? w.example_translation_ar : w.example_translation_en) + '"' + 
-            '</div>' +
-          '</div>' +
-        '</div>' +
-
-        '<div style="display: flex; gap: 12px; margin-top: 8px; width: 100%;">' +
-          '<button class="practice-btn" id="btnPrevFrench" style="flex: 1; justify-content: center; height: 44px; display: flex; align-items: center;">' +
-            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>' +
-            '<span style="margin-left: 6px;">Back</span>' +
-          '</button>' +
-          '<button class="btn-solid" id="btnMarkFrenchLearned" style="flex: 2; justify-content: center; height: 44px; margin: 0; display: flex; align-items: center; gap: 6px; background: ' + (wordLearned ? 'var(--bg-1)' : 'var(--success)') + '; color: ' + (wordLearned ? 'var(--ink)' : 'var(--accent-ink)') + '; border: ' + (wordLearned ? '1px solid var(--border)' : 'none') + ';">' +
-            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>' +
-            '<span>' + (wordLearned ? 'Learned ✓' : 'Mark as Learned') + '</span>' +
-          '</button>' +
-          '<button class="practice-btn" id="btnNextFrench" style="flex: 1; justify-content: center; height: 44px; display: flex; align-items: center;">' +
-            '<span style="margin-right: 6px;">Next</span>' +
-            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>' +
-          '</button>' +
-        '</div>' +
-      '</div>';
-
-    bindTap($('frenchTranslationRevealBox'), function() {
-      if (!isTranslationRevealed) {
-        isTranslationRevealed = true;
-        $('frenchTranslationPlaceholder').style.display = 'none';
-        $('frenchTranslationContent').style.display = 'block';
-      }
-    });
-
-    bindTap($('btnPronounceFrenchWord'), function() {
-      speakFrench(w.word);
-    });
-
-    bindTap($('btnPrevFrench'), function() {
-      if (activeFrenchIndex > 0) {
-        activeFrenchIndex--;
-        renderFrenchCard();
-      } else {
-        showToast("This is the first word.");
-      }
-    });
-
-    bindTap($('btnNextFrench'), function() {
-      if (activeFrenchIndex < totalWords - 1) {
-        activeFrenchIndex++;
-        renderFrenchCard();
-      } else {
-        showToast("This is the last word.");
-      }
-    });
-
-    bindTap($('btnMarkFrenchLearned'), async function() {
-      if (wordLearned) {
-        if (activeFrenchIndex < totalWords - 1) {
-          activeFrenchIndex++;
-          renderFrenchCard();
-        } else {
-          showToast("End of level!");
-        }
-        return;
-      }
-      
-      Progress.frenchLearned = Progress.frenchLearned || {};
-      
+    if (!wordAlreadyLearned) {
       var localDate = new Date();
       var year = localDate.getFullYear();
       var month = String(localDate.getMonth() + 1).padStart(2, '0');
@@ -2998,16 +2942,243 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       Progress.streak = Progress.streak || 1;
       
       showToast("Bien joué ! Word saved to learned vocabulary (+10 pts)");
-      
       await saveProgress();
-      
+    }
+    
+    setTimeout(function() {
+      var totalWords = filteredFrenchWords.length;
       if (activeFrenchIndex < totalWords - 1) {
         activeFrenchIndex++;
+        frenchSession.phase = 'listen';
         renderFrenchCard();
       } else {
-        renderFrenchCard(); // Trigger completed view
+        activeFrenchIndex++; // completed state
+        renderFrenchCard();
       }
-    });
+    }, 1500);
+  }
+
+  function renderFrenchCard() {
+    var totalWords = filteredFrenchWords.length;
+    $('frenchStudyTotal').textContent = totalWords;
+    $('frenchStudyScore').textContent = Progress.score;
+    $('frenchStudyStreak').textContent = Progress.streak;
+    
+    if (totalWords === 0) {
+      $('frenchCardContainer').innerHTML = 
+        '<div style="text-align: center; padding: 40px 20px; width: 100%;">' +
+          '<h4 style="font-family: var(--font-display); font-size: 20px; font-weight: 700; margin-bottom: 8px;">No Words Available</h4>' +
+          '<p style="color: var(--ink-dim); font-size: 14px; margin-bottom: 16px;">Try changing the French Level in Preferences to see more words.</p>' +
+        '</div>';
+      $('frenchStudyCount').textContent = '0';
+      return;
+    }
+    
+    if (activeFrenchIndex >= totalWords) {
+      $('frenchCardContainer').innerHTML = 
+        '<div style="text-align: center; padding: 40px 20px; width: 100%;">' +
+          '<span style="font-size: 40px; display: block; margin-bottom: 12px;">🎉</span>' +
+          '<h4 style="font-family: var(--font-display); font-size: 22px; font-weight: 700; font-style: italic; margin-bottom: 8px; color: var(--ink);">Syllabus Completed!</h4>' +
+          '<p style="color: var(--ink-dim); font-size: 14px; line-height: 1.5; max-width: 320px; margin: 0 auto 20px;">You have studied all French words in this level! Keep reviewing or try a higher difficulty level in Preferences.</p>' +
+          '<button class="btn-solid" id="btnRestartFrenchStudy" style="margin: 0 auto;">Restart Level</button>' +
+        '</div>';
+      
+      bindTap($('btnRestartFrenchStudy'), function() {
+        activeFrenchIndex = 0;
+        frenchSession.phase = 'listen';
+        renderFrenchCard();
+      });
+      $('frenchStudyCount').textContent = totalWords;
+      return;
+    }
+    
+    var w = filteredFrenchWords[activeFrenchIndex];
+    $('frenchStudyCount').textContent = activeFrenchIndex + 1;
+    
+    Progress.frenchLearned = Progress.frenchLearned || {};
+    var wordLearned = !!Progress.frenchLearned[w.word];
+    isTranslationRevealed = false;
+    
+    if (frenchSession.phase === 'listen') {
+      var html = 
+        '<div class="tags-row" style="margin-bottom: 12px; display: flex; gap: 8px; justify-content: center; align-items: center; width: 100%;">' +
+          '<span class="tag tag-pos">' + w.pos + '</span>' +
+          '<span class="tag tag-level" style="background: rgba(139, 92, 246, 0.08); color: #8b5cf6; border-color: rgba(139, 92, 246, 0.15);">' + w.level + '</span>' +
+          (wordLearned ? '<span style="font-family: var(--font-mono); font-size: 11px; color: var(--success); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Learned</span>' : '') +
+        '</div>' +
+        
+        '<div class="word-display" id="frenchWordDisplay" style="font-family: var(--font-display); font-weight: 800; font-style: italic; font-size: clamp(38px, 8vw, 56px); text-align: center; margin-bottom: 12px; transition: opacity 0.4s ease, transform 0.4s ease;">' + w.word + '</div>' +
+        
+        '<div class="sound-ring-wrap" style="margin-bottom: 16px; display: flex; justify-content: center;">' +
+          '<button class="sound-btn" id="btnPronounceFrenchWord" aria-label="Play pronunciation" style="background: var(--accent); color: var(--accent-ink); border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border: none; outline: none; transition: transform 0.2s;">' +
+            '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 9v6h4l5 5V4L9 9H5Z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7" stroke="currentColor" stroke-width="1.8"/></svg>' +
+          '</button>' +
+        '</div>' +
+
+        '<div class="meaning-block" style="text-align: center; max-width: 52ch; margin-bottom: 16px; width: 100%;">' +
+          '<div class="meaning-label" style="color: var(--ink-faint); font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Signification</div>' +
+          '<div class="meaning-text" style="font-size: 16px; font-weight: 500; margin-top: 4px; color: var(--ink);">' + w.meaning + '</div>' +
+          (w.synonyms ? '<div style="margin-top: 10px;"><div class="synonyms-text" style="font-size: 13px; color: var(--ink-dim);"><span class="synonyms-label" style="font-family: var(--font-mono); font-size: 11px; font-weight: 600;">Synonymes:</span> ' + w.synonyms + '</div></div>' : '') +
+          '<div class="example-text" style="margin-top: 16px; font-style: italic; font-size: 14px; color: var(--ink-dim); border-left: 2px solid var(--border); padding: 2px 0 2px 10px; text-align: left; max-width: 440px; margin-left: auto; margin-right: auto;">"' + highlightWord(w.example, w.word) + '"</div>' +
+        '</div>' +
+
+        '<div id="frenchTranslationRevealBox" style="background: var(--bg-1); border: 1px dashed var(--border); border-radius: 8px; padding: 14px; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 20px; width: 100%; max-width: 440px;" class="hover-card">' +
+          '<div id="frenchTranslationPlaceholder" style="font-size: 12px; font-family: var(--font-mono); color: var(--ink-dim); display: flex; align-items: center; justify-content: center; gap: 8px;">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 8 6 6 6-6"/></svg>' +
+            'Reveal Translation (' + (userTranslationLanguage === 'arabic' ? 'العربية' : 'English') + ')' +
+          '</div>' +
+          '<div id="frenchTranslationContent" style="display: none; text-align: left;">' +
+            '<div style="font-family: var(--font-mono); font-size: 10px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Translation (' + (userTranslationLanguage === 'arabic' ? 'العربية' : 'English') + ')</div>' +
+            '<div style="font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--ink);' + (userTranslationLanguage === 'arabic' ? ' text-align: right; direction: rtl;' : '') + '">' + 
+              (userTranslationLanguage === 'arabic' ? w.translation_ar : w.translation_en) + 
+            '</div>' +
+            '<div style="font-size: 13px; color: var(--ink-dim); margin-top: 6px;' + (userTranslationLanguage === 'arabic' ? ' text-align: right; direction: rtl; font-style: normal;' : ' font-style: italic;') + '">' + 
+              '"' + (userTranslationLanguage === 'arabic' ? w.example_translation_ar : w.example_translation_en) + '"' + 
+            '</div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="action-row" style="width: 100%; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">' +
+          '<button class="skip-btn" id="btnPrevFrench" style="padding: 10px 18px; font-size: 13px; display: flex; align-items: center; gap: 4px; border-radius: 6px;">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>' +
+            'Back' +
+          '</button>' +
+          '<button class="ready-btn" id="btnReadyTypeFrench" style="padding: 11px 24px; font-size: 13px; border-radius: 6px;">' +
+            "I've got it — let's type it" +
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="margin-left: 4px;"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+          '</button>' +
+          '<button class="skip-btn" id="btnNextFrench" style="padding: 10px 18px; font-size: 13px; display: flex; align-items: center; gap: 4px; border-radius: 6px;">' +
+            'Next' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>' +
+          '</button>' +
+        '</div>';
+
+      $('frenchCardContainer').innerHTML = html;
+
+      bindTap($('frenchTranslationRevealBox'), function() {
+        if (!isTranslationRevealed) {
+          isTranslationRevealed = true;
+          $('frenchTranslationPlaceholder').style.display = 'none';
+          $('frenchTranslationContent').style.display = 'block';
+        }
+      });
+
+      bindTap($('btnPronounceFrenchWord'), function() {
+        speakFrench(w.word);
+      });
+
+      bindTap($('btnPrevFrench'), function() {
+        if (activeFrenchIndex > 0) {
+          activeFrenchIndex--;
+          frenchSession.phase = 'listen';
+          renderFrenchCard();
+        } else {
+          showToast("This is the first word.");
+        }
+      });
+
+      bindTap($('btnNextFrench'), function() {
+        if (activeFrenchIndex < totalWords - 1) {
+          activeFrenchIndex++;
+          frenchSession.phase = 'listen';
+          renderFrenchCard();
+        } else {
+          showToast("This is the last word.");
+        }
+      });
+
+      bindTap($('btnReadyTypeFrench'), function() {
+        var wd = $('frenchWordDisplay');
+        if (wd) {
+          wd.style.opacity = '0';
+          wd.style.transform = 'translateY(-8px)';
+          setTimeout(function(){
+            frenchSession.phase = 'type';
+            renderFrenchCard();
+          }, 350);
+        } else {
+          frenchSession.phase = 'type';
+          renderFrenchCard();
+        }
+      });
+
+    } else {
+      var cloze = buildFrenchCloze(w.example, w.word);
+      
+      var html = 
+        '<div class="type-hint-label" style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-faint); margin-bottom: 12px; text-align: center;">Type the French word you just learned</div>' +
+        
+        (cloze ? '<div class="cloze-sentence" style="font-family: var(--font-display); font-size: clamp(18px, 4vw, 22px); line-height: 1.5; color: var(--ink); font-style: italic; text-align: center; margin-bottom: 16px; font-weight: 500; max-width: 440px;">' + cloze + '</div>' : '') +
+        
+        '<div class="meaning-block" style="text-align: center; max-width: 52ch; margin-bottom: 16px; width: 100%;">' +
+          '<div class="meaning-label" style="color: var(--ink-faint); font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Meaning</div>' +
+          '<div class="meaning-text" style="font-size: 15px; font-weight: 500; color: var(--ink);">' + w.meaning + '</div>' +
+        '</div>' +
+        
+        '<div id="frenchTranslationRevealBox" style="background: var(--bg-1); border: 1px dashed var(--border); border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 20px; width: 100%; max-width: 440px;" class="hover-card">' +
+          '<div id="frenchTranslationPlaceholder" style="font-size: 11px; font-family: var(--font-mono); color: var(--ink-dim); display: flex; align-items: center; justify-content: center; gap: 6px;">' +
+            '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 8 6 6 6-6"/></svg>' +
+            'Need translation help? Click to Reveal' +
+          '</div>' +
+          '<div id="frenchTranslationContent" style="display: none; text-align: left;">' +
+            '<div style="font-family: var(--font-mono); font-size: 9px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Translation</div>' +
+            '<div style="font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--ink);' + (userTranslationLanguage === 'arabic' ? ' text-align: right; direction: rtl;' : '') + '">' + 
+              (userTranslationLanguage === 'arabic' ? w.translation_ar : w.translation_en) + 
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        
+        '<div class="type-form" id="frenchTypeForm" style="width: 100%; max-width: 400px; display: flex; flex-direction: column; align-items: center;">' +
+          '<input type="text" class="type-input" id="typeFrenchInput" placeholder="Start typing in French…" autocomplete="off" autocapitalize="off" spellcheck="false" style="width: 100%; text-align: center; font-size: 18px; padding: 12px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--bg-1); color: var(--ink); margin-bottom: 8px;" />' +
+          '<div class="feedback" id="frenchTypeFeedback" style="font-size: 13px; font-weight: 600; margin-top: 4px; min-height: 20px;"></div>' +
+          '<div class="action-row" style="margin-top: 14px; width: 100%; display: flex; justify-content: center; gap: 10px;">' +
+            '<button type="button" class="skip-btn" id="btnFrenchBackToInfo" style="padding: 10px 18px; font-size: 13px; border-radius: 6px;">Back to Info</button>' +
+            '<button type="button" class="submit-btn" id="btnFrenchCheck" style="padding: 10px 24px; font-size: 13px; background: var(--ink); color: var(--bg-card); border-radius: 6px; font-weight: 600; border: none; outline: none;">Check</button>' +
+            '<button type="button" class="skip-btn" id="btnFrenchSkip" style="padding: 10px 18px; font-size: 13px; border-radius: 6px;">Skip</button>' +
+          '</div>' +
+        '</div>';
+
+      $('frenchCardContainer').innerHTML = html;
+
+      bindTap($('frenchTranslationRevealBox'), function() {
+        if (!isTranslationRevealed) {
+          isTranslationRevealed = true;
+          $('frenchTranslationPlaceholder').style.display = 'none';
+          $('frenchTranslationContent').style.display = 'block';
+        }
+      });
+
+      var input = $('typeFrenchInput');
+      if (input) {
+        input.focus();
+        input.addEventListener('keydown', function(ev){
+          if(ev.key === 'Enter'){
+            ev.preventDefault();
+            checkFrenchAnswer(input.value);
+          }
+        });
+      }
+
+      bindTap($('btnFrenchCheck'), function() {
+        checkFrenchAnswer(input.value);
+      });
+
+      bindTap($('btnFrenchBackToInfo'), function() {
+        frenchSession.phase = 'listen';
+        renderFrenchCard();
+      });
+
+      bindTap($('btnFrenchSkip'), function() {
+        if (activeFrenchIndex < totalWords - 1) {
+          activeFrenchIndex++;
+          frenchSession.phase = 'listen';
+          renderFrenchCard();
+        } else {
+          activeFrenchIndex++; // triggers completed view
+          renderFrenchCard();
+        }
+      });
+    }
   }
 
   function speakFrench(text) {
@@ -3167,7 +3338,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
           span.style.padding = '0 2px';
           span.style.borderRadius = '3px';
           span.style.transition = 'all 0.2s';
-          span.style.display = 'inline-block';
+          span.style.display = 'inline';
           
           span.onmouseenter = function() {
             span.style.background = 'var(--accent-soft)';
@@ -3326,6 +3497,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       var studyView = $('view-french-study');
       if (studyView) studyView.classList.add('active');
       reminderLoop = false; dismissReminder();
+      frenchSession.phase = 'listen';
       renderFrenchCard();
     } else if(name==='french-reading') {
       var readingView = $('view-french-reading');
