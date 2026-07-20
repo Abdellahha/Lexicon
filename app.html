@@ -3315,19 +3315,31 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
           sentence: "Salut ! Je ________ très content de te parler ce soir ! (Hi! I am very happy to talk to you tonight!)",
           options: ["suis", "es", "est", "sommes"],
           answer: 0,
-          tip: "Use **suis** (present tense of *être*) with **Je** to say 'I am'."
+          tip: "Use **suis** (present tense of *être*) with **Je** to say 'I am'.",
+          fullSentence: "Je suis très content de te parler ce soir !",
+          translation: "I am very happy to talk to you tonight!",
+          alignedFrench: "<subject>Je</subject> <verb>suis</verb> <adverb>très</adverb> <adjective>content</adjective> de te parler <adverb>ce soir</adverb> !",
+          alignedTranslation: "<subject>I</subject> <verb>am</verb> <adverb>very</adverb> <adjective>happy</adjective> to talk to you <adverb>tonight</adverb>!"
         },
         {
           sentence: "Est-ce que tu ________ le temps de m'aider par SMS ? (Do you have time to help me via text?)",
           options: ["as", "ai", "a", "avez"],
           answer: 0,
-          tip: "Use **as** (present tense of *avoir*) with **tu** to say 'you have'."
+          tip: "Use **as** (present tense of *avoir*) with **tu** to say 'you have'.",
+          fullSentence: "Est-ce que tu as le temps de m'aider par SMS ?",
+          translation: "Do you have time to help me via text?",
+          alignedFrench: "Est-ce que <subject>tu</subject> <verb>as</verb> <object>le temps</object> de m'aider par SMS ?",
+          alignedTranslation: "Do <subject>you</subject> <verb>have</verb> <object>time</object> to help me via text?"
         },
         {
           sentence: "Nous ________ faim, on va au restaurant ? (We are hungry, shall we go to the restaurant?)",
           options: ["avons", "sommes", "ont", "avez"],
           answer: 0,
-          tip: "In French, expressing hunger uses **avoir faim** (to have hunger). Use **avons** with **Nous**."
+          tip: "In French, expressing hunger uses **avoir faim** (to have hunger). Use **avons** with **Nous**.",
+          fullSentence: "Nous avons faim, on va au restaurant ?",
+          translation: "We are hungry, shall we go to the restaurant?",
+          alignedFrench: "<subject>Nous</subject> <verb>avons</verb> <object>faim</object>, on va au restaurant ?",
+          alignedTranslation: "<subject>We</subject> <verb>are</verb> <object>hungry</object>, shall we go to the restaurant?"
         }
       ]
     },
@@ -3354,19 +3366,31 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
           sentence: "________ tu es disponible demain pour un café ? (Are you available tomorrow for a coffee?)",
           options: ["Est-ce que", "Qu'est-ce que", "Où est", "Qui est"],
           answer: 0,
-          tip: "Simply prefix **Est-ce que** to any statement to turn it into a yes/no question!"
+          tip: "Simply prefix **Est-ce que** to any statement to turn it into a yes/no question!",
+          fullSentence: "Est-ce que tu es disponible demain pour un café ?",
+          translation: "Are you available tomorrow for a coffee?",
+          alignedFrench: "Est-ce que <subject>tu</subject> <verb>es</verb> <adjective>disponible</adjective> <adverb>demain</adverb> pour un café ?",
+          alignedTranslation: "Are <subject>you</subject> <adjective>available</adjective> <adverb>tomorrow</adverb> for a coffee?"
         },
         {
           sentence: "Où ________ tu habites à Paris ? (Where do you live in Paris?)",
           options: ["est-ce que", "qu'est-ce que", "est-ce qu'", "est-ce"],
           answer: 0,
-          tip: "Place **est-ce que** right after interrogative words like *Où* (Where), *Quand* (When), or *Pourquoi* (Why)."
+          tip: "Place **est-ce que** right after interrogative words like *Où* (Where), *Quand* (When), or *Pourquoi* (Why).",
+          fullSentence: "Où est-ce que tu habites à Paris ?",
+          translation: "Where do you live in Paris?",
+          alignedFrench: "<adverb>Où</adverb> est-ce que <subject>tu</subject> <verb>habites</verb> à Paris ?",
+          alignedTranslation: "<adverb>Where</adverb> do <subject>you</subject> <verb>live</verb> in Paris?"
         },
         {
           sentence: "Qu'________ il veut manger ce soir ? (What does he want to eat tonight?)",
           options: ["est-ce qu'", "est-ce que", "est-ce", "est-ce qui"],
           answer: 0,
-          tip: "**Que** contracts to **qu'** when preceding a pronoun starting with a vowel, like *il*, *elle*, or *on*."
+          tip: "**Que** contracts to **qu'** when preceding a pronoun starting with a vowel, like *il*, *elle*, or *on*.",
+          fullSentence: "Qu'est-ce qu'il veut manger ce soir ?",
+          translation: "What does he want to eat tonight?",
+          alignedFrench: "Qu'est-ce qu'<subject>il</subject> <verb>veut</verb> manger <adverb>ce soir</adverb> ?",
+          alignedTranslation: "What does <subject>he</subject> <verb>want</verb> to eat <adverb>tonight</adverb>?"
         }
       ]
     },
@@ -3393,19 +3417,31 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
           sentence: "Je ________ t'envoyer un message quand j'arrive. (I am going to send you a message when I arrive.)",
           options: ["vais", "vas", "va", "allez"],
           answer: 0,
-          tip: "Use the conjugated form of *aller* (to go) + infinitive. For *Je*, use **vais**."
+          tip: "Use the conjugated form of *aller* (to go) + infinitive. For *Je*, use **vais**.",
+          fullSentence: "Je vais t'envoyer un message quand j'arrive.",
+          translation: "I am going to send you a message when I arrive.",
+          alignedFrench: "<subject>Je</subject> <verb>vais</verb> t'envoyer <object>un message</object> quand j'arrive.",
+          alignedTranslation: "<subject>I</subject> <verb>am going</verb> to send you <object>a message</object> when I arrive."
         },
         {
           sentence: "Qu'est-ce que vous ________ faire ce week-end ? (What are you going to do this weekend?)",
           options: ["allez", "vont", "allons", "vas"],
           answer: 0,
-          tip: "The conjugated form of *aller* matching the pronoun *vous* is **allez**."
+          tip: "The conjugated form of *aller* matching the pronoun *vous* is **allez**.",
+          fullSentence: "Qu'est-ce que vous allez faire ce week-end ?",
+          translation: "What are you going to do this weekend?",
+          alignedFrench: "Qu'est-ce que <subject>vous</subject> <verb>allez</verb> faire <adverb>ce week-end</adverb> ?",
+          alignedTranslation: "What are <subject>you</subject> <verb>going</verb> to do <adverb>this weekend</adverb>?"
         },
         {
           sentence: "On va ________ un verre ce soir, tu viens ? (We are going to have a drink tonight, coming?)",
           options: ["prendre", "prends", "prenons", "prenez"],
           answer: 0,
-          tip: "In the Futur Proche (*aller + verb*), the second verb is always in its unchanged **infinitive** form: **prendre**."
+          tip: "In the Futur Proche (*aller + verb*), the second verb is always in its unchanged **infinitive** form: **prendre**.",
+          fullSentence: "On va prendre un verre ce soir, tu viens ?",
+          translation: "We are going to have a drink tonight, coming?",
+          alignedFrench: "<subject>On</subject> <verb>va</verb> prendre <object>un verre</object> <adverb>ce soir</adverb>, tu viens ?",
+          alignedTranslation: "<subject>We</subject> <verb>are going</verb> to have <object>a drink</object> <adverb>tonight</adverb>, coming?"
         }
       ]
     },
@@ -3432,19 +3468,31 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
           sentence: "Je ________ comprends pas ce message. (I don't understand this message.)",
           options: ["ne", "pas", "non", "rien"],
           answer: 0,
-          tip: "The classic negation wraps around the verb like a sandwich: **ne** + verb + **pas**."
+          tip: "The classic negation wraps around the verb like a sandwich: **ne** + verb + **pas**.",
+          fullSentence: "Je ne comprends pas ce message.",
+          translation: "I don't understand this message.",
+          alignedFrench: "<subject>Je</subject> <verb>ne comprends pas</verb> <object>ce message</object>.",
+          alignedTranslation: "<subject>I</subject> <verb>do not understand</verb> <object>this message</object>."
         },
         {
           sentence: "Il ________'aime pas le café noir. (He doesn't like black coffee.)",
           options: ["n", "ne", "pas", "de"],
           answer: 0,
-          tip: "Contract **ne** to **n'** before verbs starting with a vowel, like *aimer*."
+          tip: "Contract **ne** to **n'** before verbs starting with a vowel, like *aimer*.",
+          fullSentence: "Il n'aime pas le café noir.",
+          translation: "He doesn't like black coffee.",
+          alignedFrench: "<subject>Il</subject> <verb>n'aime pas</verb> <object>le café noir</object>.",
+          alignedTranslation: "<subject>He</subject> <verb>does not like</verb> <object>black coffee</object>."
         },
         {
           sentence: "Désolé, je ne ________ pas venir demain. (Sorry, I cannot come tomorrow.)",
           options: ["peux", "peux pas", "pouvez", "peut"],
           answer: 0,
-          tip: "Place the conjugated verb (**peux**) in the middle of the *ne... pas* sandwich."
+          tip: "Place the conjugated verb (**peux**) in the middle of the *ne... pas* sandwich.",
+          fullSentence: "Désolé, je ne peux pas venir demain.",
+          translation: "Sorry, I cannot come tomorrow.",
+          alignedFrench: "Désolé, <subject>je</subject> ne <verb>peux</verb> pas venir <adverb>demain</adverb>.",
+          alignedTranslation: "Sorry, <subject>I</subject> cannot <verb>come</verb> <adverb>tomorrow</adverb>."
         }
       ]
     },
@@ -3472,19 +3520,31 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
           sentence: "Bonjour, je ________ commander une pizza, s'il vous plaît. (Hello, I would like to order a pizza, please.)",
           options: ["voudrais", "veux", "voulais", "voudrait"],
           answer: 0,
-          tip: "Use conditional **Je voudrais** ('I would like') instead of direct *Je veux* ('I want') to sound polite!"
+          tip: "Use conditional **Je voudrais** ('I would like') instead of direct *Je veux* ('I want') to sound polite!",
+          fullSentence: "Bonjour, je voudrais commander une pizza, s'il vous plaît.",
+          translation: "Hello, I would like to order a pizza, please.",
+          alignedFrench: "Bonjour, <subject>je</subject> <verb>voudrais</verb> commander <object>une pizza</object>, s'il vous plaît.",
+          alignedTranslation: "Hello, <subject>I</subject> <verb>would like</verb> to order <object>a pizza</object>, please."
         },
         {
           sentence: "Tu peux m'envoyer l'adresse, s'il ________ plaît ? (Can you send me the address, please? - informal)",
           options: ["te", "vous", "se", "t'"],
           answer: 0,
-          tip: "For casual texting with friends/peers, use informal **s'il te plaît**. For formal, use *s'il vous plaît*."
+          tip: "For casual texting with friends/peers, use informal **s'il te plaît**. For formal, use *s'il vous plaît*.",
+          fullSentence: "Tu peux m'envoyer l'adresse, s'il te plaît ?",
+          translation: "Can you send me the address, please?",
+          alignedFrench: "<subject>Tu</subject> <verb>peux</verb> m'envoyer <object>l'adresse</object>, s'il te plaît ?",
+          alignedTranslation: "<verb>Can</verb> <subject>you</subject> send me <object>the address</object>, please?"
         },
         {
           sentence: "Merci beaucoup pour ton aide ! — De ________ ! (Thank you so much for your help! - You're welcome!)",
           options: ["rien", "s'il te plaît", "merci", "pas"],
           answer: 0,
-          tip: "**De rien** is the most common casual way to say 'You're welcome' in texting and speaking."
+          tip: "**De rien** is the most common casual way to say 'You're welcome' in texting and speaking.",
+          fullSentence: "De rien !",
+          translation: "You're welcome!",
+          alignedFrench: "De <adjective>rien</adjective> !",
+          alignedTranslation: "You're <adjective>welcome</adjective>!"
         }
       ]
     },
@@ -3511,19 +3571,31 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
           sentence: "J'aime beaucoup ________ de la musique française. (I really like listening to French music.)",
           options: ["écouter", "écoute", "écoutons", "écoutez"],
           answer: 0,
-          tip: "When two verbs follow each other directly, the second verb must be in its **infinitive** form: **écouter**."
+          tip: "When two verbs follow each other directly, the second verb must be in its **infinitive** form: **écouter**.",
+          fullSentence: "J'aime beaucoup écouter de la musique française.",
+          translation: "I really like listening to French music.",
+          alignedFrench: "<subject>J'</subject><verb>aime beaucoup</verb> écouter de <object>la musique française</object>.",
+          alignedTranslation: "<subject>I</subject> <verb>really like</verb> listening to <object>French music</object>."
         },
         {
           sentence: "Elle ________ la cuisine italienne, c'est sa préférée. (She loves Italian food, it's her favorite.)",
           options: ["adore", "adores", "adorons", "adorez"],
           answer: 0,
-          tip: "The present tense form of the verb *adorer* for *elle* (she) is **adore**."
+          tip: "The present tense form of the verb *adorer* for *elle* (she) is **adore**.",
+          fullSentence: "Elle adore la cuisine italienne, c'est sa préférée.",
+          translation: "She loves Italian food, it's her favorite.",
+          alignedFrench: "<subject>Elle</subject> <verb>adore</verb> <object>la cuisine italienne</object>, c'est sa préférée.",
+          alignedTranslation: "<subject>She</subject> <verb>loves</verb> <object>Italian food</object>, it's her favorite."
         },
         {
           sentence: "Est-ce que tu ________ voyager pendant les vacances ? (Do you like to travel during holidays?)",
           options: ["aimes", "aime", "aimons", "aimez"],
           answer: 0,
-          tip: "The present conjugation of *aimer* matching the pronoun *tu* always ends in **-es** -> **aimes**."
+          tip: "The present conjugation of *aimer* matching the pronoun *tu* always ends in **-es** -> **aimes**.",
+          fullSentence: "Est-ce que tu aimes voyager pendant les vacances ?",
+          translation: "Do you like to travel during holidays?",
+          alignedFrench: "Est-ce que <subject>tu</subject> <verb>aimes</verb> voyager pendant <adverb>les vacances</adverb> ?",
+          alignedTranslation: "Do <subject>you</subject> <verb>like</verb> to travel during <adverb>holidays</adverb>?"
         }
       ]
     }
@@ -3541,7 +3613,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     var topicsHtml = ALL_FRENCH_GRAMMAR_TOPICS.map(function(topic, index) {
       var topicAnswers = Progress.frenchGrammar[topic.id] || {};
       var completedCount = 0;
-      var numQuestions = topic.questions.length;
+      var numQuestions = 50;
       for (var qIdx = 0; qIdx < numQuestions; qIdx++) {
         if (topicAnswers[qIdx]) completedCount++;
       }
@@ -3664,7 +3736,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
         '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">' +
           '<button id="btnModeStatic" class="mode-select-btn active" style="padding: 14px; border-radius: 8px; border: 1.5px solid var(--accent); background: var(--bg-card); cursor: pointer; text-align: left; display: flex; flex-direction: column; gap: 4px; transition: all 0.2s;">' +
             '<span style="font-weight: 700; font-size: 14px; color: var(--ink);">Standard Quiz</span>' +
-            '<span style="font-size: 11px; color: var(--ink-dim);">3 focused static exercises</span>' +
+            '<span style="font-size: 11px; color: var(--ink-dim);">50 focused grammar exercises</span>' +
           '</button>' +
           '<button id="btnModeAI" class="mode-select-btn" style="padding: 14px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--bg-card); cursor: pointer; text-align: left; display: flex; flex-direction: column; gap: 4px; transition: all 0.2s;">' +
             '<span style="font-weight: 700; font-size: 14px; color: var(--ink); display: flex; align-items: center; gap: 6px;">AI Unlimited ✨</span>' +
@@ -3774,6 +3846,72 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     return res;
   }
 
+  function prefetchFrenchGrammarQuestion(idx) {
+    var session = frenchGrammarSession;
+    if (!session) return;
+    
+    session.fetchingIndices = session.fetchingIndices || {};
+    if (session.questions[idx] || session.fetchingIndices[idx]) {
+      return;
+    }
+    
+    session.fetchingIndices[idx] = true;
+    var historySentences = session.questions.filter(Boolean).map(function(q) { return q.fullSentence; });
+    
+    fetch('/api/generate-french-grammar-exercise', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        topicId: session.topicId,
+        topicTitle: session.title,
+        translationLanguage: userTranslationLanguage,
+        history: historySentences
+      })
+    })
+    .then(function(res) {
+      if (!res.ok) throw new Error('API failed');
+      return res.json();
+    })
+    .then(function(question) {
+      if (session === frenchGrammarSession) {
+        session.questions[idx] = question;
+        delete session.fetchingIndices[idx];
+        console.log('Prefetched AI question at index', idx);
+        if (session.currentIdx === idx) {
+          renderFrenchGrammarQuestion();
+        }
+      }
+    })
+    .catch(function(err) {
+      console.error('Error prefetching AI question at index', idx, err);
+      if (session === frenchGrammarSession) {
+        delete session.fetchingIndices[idx];
+        
+        var question;
+        var topic = ALL_FRENCH_GRAMMAR_TOPICS.find(function(t) { return t.id === session.topicId; });
+        if (topic && topic.questions && topic.questions.length > 0) {
+          var randQ = topic.questions[Math.floor(Math.random() * topic.questions.length)];
+          question = JSON.parse(JSON.stringify(randQ));
+        } else {
+          question = {
+            sentence: "Je ________ très fatigué ce soir. (I am very tired tonight.)",
+            options: ["suis", "es", "est", "sommes"],
+            answer: 0,
+            tip: userTranslationLanguage === 'arabic' ? "استخدم <b>suis</b> مع <b>Je</b> للقول 'أنا أكون'." : "Use <b>suis</b> with <b>Je</b> to say 'I am'.",
+            fullSentence: "Je suis très fatigué ce soir.",
+            translation: userTranslationLanguage === 'arabic' ? "أنا متعب جدا الليلة." : "I am very tired tonight.",
+            alignedFrench: "<subject>Je</subject> <verb>suis</verb> <adverb>très</adverb> <adjective>fatigué</adjective> <adverb>ce soir</adverb>.",
+            alignedTranslation: userTranslationLanguage === 'arabic' ? "<subject>أنا</subject> <adjective>متعب</adjective> <adverb>جداً</adverb> <adverb>الليلة</adverb>." : "<subject>I</subject> <verb>am</verb> <adverb>very</adverb> <adjective>tired</adjective> <adverb>tonight</adverb>."
+          };
+        }
+        session.questions[idx] = question;
+        if (session.currentIdx === idx) {
+          renderFrenchGrammarQuestion();
+        }
+      }
+    });
+  }
+
   function startFrenchGrammarPractice(topicId) {
     var topic = ALL_FRENCH_GRAMMAR_TOPICS.find(function(t) { return t.id === topicId; });
     if (!topic) return;
@@ -3784,7 +3922,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     frenchGrammarSession = {
       topicId: topicId,
       title: topic.title,
-      questions: currentGrammarPracticeMode === 'ai' ? [] : topic.questions,
+      questions: currentGrammarPracticeMode === 'ai' ? [] : JSON.parse(JSON.stringify(topic.questions)),
       currentIdx: 0,
       correctAttempts: 0,
       practicedWordsCount: 0,
@@ -3794,6 +3932,15 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
 
     $('french-grammar-topics-screen').style.display = 'none';
     $('french-grammar-practice-screen').style.display = 'block';
+    
+    if (frenchGrammarSession.isAI) {
+      prefetchFrenchGrammarQuestion(0);
+      prefetchFrenchGrammarQuestion(1);
+    } else {
+      // Prefetch next questions starting from the end of the static array (index 3)
+      prefetchFrenchGrammarQuestion(frenchGrammarSession.questions.length);
+      prefetchFrenchGrammarQuestion(frenchGrammarSession.questions.length + 1);
+    }
     
     renderFrenchGrammarQuestion();
   }
@@ -3805,7 +3952,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     // Update progress text with the total practiced words count!
     $('frenchGrammarPracticeProgress').textContent = 'Practiced: ' + (session.practicedWordsCount || 0) + ' words';
     
-    var numQ = session.isAI ? 5 : session.questions.length;
+    var numQ = session.isAI ? 5 : 50;
     var pct = Math.round((qIdx / numQ) * 100);
     if (pct > 100) pct = 100;
     $('frenchGrammarPracticeProgressFill').style.width = pct + '%';
@@ -3824,57 +3971,23 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     if (!stageEl) return;
 
     var question;
-    if (session.isAI) {
-      if (session.questions[qIdx]) {
-        question = session.questions[qIdx];
-      } else {
-        // Show loading state
-        stageEl.innerHTML = 
-          '<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 60px 20px; gap: 16px; text-align:center;">' +
-            '<div style="border: 3px solid rgba(var(--accent-rgb), 0.1); border-top: 3px solid var(--accent); border-radius: 50%; width: 36px; height: 36px; animation: spin 1s linear infinite;"></div>' +
-            '<div style="font-weight: 700; color: var(--ink); font-family: var(--font-display); font-size: 16px;">Generating Dynamic AI Exercise...</div>' +
-            '<div style="font-size: 13px; color: var(--ink-dim); max-width: 40ch; line-height:1.5;">Gemini is tailoring an authentic conversational exercise for the lesson "' + escapeHtml(session.title) + '".</div>' +
-          '</div>';
-        
-        try {
-          var historySentences = session.questions.filter(Boolean).map(function(q) { return q.fullSentence; });
-          var response = await fetch('/api/generate-french-grammar-exercise', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              topicId: session.topicId,
-              topicTitle: session.title,
-              translationLanguage: userTranslationLanguage,
-              history: historySentences
-            })
-          });
-          if (!response.ok) throw new Error('API failed');
-          question = await response.json();
-          session.questions[qIdx] = question;
-        } catch (err) {
-          console.error('Error fetching AI grammar question:', err);
-          // Fallback question based on topic questions if available
-          var topic = ALL_FRENCH_GRAMMAR_TOPICS.find(function(t) { return t.id === session.topicId; });
-          if (topic && topic.questions && topic.questions.length > 0) {
-            var randQ = topic.questions[Math.floor(Math.random() * topic.questions.length)];
-            question = JSON.parse(JSON.stringify(randQ));
-          } else {
-            question = {
-              sentence: "Je ________ très fatigué ce soir. (I am very tired tonight.)",
-              options: ["suis", "es", "est", "sommes"],
-              answer: 0,
-              tip: userTranslationLanguage === 'arabic' ? "استخدم <b>suis</b> مع <b>Je</b> للقول 'أنا أكون'." : "Use <b>suis</b> with <b>Je</b> to say 'I am'.",
-              fullSentence: "Je suis très fatigué ce soir.",
-              translation: userTranslationLanguage === 'arabic' ? "أنا متعب جدا الليلة." : "I am very tired tonight.",
-              alignedFrench: "<subject>Je</subject> <verb>suis</verb> <adverb>très</adverb> <adjective>fatigué</adjective> <adverb>ce soir</adverb>.",
-              alignedTranslation: userTranslationLanguage === 'arabic' ? "<subject>أنا</subject> <adjective>متعب</adjective> <adverb>جداً</adverb> <adverb>الليلة</adverb>." : "<subject>I</subject> <verb>am</verb> <adverb>very</adverb> <adjective>tired</adjective> <adverb>tonight</adverb>."
-            };
-          }
-          session.questions[qIdx] = question;
-        }
-      }
-    } else {
+    if (session.questions[qIdx]) {
       question = session.questions[qIdx];
+      prefetchFrenchGrammarQuestion(qIdx + 1);
+      prefetchFrenchGrammarQuestion(qIdx + 2);
+    } else {
+      // Show loading state
+      stageEl.innerHTML = 
+        '<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 60px 20px; gap: 16px; text-align:center;">' +
+          '<div style="border: 3px solid rgba(var(--accent-rgb), 0.1); border-top: 3px solid var(--accent); border-radius: 50%; width: 36px; height: 36px; animation: spin 1s linear infinite;"></div>' +
+          '<div style="font-weight: 700; color: var(--ink); font-family: var(--font-display); font-size: 16px;">Generating Dynamic Exercise...</div>' +
+          '<div style="font-size: 13px; color: var(--ink-dim); max-width: 40ch; line-height:1.5;">Gemini is tailoring an authentic conversational exercise for the lesson "' + escapeHtml(session.title) + '".</div>' +
+        '</div>';
+      
+      prefetchFrenchGrammarQuestion(qIdx);
+      prefetchFrenchGrammarQuestion(qIdx + 1);
+      prefetchFrenchGrammarQuestion(qIdx + 2);
+      return;
     }
 
     // Replace ________ with an elegant underlined blank container
@@ -3903,7 +4016,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
 
     // If there is a preferred translation, display it nicely as a secondary cue on the question card
     var questionTranslationHtml = '';
-    if (session.isAI && question.translation) {
+    if (question.translation) {
       questionTranslationHtml = '<div style="font-size:13.5px; color:var(--ink-dim); margin-top: -12px; margin-bottom: 24px;' + (userTranslationLanguage === 'arabic' ? ' text-align:right; direction:rtl;' : '') + '">💡 ' + escapeHtml(question.translation) + '</div>';
     }
 
@@ -3977,7 +4090,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
         htmlTip = htmlTip.replace(/`([^`]+)`/g, '<code>$1</code>');
 
         var alignmentBoxHtml = '';
-        if (session.isAI && question.alignedFrench && question.alignedTranslation) {
+        if (question.alignedFrench && question.alignedTranslation) {
           alignmentBoxHtml = 
             '<div style="margin-top:16px; border:1px solid rgba(var(--accent-rgb), 0.15); background:rgba(var(--accent-rgb), 0.02); border-radius:12px; padding:18px 20px; text-align:left;">' +
               '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">' +
@@ -4042,7 +4155,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   function renderFrenchGrammarTopicComplete() {
     var session = frenchGrammarSession;
     var completedCount = session.correctAttempts;
-    var totalQuestions = session.isAI ? session.questions.length : session.questions.length;
+    var totalQuestions = session.isAI ? 5 : 50;
     var pctCorrect = totalQuestions > 0 ? Math.round((completedCount / totalQuestions) * 100) : 100;
 
     var isGoodScore = pctCorrect >= 80;
