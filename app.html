@@ -8632,24 +8632,40 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     }
     TOTAL = WORDS.length;
 
-    // Load French vocabulary from API
+    // Load French vocabulary. Try the static JSON file first (this is what
+    // works on GitHub Pages / any static host, since there is no server
+    // there to answer /api/* routes). Fall back to the /api/french-words
+    // route, which is only reachable when server.ts is actually running
+    // (e.g. local dev, or a real Node host).
     try {
-      var resF = await fetch('/api/french-words');
-      if (resF.ok) {
-        ALL_FRENCH_WORDS_LIST = await resF.json();
+      var resF = await fetch('./french-words-data.json');
+      if (!resF.ok) throw new Error('static french-words-data.json not found');
+      ALL_FRENCH_WORDS_LIST = await resF.json();
+    } catch (staticErrF) {
+      try {
+        var resF2 = await fetch('/api/french-words');
+        if (resF2.ok) {
+          ALL_FRENCH_WORDS_LIST = await resF2.json();
+        }
+      } catch (err) {
+        console.warn('Failed to fetch French vocabulary:', err);
       }
-    } catch (err) {
-      console.warn('Failed to fetch French vocabulary from API:', err);
     }
 
-    // Load French reading texts from API
+    // Load French reading texts the same way: static file first, API fallback.
     try {
-      var resT = await fetch('/api/french-texts');
-      if (resT.ok) {
-        FRENCH_TEXTS = await resT.json();
+      var resT = await fetch('./french-texts.json');
+      if (!resT.ok) throw new Error('static french-texts.json not found');
+      FRENCH_TEXTS = await resT.json();
+    } catch (staticErrT) {
+      try {
+        var resT2 = await fetch('/api/french-texts');
+        if (resT2.ok) {
+          FRENCH_TEXTS = await resT2.json();
+        }
+      } catch (err) {
+        console.warn('Failed to fetch French reading texts:', err);
       }
-    } catch (err) {
-      console.warn('Failed to fetch French reading texts from API:', err);
     }
 
     // Filter French words based on currentFrenchLevel
