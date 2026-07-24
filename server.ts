@@ -224,6 +224,75 @@ Generate your response in the specified JSON schema. Keep the advice friendly, c
     }
   });
 
+  // API Route to generate a reading story using 15-20 learned words
+  app.post("/api/generate-learned-story", async (req, res) => {
+    try {
+      const { words } = req.body;
+      const targetWords = Array.isArray(words) ? words : [];
+
+      if (!targetWords.length) {
+        return res.status(400).json({ error: "No words provided" });
+      }
+
+      const ai = getGeminiClient();
+      if (!ai) {
+        // Fallback local story generator
+        const title = "A Day of New Discoveries";
+        const story = `Every morning brings an opportunity to learn and grow. When we try to ${targetWords[0] || 'accomplish'} our goals, we must stay focused and ${targetWords[1] || 'adapt'} to changes around us. Friends often ${targetWords[2] || 'collaborate'} to ${targetWords[3] || 'achieve'} extraordinary results together. By making a ${targetWords[4] || 'careful'} plan, anyone can ${targetWords[5] || 'enhance'} their skills and ${targetWords[6] || 'obtain'} great knowledge. It is essential to ${targetWords[7] || 'foster'} curiosity and ${targetWords[8] || 'embrace'} new ideas as we journey forward.`;
+        return res.json({ title, story, wordsUsed: targetWords });
+      }
+
+      const prompt = `Write an engaging, clear, and cohesive English story or short reading article (150 to 250 words) suitable for English language learners.
+The story MUST naturally incorporate the following ${targetWords.length} vocabulary words: ${JSON.stringify(targetWords)}.
+
+Requirements:
+1. Include ALL or as many of the target words as possible in natural context.
+2. Give the story a creative, catchy title.
+3. Keep the writing clear, grammatically correct, and easy to read.
+
+Return the output in JSON format with "title" and "story" fields.`;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-3.5-flash",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              title: {
+                type: Type.STRING,
+                description: "Title of the story"
+              },
+              story: {
+                type: Type.STRING,
+                description: "The full story text (150 to 250 words) incorporating the target words"
+              }
+            },
+            required: ["title", "story"]
+          }
+        }
+      });
+
+      const responseText = response.text || "{}";
+      const result = JSON.parse(responseText.trim());
+      res.json({
+        title: result.title || "Learned Words Story",
+        story: result.story || "Story text...",
+        wordsUsed: targetWords
+      });
+
+    } catch (err: any) {
+      console.error("Error generating learned words story:", err);
+      res.status(500).json({
+        error: "Failed to generate story",
+        title: "A Journey of Learning",
+        story: `Learning new vocabulary is a rewarding journey. As you practice every day, you begin to understand how each word fits into real conversations and stories. Keep reading and listening to master your English vocabulary!`,
+        wordsUsed: req.body.words || []
+      });
+    }
+  });
+
   // API Route to evaluate spoken text for Speak & Read Practice
   app.post("/api/evaluate-speech", async (req, res) => {
     try {

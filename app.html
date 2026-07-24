@@ -1148,19 +1148,13 @@ body {
           <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
       </div>
-      <div class="card locked" id="cardGrammar" style="position: relative; cursor: not-allowed; opacity: 0.65;">
-        <div class="card-index" style="display: flex; justify-content: space-between; align-items: center;">
-          <span>03 · Grammar</span>
-          <span style="font-size: 10px; font-weight: 700; background: var(--border); color: var(--ink-dim); padding: 2px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.05em;">Coming Soon</span>
-        </div>
-        <div class="card-title" style="display: flex; align-items: center; gap: 6px;">
-          Grammar in Context
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--ink-faint);"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-        </div>
-        <div class="card-desc">Learn English structure through real-world sentences.</div>
+      <div class="card active-card" id="cardGrammar">
+        <div class="card-index">03 · Reading Context</div>
+        <div class="card-title">Learned Words Story</div>
+        <div class="card-desc">Read full custom stories built using 15–20 of your learned words. Listen with AI Voice &amp; explore highlighted vocabulary!</div>
         <div class="card-foot">
-          <div class="card-progress-bar" style="opacity: 0.3;"><div class="card-progress-fill" id="grammarProgressFill" style="width:0%"></div></div>
-          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" style="opacity: 0.3;"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="card-progress-bar"><div class="card-progress-fill" id="grammarProgressFill" style="width:0%"></div></div>
+          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
       </div>
 
@@ -1369,45 +1363,22 @@ body {
     </div>
   </div>
 
-  <!-- GRAMMAR VIEW -->
+  <!-- LEARNED WORDS STORY VIEW -->
   <div class="view" id="view-grammar">
-    <!-- State 1: Topics list -->
     <div id="grammar-topics-screen">
-      <div class="study-top">
-        <button class="btn-ghost" id="btnGrammarBack" style="display: none !important;">
+      <div class="study-top" style="margin-bottom: 12px;">
+        <button class="btn-ghost" id="btnGrammarBack" style="display: inline-flex; align-items: center; gap: 6px;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Home
         </button>
-        <div class="session-meta" style="display: none !important;">
-          <span>Grammar Score <b id="grammarScore">0</b></span>
-        </div>
       </div>
-      <div class="hero" style="margin-bottom: 24px; display: block; background: transparent; padding: 24px 0 0; text-align: left; box-shadow: none;">
-        <div class="hero-title" style="font-size: clamp(28px, 6vw, 36px); line-height: 1.2; font-family: var(--font-display); font-weight: 800; font-style: italic; margin-bottom: 8px;">Grammar <span style="color: var(--ink-faint); font-weight: 400;">in Context</span></div>
-        <p class="hero-sub" style="font-size: 14px; color: var(--ink-dim); line-height: 1.6; max-width: 60ch; margin: 0;">Learn English structures through active sentence builders. Choose a topic below to begin mastering grammar easily.</p>
+      <div class="hero" style="margin-bottom: 24px; display: block; background: transparent; padding: 12px 0 0; text-align: left; box-shadow: none;">
+        <div class="hero-title" style="font-size: clamp(28px, 6vw, 36px); line-height: 1.2; font-family: var(--font-display); font-weight: 800; font-style: italic; margin-bottom: 8px;">Learned Words <span style="color: var(--ink-faint); font-weight: 400;">Reading Story</span></div>
+        <p class="hero-sub" style="font-size: 14px; color: var(--ink-dim); line-height: 1.6; max-width: 60ch; margin: 0;">Read engaging AI-generated stories containing 15 to 20 of your learned vocabulary words. Click any highlighted word for its meaning, or use AI Voice to read aloud!</p>
       </div>
-      <div class="section-label">Topics</div>
-      <div class="grammar-topic-grid" id="grammarTopicGrid">
-        <!-- topics dynamically rendered -->
-      </div>
-    </div>
-
-    <!-- State 2: Practice screen -->
-    <div id="grammar-practice-screen" style="display:none;">
-      <div class="study-top">
-        <button class="btn-ghost" id="btnGrammarPracticeBack">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Topics
-        </button>
-        <div class="session-meta">
-          <span id="grammarPracticeProgress">Question 1/10</span>
-          <span>Score <b id="grammarSessionScore">0</b></span>
-        </div>
-      </div>
-      <div class="progress-track"><div class="progress-fill" id="grammarPracticeProgressFill" style="width:0%"></div></div>
-
-      <div class="stage" id="grammarStage" style="min-height:auto; padding: 36px 30px; margin-bottom:20px; text-align: left; align-items: stretch; display: flex; flex-direction: column;">
-        <!-- Question, options, and tip rendered here -->
+      
+      <div id="learnedStoryContainer">
+        <!-- AI Story or Unlock message dynamically rendered -->
       </div>
     </div>
   </div>
@@ -7634,261 +7605,242 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     }
   ];
 
-  var grammarSession = null;
+  /* ---------------- LEARNED WORDS READING STORIES MODULE ---------------- */
+  var currentStoryText = "";
+  var currentStoryWords = [];
+  var isStoryAudioPlaying = false;
 
-  function renderGrammarTopics() {
-    Progress.grammar = Progress.grammar || {};
-    var container = $('grammarTopicGrid');
+  function highlightLearnedWordsInStory(text, targetWords) {
+    if (!text) return '';
+    var targetSet = {};
+    (targetWords || []).forEach(function(w) {
+      if (w) targetSet[w.toLowerCase().trim()] = true;
+    });
+
+    var allLearned = Object.keys(Progress.learned || {});
+    allLearned.forEach(function(w) {
+      if (w) targetSet[w.toLowerCase().trim()] = true;
+    });
+
+    var tokens = text.split(/([a-zA-Z0-9'’-]+)/);
+    var html = '';
+
+    tokens.forEach(function(token) {
+      if (/^[a-zA-Z0-9'’-]+$/.test(token)) {
+        var tokenLower = token.toLowerCase();
+        var entry = (typeof findWordEntry === 'function') ? findWordEntry(tokenLower) : null;
+        var baseWord = entry ? entry.word.toLowerCase() : tokenLower;
+
+        var isLearnedMatch = targetSet[tokenLower] || targetSet[baseWord];
+
+        if (isLearnedMatch) {
+          var wordKey = entry ? entry.word : token;
+          html += '<mark class="clickable-speaking-word" data-word="' + escapeHtml(wordKey) + '" style="background: rgba(139, 92, 246, 0.18); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.35); padding: 2px 7px; border-radius: 6px; font-weight: 700; font-style: normal; cursor: pointer; display: inline-block; margin: 1px; transition: all 0.2s;" title="Learned Word: Click for definition">' + escapeHtml(token) + '</mark>';
+        } else {
+          html += escapeHtml(token);
+        }
+      } else {
+        html += escapeHtml(token);
+      }
+    });
+
+    return html;
+  }
+
+  async function renderLearnedWordsStory() {
+    var container = $('learnedStoryContainer');
     if (!container) return;
 
-    var totalGlobalScore = 0;
-    var topicsHtml = GRAMMAR_TOPICS.map(function(topic, index) {
-      var topicAnswers = Progress.grammar[topic.id] || {};
-      var completedCount = 0;
-      var numQuestions = topic.questions.length;
-      for (var qIdx = 0; qIdx < numQuestions; qIdx++) {
-        if (topicAnswers[qIdx]) completedCount++;
-      }
-      totalGlobalScore += (completedCount * 10);
+    var learnedKeys = Object.keys(Progress.learned || {});
+    
+    // Check if user has learned enough words
+    if (learnedKeys.length < 3) {
+      container.innerHTML = 
+        '<div style="text-align: center; padding: 40px 20px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); max-width: 520px; margin: 20px auto;">' +
+          '<div style="font-size: 48px; margin-bottom: 12px;">🔒</div>' +
+          '<h3 style="font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--ink); margin-bottom: 8px;">Learn Vocabulary to Unlock Stories</h3>' +
+          '<p style="font-size: 14px; color: var(--ink-dim); line-height: 1.5; margin-bottom: 20px;">' +
+            'You have learned <b>' + learnedKeys.length + '</b> word' + (learnedKeys.length === 1 ? '' : 's') + ' so far. Please learn at least 3 to 5 words to generate custom AI reading stories containing 15–20 learned words!' +
+          '</p>' +
+          '<button class="btn-solid" id="btnGoToVocabFromStory" style="background: var(--ink); color: var(--bg); border: none; padding: 12px 24px; cursor: pointer;">Start Learning Vocabulary</button>' +
+        '</div>';
 
-      var isCompleted = completedCount === numQuestions;
-      var pct = Math.round((completedCount / numQuestions) * 100);
+      bindTap($('btnGoToVocabFromStory'), function() {
+        showView('study');
+        startStudy();
+      });
+      return;
+    }
 
-      var statusBadge = '';
-      if (isCompleted) {
-        statusBadge = '<span class="grammar-badge completed">✓ Mastered</span>';
-      } else if (completedCount > 0) {
-        statusBadge = '<span class="grammar-badge">' + completedCount + '/' + numQuestions + ' Solved</span>';
-      } else {
-        statusBadge = '<span class="grammar-badge" style="color:var(--ink-faint);">Not started</span>';
-      }
+    // Select 15 to 20 words from user's learned words
+    var numToPick = Math.min(20, Math.max(15, learnedKeys.length));
+    if (learnedKeys.length < 15) {
+      numToPick = learnedKeys.length;
+    }
+    
+    var shuffled = learnedKeys.slice().sort(function() { return 0.5 - Math.random(); });
+    currentStoryWords = shuffled.slice(0, numToPick);
 
-      var displayIndex = (index + 1) < 10 ? '0' + (index + 1) : '' + (index + 1);
-
-      return '<div class="grammar-topic-card" data-topic-id="' + topic.id + '">' +
-        '<div>' +
-          '<div class="grammar-topic-index">Lesson ' + displayIndex + '</div>' +
-          '<div class="grammar-topic-title">' + escapeHtml(topic.title) + '</div>' +
-          '<div class="grammar-topic-desc">' + escapeHtml(topic.desc) + '</div>' +
+    // Render loading view
+    container.innerHTML = 
+      '<div style="text-align: center; padding: 60px 20px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); max-width: 600px; margin: 20px auto;">' +
+        '<div class="loading-wrap" style="margin-bottom: 16px;">' +
+          '<div class="loading-dot"><span></span><span></span><span></span></div>' +
         '</div>' +
-        '<div class="grammar-topic-foot">' +
-          '<div class="card-progress-bar" style="max-width:120px;"><div class="card-progress-fill" style="width:' + pct + '%"></div></div>' +
-          statusBadge +
-        '</div>' +
+        '<div style="font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--ink); margin-bottom: 6px;">Generating Story with AI...</div>' +
+        '<div style="font-size: 13px; color: var(--ink-dim); font-family: var(--font-mono);">Weaving ' + currentStoryWords.length + ' of your learned words into a cohesive article.</div>' +
       '</div>';
+
+    // Stop previous audio
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+    isStoryAudioPlaying = false;
+
+    // Fetch AI Story
+    try {
+      var res = await fetch('/api/generate-learned-story', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ words: currentStoryWords })
+      });
+
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      var data = await res.json();
+      
+      currentStoryText = data.story || '';
+      renderStoryContent(data.title || "Learned Words Story", currentStoryText, currentStoryWords);
+
+    } catch (err) {
+      console.warn("AI Story generation failed, using local template:", err);
+      // Fallback local story text
+      var fallbackTitle = "A Journey of Persistent Growth";
+      var fallbackStory = "Every step in learning a new language brings greater confidence. When you " + (currentStoryWords[0] || "accomplish") + " your daily tasks, you " + (currentStoryWords[1] || "enhance") + " your knowledge naturally. Working with friends allows us to " + (currentStoryWords[2] || "collaborate") + " and " + (currentStoryWords[3] || "achieve") + " impressive goals together. Always be " + (currentStoryWords[4] || "careful") + " with your habits, as small efforts " + (currentStoryWords[5] || "accumulate") + " over time to produce " + (currentStoryWords[6] || "significant") + " progress. Keep practicing daily to " + (currentStoryWords[7] || "foster") + " your skills and " + (currentStoryWords[8] || "embrace") + " every challenge!";
+      currentStoryText = fallbackStory;
+      renderStoryContent(fallbackTitle, fallbackStory, currentStoryWords);
+    }
+  }
+
+  function renderStoryContent(title, storyText, wordsList) {
+    var container = $('learnedStoryContainer');
+    if (!container) return;
+
+    // Render word pills
+    var pillsHtml = wordsList.map(function(w) {
+      var entry = (typeof findWordEntry === 'function') ? findWordEntry(w) : null;
+      var pos = entry && entry.pos ? ' <span style="font-size:9px; opacity:0.6; font-style:italic;">' + escapeHtml(entry.pos) + '</span>' : '';
+      return '<span class="clickable-speaking-word" data-word="' + escapeHtml(w) + '" style="background: rgba(139, 92, 246, 0.12); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.25); padding: 5px 12px; border-radius: 20px; font-weight: 700; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" title="Click for definition">' +
+        '<span>' + escapeHtml(w) + '</span>' + pos +
+      '</span>';
     }).join('');
 
-    container.innerHTML = topicsHtml;
-    $('grammarScore').textContent = totalGlobalScore;
+    var highlightedStoryHtml = highlightLearnedWordsInStory(storyText, wordsList);
 
-    // bind clicks on cards
-    var cards = container.querySelectorAll('.grammar-topic-card');
-    Array.prototype.forEach.call(cards, function(card) {
-      bindTap(card, function() {
-        var topicId = card.getAttribute('data-topic-id');
-        startGrammarPractice(topicId);
-      });
+    container.innerHTML = 
+      '<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">' +
+        '<div>' +
+          '<div style="font-family: var(--font-mono); font-size: 10px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700;">READING CONTEXT</div>' +
+          '<div style="font-family: var(--font-display); font-size: 24px; font-weight: 800; font-style: italic; color: var(--ink); margin-top: 2px;">' + escapeHtml(title) + '</div>' +
+        '</div>' +
+        
+        '<div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">' +
+          '<button id="btnPlayStoryAudio" class="btn-solid" style="background: var(--accent); color: var(--accent-ink); border: none; font-size: 13px; padding: 10px 18px; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; outline: none; transition: transform 0.2s;">' +
+            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" id="storyAudioIcon"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>' +
+            '<span id="storyAudioText">🔊 Read Aloud with AI Voice</span>' +
+          '</button>' +
+          
+          '<button id="btnGenerateNewStory" class="btn-ghost" style="padding: 10px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>' +
+            '<span>New Story (' + wordsList.length + ' Words)</span>' +
+          '</button>' +
+        '</div>' +
+      '</div>' +
+
+      '<!-- TARGET WORDS PILLS BAR -->' +
+      '<div style="background: var(--bg-1); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 24px;">' +
+        '<div style="font-family: var(--font-mono); font-size: 10px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">' +
+          '<span>Learned Words Practiced in this Story (' + wordsList.length + ')</span>' +
+          '<span style="color: #8b5cf6; font-weight: 700;">💜 Highlighted below</span>' +
+        '</div>' +
+        '<div style="display: flex; flex-wrap: wrap; gap: 8px;">' +
+          pillsHtml +
+        '</div>' +
+      '</div>' +
+
+      '<!-- STORY READING CARD -->' +
+      '<div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 32px 28px; box-shadow: var(--shadow); position: relative; margin-bottom: 30px;">' +
+        '<div id="storyMainBody" style="font-family: var(--font-display); font-size: clamp(17px, 4vw, 20px); line-height: 1.85; color: var(--ink); text-align: left; font-weight: 400;">' +
+          highlightedStoryHtml +
+        '</div>' +
+      '</div>';
+
+    // Bind event handlers
+    bindTap($('btnGenerateNewStory'), function() {
+      renderLearnedWordsStory();
+    });
+
+    bindTap($('btnPlayStoryAudio'), function() {
+      toggleStoryAudio(storyText);
+    });
+
+    // Bind modal clicks for highlighted words in story & pills
+    bindTap($('learnedStoryContainer'), function(ev) {
+      var target = ev.target.closest('.clickable-speaking-word');
+      if (target) {
+        var w = target.getAttribute('data-word');
+        if (w) showWordMeaningModal(w);
+      }
     });
   }
 
-  function startGrammarPractice(topicId) {
-    var topic = GRAMMAR_TOPICS.find(function(t) { return t.id === topicId; });
-    if (!topic) return;
+  function toggleStoryAudio(textToRead) {
+    if (!('speechSynthesis' in window)) {
+      showCustomAlert("AI Voice Unavailable", "Speech Synthesis is not supported in this browser.");
+      return;
+    }
 
-    Progress.grammar = Progress.grammar || {};
-    Progress.grammar[topicId] = Progress.grammar[topicId] || {};
+    var btn = $('btnPlayStoryAudio');
+    var txtEl = $('storyAudioText');
 
-    grammarSession = {
-      topicId: topicId,
-      title: topic.title,
-      questions: topic.questions,
-      currentIdx: 0,
-      correctAttempts: 0
+    if (isStoryAudioPlaying) {
+      speechSynthesis.cancel();
+      isStoryAudioPlaying = false;
+      if (txtEl) txtEl.textContent = '🔊 Read Aloud with AI Voice';
+      if (btn) btn.style.background = 'var(--accent)';
+      return;
+    }
+
+    speechSynthesis.cancel();
+    var utterance = new SpeechSynthesisUtterance(textToRead);
+    if (!britishVoice) pickVoice();
+    if (britishVoice) utterance.voice = britishVoice;
+    utterance.lang = 'en-GB';
+    utterance.rate = 0.85;
+    utterance.pitch = 1.0;
+
+    isStoryAudioPlaying = true;
+    if (txtEl) txtEl.textContent = '⏸️ Stop Reading';
+    if (btn) btn.style.background = '#8b5cf6';
+
+    utterance.onend = function() {
+      isStoryAudioPlaying = false;
+      if (txtEl) txtEl.textContent = '🔊 Read Aloud with AI Voice';
+      if (btn) btn.style.background = 'var(--accent)';
     };
 
-    $('grammar-topics-screen').style.display = 'none';
-    $('grammar-practice-screen').style.display = 'block';
-    
-    renderGrammarQuestion();
+    utterance.onerror = function() {
+      isStoryAudioPlaying = false;
+      if (txtEl) txtEl.textContent = '🔊 Read Aloud with AI Voice';
+      if (btn) btn.style.background = 'var(--accent)';
+    };
+
+    speechSynthesis.speak(utterance);
   }
 
-  function renderGrammarQuestion() {
-    var session = grammarSession;
-    var qIdx = session.currentIdx;
-    var question = session.questions[qIdx];
-    var numQ = session.questions.length;
-    
-    $('grammarPracticeProgress').textContent = 'Sentence ' + (qIdx + 1) + ' of ' + numQ;
-    var pct = Math.round((qIdx / numQ) * 100);
-    $('grammarPracticeProgressFill').style.width = pct + '%';
-    
-    // Calculate total score of this specific topic session
-    var topicAnswers = Progress.grammar[session.topicId] || {};
-    var sessionScore = 0;
-    for (var i = 0; i < numQ; i++) {
-      if (topicAnswers[i]) sessionScore += 10;
-    }
-    $('grammarSessionScore').textContent = sessionScore;
-
-    var stageEl = $('grammarStage');
-    if (!stageEl) return;
-
-    // Replace ________ with an elegant underlined blank container
-    var sentenceFormatted = question.sentence.replace(/________/g, '<span style="border-bottom: 2px dashed var(--accent); color: var(--accent); padding: 0 12px; font-weight: 700; font-family: var(--font-body);">&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;</span>');
-
-    // Shuffle options dynamically so they are mixed as A, B, C, D
-    var originalOptions = question.options;
-    var correctOptionText = originalOptions[question.answer];
-    var indices = originalOptions.map(function(_, i) { return i; });
-    for (var idxI = indices.length - 1; idxI > 0; idxI--) {
-      var idxJ = Math.floor(Math.random() * (idxI + 1));
-      var tempIdx = indices[idxI];
-      indices[idxI] = indices[idxJ];
-      indices[idxJ] = tempIdx;
-    }
-    var shuffledOptions = indices.map(function(idx) { return originalOptions[idx]; });
-    var newAnswerIdx = shuffledOptions.indexOf(correctOptionText);
-
-    var optionsHtml = shuffledOptions.map(function(opt, idx) {
-      var letter = String.fromCharCode(65 + idx); // A, B, C, D
-      return '<button class="grammar-option-btn" data-idx="' + idx + '" type="button">' +
-        '<div class="grammar-option-circle">' + letter + '</div>' +
-        '<span>' + escapeHtml(opt) + '</span>' +
-      '</button>';
-    }).join('');
-
-    stageEl.innerHTML = 
-      '<div style="font-family: var(--font-mono); font-size:11px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:12px;">Construct the sentence</div>' +
-      '<div class="cloze-sentence" style="font-size: clamp(16px, 4.5vw, 20px); font-family: var(--font-body); color: var(--ink); line-height: 1.6; margin-bottom: 24px; text-align: left; font-weight:500;">' + sentenceFormatted + '</div>' +
-      '<div style="display: flex; flex-direction: column; gap: 10px;" id="grammarOptionsCol">' +
-        optionsHtml +
-      '</div>' +
-      '<div id="grammarFeedbackBox" style="display:none;"></div>' +
-      '<div style="display:none; margin-top:24px; justify-content: flex-end;" id="grammarActionRow">' +
-        '<button class="btn-solid" id="btnGrammarNext">Next Sentence</button>' +
-      '</div>';
-
-    var optionBtns = stageEl.querySelectorAll('.grammar-option-btn');
-    var feedbackBox = stageEl.querySelector('#grammarFeedbackBox');
-    var actionRow = stageEl.querySelector('#grammarActionRow');
-    var hasAnswered = false;
-
-    Array.prototype.forEach.call(optionBtns, function(btn) {
-      bindTap(btn, function() {
-        if (hasAnswered) return;
-        hasAnswered = true;
-
-        var selectedIdx = parseInt(btn.getAttribute('data-idx'), 10);
-        var isCorrect = selectedIdx === newAnswerIdx;
-
-        // Disable all option buttons and highlight correct/incorrect
-        Array.prototype.forEach.call(optionBtns, function(b) {
-          b.disabled = true;
-          var bIdx = parseInt(b.getAttribute('data-idx'), 10);
-          if (bIdx === newAnswerIdx) {
-            b.classList.add('correct');
-          }
-        });
-
-        if (isCorrect) {
-          btn.classList.add('correct');
-          session.correctAttempts++;
-          
-          // Mark as solved
-          Progress.grammar[session.topicId][qIdx] = true;
-          // Increment actual global user score!
-          Progress.score += 10;
-          Progress.streak++;
-          
-          // Read aloud the finished sentence!
-          var completeSentence = question.sentence.replace(/________/g, correctOptionText);
-          speak(completeSentence);
-          
-          saveProgress();
-        } else {
-          btn.classList.add('incorrect');
-          Progress.streak = 0;
-          saveProgress();
-        }
-
-        // Render explanation tip beautifully
-        var explanationMarkdown = question.tip;
-        // Parse simple markdown-like **bold** in tips
-        var htmlTip = explanationMarkdown.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-        htmlTip = htmlTip.replace(/`([^`]+)`/g, '<code>$1</code>');
-
-        feedbackBox.innerHTML = 
-          '<div class="grammar-tip-box" style="animation: fadeIn 0.3s ease-out;">' +
-            '<div class="grammar-tip-title">Grammar Tip &amp; Context</div>' +
-            '<div class="grammar-tip-text" style="font-size:13.5px; line-height:1.6; color:var(--ink-dim);">' + htmlTip + '</div>' +
-          '</div>';
-        feedbackBox.style.display = 'block';
-        actionRow.style.display = 'flex';
-      });
-    });
-
-    bindTap(stageEl.querySelector('#btnGrammarNext'), function() {
-      session.currentIdx++;
-      if (session.currentIdx < numQ) {
-        renderGrammarQuestion();
-      } else {
-        renderGrammarTopicComplete();
-      }
-    });
+  function renderGrammarTopics() {
+    renderLearnedWordsStory();
   }
 
-  function renderGrammarTopicComplete() {
-    var session = grammarSession;
-    var completedCount = session.correctAttempts;
-    var totalQuestions = session.questions.length;
-    var pctCorrect = Math.round((completedCount / totalQuestions) * 100);
-    
-    // Check if fully mastered
-    var isFullySolvedNow = true;
-    var topicAnswers = Progress.grammar[session.topicId] || {};
-    for (var i = 0; i < totalQuestions; i++) {
-      if (!topicAnswers[i]) isFullySolvedNow = false;
-    }
-
-    var isGoodScore = pctCorrect >= 80;
-
-    var iconBg = isGoodScore ? 'rgba(76,175,80,0.1)' : 'rgba(255,152,0,0.1)';
-    var iconColor = isGoodScore ? '#4CAF50' : '#FF9800';
-    var iconSvg = isGoodScore ? 
-      '<svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/></svg>' :
-      '<svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
-
-    var title = isGoodScore ? 'Fantastic Work! 🎉' : 'Lesson Finished';
-    var desc = 'You scored <b>' + pctCorrect + '%</b> on <b>' + escapeHtml(session.title) + '</b>.<br>' +
-      (isGoodScore ? 'You have a great grasp of this topic.' : 'Keep practicing to get a perfect score and master the lesson!');
-
-    var stageEl = $('grammarStage');
-    stageEl.innerHTML = 
-      '<div class="match-complete" style="text-align: center; width:100%;">' +
-        '<div class="checkpoint-icon" style="background:' + iconBg + '; color:' + iconColor + '; margin: 0 auto 18px;">' + iconSvg + '</div>' +
-        '<div class="checkpoint-title" style="font-size:24px; margin-bottom:8px;">' + title + '</div>' +
-        '<div class="checkpoint-sub" style="font-size:14px; max-width: 50ch; margin: 0 auto 20px;">' + desc + '</div>' +
-        '<div class="checkpoint-stats" style="margin-bottom:24px;">' +
-          '<div class="cstat"><b>' + completedCount + '/' + totalQuestions + '</b><span>Correct</span></div>' +
-          '<div class="cstat"><b>+' + (completedCount * 10) + '</b><span>Score gained</span></div>' +
-          '<div class="cstat"><b>Lvl ' + levelFromScore(Progress.score) + '</b><span>Current level</span></div>' +
-        '</div>' +
-        '<div class="checkpoint-actions" style="justify-content:center; gap: 12px; display:flex;">' +
-          '<button class="btn-solid" id="btnGrammarFinishDone">View Lessons</button>' +
-          '<button class="btn-ghost" id="btnGrammarRetryTopic">Try Again</button>' +
-        '</div>' +
-      '</div>';
-
-    bindTap($('btnGrammarFinishDone'), function() {
-      exitGrammarPractice();
-    });
-
-    bindTap($('btnGrammarRetryTopic'), function() {
-      // Clear current topic local answers to try again from scratch!
-      Progress.grammar[session.topicId] = {};
-      saveProgress();
-      startGrammarPractice(session.topicId);
-    });
+  function exitGrammarPractice() {
+    showView('home');
   }
 
   /* ---------------- SPEAKING PRACTICE MODULE ---------------- */
@@ -8221,12 +8173,15 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     var rec = new SpeechRecognition();
     rec.continuous = true;
     rec.interimResults = true;
+    rec.maxAlternatives = 10;
     rec.lang = 'en-US';
     return rec;
   }
 
   var lastFinalTranscript = '';
   var lastSpokenTranscript = '';
+  var lastAlternativesList = [];
+  var userExplicitlyStopped = false;
 
   function startSpeakingRecording() {
     if (isRecording) return;
@@ -8241,8 +8196,11 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     }
     
     isRecording = true;
+    userExplicitlyStopped = false;
     lastFinalTranscript = '';
     lastSpokenTranscript = '';
+    lastAlternativesList = [];
+
     $('speakingStatusLabel').textContent = 'Listening... Speak now!';
     $('speakingStatusLabel').style.color = 'var(--success)';
     $('btnSpeakingMic').style.borderColor = 'var(--success)';
@@ -8255,10 +8213,19 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     recognition.onresult = function(event) {
       var interimTranscript = '';
       for (var i = event.resultNoMatch ? 0 : event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript;
+        var resObj = event.results[i];
+        if (resObj.isFinal) {
+          finalTranscript += resObj[0].transcript;
         } else {
-          interimTranscript += event.results[i][0].transcript;
+          interimTranscript += resObj[0].transcript;
+        }
+        for (var alt = 0; alt < resObj.length; alt++) {
+          if (resObj[alt] && resObj[alt].transcript) {
+            var cand = resObj[alt].transcript.trim();
+            if (cand && lastAlternativesList.indexOf(cand) === -1) {
+              lastAlternativesList.push(cand);
+            }
+          }
         }
       }
       lastFinalTranscript = finalTranscript;
@@ -8277,19 +8244,33 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     };
     
     recognition.onend = function() {
-      if (isRecording) {
-        isRecording = false;
+      // Auto-restart if browser STT paused prematurely but user hasn't explicitly clicked stop!
+      if (isRecording && !userExplicitlyStopped) {
+        try {
+          recognition.start();
+          return;
+        } catch (e) {
+          console.warn("Auto-restart recognition failed:", e);
+        }
+      }
+      if (!isRecording || userExplicitlyStopped) {
         var spoken = lastFinalTranscript.trim() || lastSpokenTranscript.trim();
-        evaluateSpokenText(spoken);
+        evaluateSpokenText(spoken, lastAlternativesList);
       }
     };
     
-    recognition.start();
+    try {
+      recognition.start();
+    } catch (e) {
+      console.error("Failed to start speech recognition:", e);
+    }
   }
 
   function stopSpeakingRecording() {
     if (!isRecording) return;
     isRecording = false;
+    userExplicitlyStopped = true;
+
     if (recognition) {
       try {
         recognition.stop();
@@ -8304,7 +8285,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     $('micPulseRing').style.opacity = '0';
 
     var spoken = lastFinalTranscript.trim() || lastSpokenTranscript.trim();
-    evaluateSpokenText(spoken);
+    evaluateSpokenText(spoken, lastAlternativesList);
   }
 
   function normalizeText(txt) {
@@ -8314,8 +8295,32 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
               .trim();
   }
 
-  async function evaluateSpokenText(spokenText) {
+  function computeLevenshteinDistance(a, b) {
+    if (!a.length) return b.length;
+    if (!b.length) return a.length;
+    var matrix = [];
+    for (var i = 0; i <= b.length; i++) matrix[i] = [i];
+    for (var j = 0; j <= a.length; j++) matrix[0][j] = j;
+    for (var i = 1; i <= b.length; i++) {
+      for (var j = 1; j <= a.length; j++) {
+        if (b.charAt(i - 1) === a.charAt(j - 1)) {
+          matrix[i][j] = matrix[i - 1][j - 1];
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j - 1] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j] + 1
+          );
+        }
+      }
+    }
+    return matrix[b.length][a.length];
+  }
+
+  async function evaluateSpokenText(spokenText, alternatives) {
     isRecording = false;
+    userExplicitlyStopped = true;
+    var alternativesArray = Array.isArray(alternatives) ? alternatives : [];
     
     if (!spokenText || spokenText.trim() === '') {
       $('speakingStatusLabel').textContent = 'No voice detected';
@@ -8350,7 +8355,8 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
         body: JSON.stringify({
           targetText: currentSpeakingChallengeText,
           spokenText: spokenText,
-          words: currentSpeakingChallengeWords
+          words: currentSpeakingChallengeWords,
+          alternatives: alternativesArray
         })
       });
 
@@ -8437,16 +8443,20 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
 
     } catch (apiErr) {
       console.error('AI speech evaluation failed, falling back:', apiErr);
-      // Local fallback in case of errors
+      // Local fallback with fuzzy matching & alternatives search
+      var allTranscripts = [spokenText].concat(alternativesArray).filter(Boolean);
       var targetNorm = normalizeText(currentSpeakingChallengeText);
-      var spokenNorm = normalizeText(spokenText);
       var targetWords = targetNorm.split(' ');
+      
+      var spokenNorm = normalizeText(spokenText);
       var spokenWords = spokenNorm.split(' ');
       
       var spokenWordsCopy = spokenWords.slice();
       var matchedCount = 0;
       targetWords.forEach(function(tw) {
-        var idx = spokenWordsCopy.indexOf(tw);
+        var idx = spokenWordsCopy.findIndex(function(sw) {
+          return sw === tw || sw.startsWith(tw) || tw.startsWith(sw) || computeLevenshteinDistance(sw, tw) <= 1;
+        });
         if (idx !== -1) {
           matchedCount++;
           spokenWordsCopy.splice(idx, 1);
@@ -8456,16 +8466,38 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       var baseRatio = targetWords.length > 0 ? (matchedCount / targetWords.length) : 0;
       var vocabMatchedCount = 0;
       var vocabDetails = [];
+
       currentSpeakingChallengeWords.forEach(function(vw) {
         var normV = normalizeText(vw);
         var matched = false;
-        for (var i = 0; i < spokenWords.length; i++) {
-          var sw = spokenWords[i];
-          if (sw === normV || sw === (normV + 's') || sw === (normV + 'ed') || sw === (normV + 'ing') || sw === (normV + 'd') || sw.indexOf(normV) === 0 && Math.abs(sw.length - normV.length) <= 3) {
+
+        for (var c = 0; c < allTranscripts.length; c++) {
+          var cand = normalizeText(allTranscripts[c]);
+          var candWords = cand.split(' ');
+          var candNoSpaces = cand.replace(/\s+/g, '');
+
+          if (cand.indexOf(normV) !== -1 || candNoSpaces.indexOf(normV) !== -1 || (normV.indexOf(cand) !== -1 && cand.length >= 4)) {
             matched = true;
             break;
           }
+
+          for (var i = 0; i < candWords.length; i++) {
+            var sw = candWords[i];
+            if (!sw) continue;
+            if (sw === normV || sw === (normV + 's') || sw === (normV + 'es') || sw === (normV + 'ed') || sw === (normV + 'ing') || sw === (normV + 'd') || sw === (normV + 'ly') || sw === (normV + 'er')) {
+              matched = true;
+              break;
+            }
+            var dist = computeLevenshteinDistance(sw, normV);
+            var maxDist = normV.length <= 4 ? 1 : (normV.length <= 7 ? 2 : 3);
+            if (dist <= maxDist) {
+              matched = true;
+              break;
+            }
+          }
+          if (matched) break;
         }
+
         if (matched) {
           vocabMatchedCount++;
           vocabDetails.push({ word: vw, passed: true });
@@ -8478,6 +8510,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       var finalScore = (baseRatio * 0.4 + vocabRatio * 0.6) * 10;
       var roundedScore = Math.round(finalScore * 10) / 10;
       if (roundedScore < 0.5 && spokenWords.length > 0) roundedScore = 0.5;
+      if (vocabRatio >= 0.5) roundedScore = Math.max(roundedScore, 8.5);
       if (roundedScore > 10) roundedScore = 10;
       
       var passed = (roundedScore >= 5);
@@ -8632,40 +8665,24 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     }
     TOTAL = WORDS.length;
 
-    // Load French vocabulary. Try the static JSON file first (this is what
-    // works on GitHub Pages / any static host, since there is no server
-    // there to answer /api/* routes). Fall back to the /api/french-words
-    // route, which is only reachable when server.ts is actually running
-    // (e.g. local dev, or a real Node host).
+    // Load French vocabulary from API
     try {
-      var resF = await fetch('./french-words-data.json');
-      if (!resF.ok) throw new Error('static french-words-data.json not found');
-      ALL_FRENCH_WORDS_LIST = await resF.json();
-    } catch (staticErrF) {
-      try {
-        var resF2 = await fetch('/api/french-words');
-        if (resF2.ok) {
-          ALL_FRENCH_WORDS_LIST = await resF2.json();
-        }
-      } catch (err) {
-        console.warn('Failed to fetch French vocabulary:', err);
+      var resF = await fetch('/api/french-words');
+      if (resF.ok) {
+        ALL_FRENCH_WORDS_LIST = await resF.json();
       }
+    } catch (err) {
+      console.warn('Failed to fetch French vocabulary from API:', err);
     }
 
-    // Load French reading texts the same way: static file first, API fallback.
+    // Load French reading texts from API
     try {
-      var resT = await fetch('./french-texts.json');
-      if (!resT.ok) throw new Error('static french-texts.json not found');
-      FRENCH_TEXTS = await resT.json();
-    } catch (staticErrT) {
-      try {
-        var resT2 = await fetch('/api/french-texts');
-        if (resT2.ok) {
-          FRENCH_TEXTS = await resT2.json();
-        }
-      } catch (err) {
-        console.warn('Failed to fetch French reading texts:', err);
+      var resT = await fetch('/api/french-texts');
+      if (resT.ok) {
+        FRENCH_TEXTS = await resT.json();
       }
+    } catch (err) {
+      console.warn('Failed to fetch French reading texts from API:', err);
     }
 
     // Filter French words based on currentFrenchLevel
