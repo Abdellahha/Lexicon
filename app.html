@@ -7619,10 +7619,18 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     tokens.forEach(function(token) {
       if (/^[a-zA-Z0-9'’-]+$/.test(token)) {
         var tokenLower = token.toLowerCase();
-        var entry = (typeof findWordEntry === 'function') ? findWordEntry(tokenLower) : null;
+        var entry = ALL_WORDS_LIST.find(function(item){ return item.word && item.word.toLowerCase() === tokenLower; });
         var baseWord = entry ? entry.word.toLowerCase() : tokenLower;
 
         var isLearnedMatch = targetSet[tokenLower] || targetSet[baseWord];
+        if (!isLearnedMatch) {
+          for (var tw in targetSet) {
+            if (tw.length >= 4 && (tokenLower.startsWith(tw) || tw.startsWith(tokenLower))) {
+              isLearnedMatch = true;
+              break;
+            }
+          }
+        }
 
         if (isLearnedMatch) {
           var wordKey = entry ? entry.word : token;
@@ -7700,10 +7708,22 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
 
     // Fetch AI Story
     try {
+      var currentWordDetails = currentStoryWords.map(function(w) {
+        var wLower = String(w).toLowerCase();
+        var entry = ALL_WORDS_LIST.find(function(item){ return item.word && item.word.toLowerCase() === wLower; }) || {};
+        var info = (Progress.learned && Progress.learned[w]) || {};
+        return {
+          word: w,
+          pos: entry.pos || info.pos || '',
+          meaning: entry.meaning || info.meaning || '',
+          example: entry.example || info.example || ''
+        };
+      });
+
       var res = await fetch('/api/generate-learned-story', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ words: currentStoryWords, batchIndex: batchIndex })
+        body: JSON.stringify({ words: currentStoryWords, wordDetails: currentWordDetails, batchIndex: batchIndex })
       });
 
       if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -7716,35 +7736,36 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
 
     } catch (err) {
       console.warn("AI Story generation failed, using local template:", err);
-      var w0 = currentStoryWords[0] || "adventure";
-      var w1 = currentStoryWords[1] || "unexpected";
-      var w2 = currentStoryWords[2] || "collaborate";
-      var w3 = currentStoryWords[3] || "achieve";
-      var w4 = currentStoryWords[4] || "careful";
-
-      var templates = [
-        {
-          title: "Topic: " + w0.charAt(0).toUpperCase() + w0.slice(1) + " & Outdoor Expedition",
-          story: "During an outdoor expedition, the team noticed a rather " + w1 + " path through the forest. They decided to embark on this " + w0 + " and " + w2 + " carefully to reach the summit. Through constant teamwork, they were able to " + w3 + " their mission while remaining " + w4 + " every step of the way."
-        },
-        {
-          title: "Topic: Creative Workshop & Innovation",
-          story: "At the community studio, participants faced a " + w1 + " design challenge. Eager to turn this into a meaningful " + w0 + ", artists chose to " + w2 + " on new ideas. Their dedication allowed them to " + w3 + " a remarkable project while being " + w4 + " with every detail."
-        },
-        {
-          title: "Topic: Science & Space Research",
-          story: "Researchers in the astronomy lab observed a " + w1 + " signal coming from deep space. Viewing this as a pivotal " + w0 + ", scientists across countries joined to " + w2 + " on data analysis. Together, they hope to " + w3 + " ground-breaking discoveries by staying " + w4 + " with their calculations."
-        },
-        {
-          title: "Topic: Culinary Traditions & Food Culture",
-          story: "At the international food festival, chefs prepared a " + w1 + " selection of traditional dishes. It turned out to be a memorable " + w0 + " where culinary experts could " + w2 + " and share secrets. They managed to " + w3 + " authentic flavors while keeping " + w4 + " track of classic recipes."
+      var sentences = currentStoryWords.map(function(w) {
+        var wLower = String(w).toLowerCase();
+        var entry = ALL_WORDS_LIST.find(function(item){ return item.word && item.word.toLowerCase() === wLower; }) || {};
+        if (entry.example && typeof entry.example === 'string' && entry.example.length > 10) {
+          return entry.example.trim();
         }
+        var pos = String(entry.pos || "").toLowerCase();
+        if (pos.indexOf("verb") !== -1) {
+          return "The team worked diligently to " + w + " their objectives.";
+        } else if (pos.indexOf("adj") !== -1) {
+          return "They observed an unusually " + w + " aspect during the expedition.";
+        } else if (pos.indexOf("adv") !== -1) {
+          return "The team proceeded " + w + " to ensure complete success.";
+        } else {
+          return "Everyone appreciated the importance of " + w + " in their work.";
+        }
+      });
+
+      var fallbackTopics = [
+        "Topic: Outdoor Exploration & Environmental Science",
+        "Topic: Creative Studio & Cultural Innovation",
+        "Topic: Scientific Research & Deep Discovery",
+        "Topic: Global Traditions & Culinary Heritage"
       ];
 
-      var fallback = templates[batchIndex % templates.length];
-      currentStoryText = fallback.story;
-      storyCache[batchIndex] = { story: fallback.story, title: fallback.title };
-      renderStoryContent(fallback.title, fallback.story, currentStoryWords, batchIndex, totalBatches, learnedKeys.length);
+      var fallbackTitle = fallbackTopics[batchIndex % fallbackTopics.length];
+      var fallbackStory = sentences.join(" ");
+      currentStoryText = fallbackStory;
+      storyCache[batchIndex] = { story: fallbackStory, title: fallbackTitle };
+      renderStoryContent(fallbackTitle, fallbackStory, currentStoryWords, batchIndex, totalBatches, learnedKeys.length);
     }
   }
 

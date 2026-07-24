@@ -224,68 +224,88 @@ Generate your response in the specified JSON schema. Keep the advice friendly, c
     }
   });
 
+  // Helper for generating grammatically precise fallback stories by part of speech
+  const generateFallbackStory = (wordsList: string[], detailsList: any[], bIdx: number) => {
+    const sentences = wordsList.map((w) => {
+      const detail = detailsList.find((d: any) => d && d.word && d.word.toLowerCase() === String(w).toLowerCase()) || {};
+      if (detail.example && typeof detail.example === 'string' && detail.example.length > 10) {
+        return detail.example.trim();
+      }
+      const pos = String(detail.pos || "").toLowerCase();
+      if (pos.includes("verb")) {
+        return `The group worked diligently to ${w} their objectives.`;
+      } else if (pos.includes("adj") || pos.includes("adjective")) {
+        return `They observed an unusually ${w} aspect during the expedition.`;
+      } else if (pos.includes("adv") || pos.includes("adverb")) {
+        return `The team proceeded ${w} to ensure complete success.`;
+      } else {
+        // Noun / default
+        return `Everyone appreciated the importance of ${w} in their work.`;
+      }
+    });
+
+    const topics = [
+      "Topic: Outdoor Exploration & Environmental Science",
+      "Topic: Creative Studio & Cultural Innovation",
+      "Topic: Scientific Research & Deep Discovery",
+      "Topic: Global Traditions & Culinary Heritage",
+      "Topic: Sustainable Architecture & Urban Living"
+    ];
+
+    return {
+      title: topics[bIdx % topics.length],
+      story: sentences.join(" ")
+    };
+  };
+
   // API Route to generate a reading story using 15-20 learned words
   app.post("/api/generate-learned-story", async (req, res) => {
     try {
-      const { words, batchIndex } = req.body;
+      const { words, wordDetails, batchIndex } = req.body;
       const targetWords = Array.isArray(words) ? words : [];
+      const wordDetailsList = Array.isArray(wordDetails) ? wordDetails : [];
       const idx = typeof batchIndex === 'number' ? batchIndex : 0;
 
       if (!targetWords.length) {
         return res.status(400).json({ error: "No words provided" });
       }
 
-      // Diverse fallback story templates by batch index
-      const generateFallbackStory = (wordsList: string[], bIdx: number) => {
-        const w0 = wordsList[0] || "adventure";
-        const w1 = wordsList[1] || "unexpected";
-        const w2 = wordsList[2] || "collaborate";
-        const w3 = wordsList[3] || "achieve";
-        const w4 = wordsList[4] || "careful";
-
-        const templates = [
-          {
-            title: `Topic: ${w0.charAt(0).toUpperCase() + w0.slice(1)} & Outdoor Expedition`,
-            story: `During an outdoor expedition, the team noticed a rather ${w1} path through the forest. They decided to embark on this ${w0} and ${w2} carefully to reach the summit. Through constant teamwork, they were able to ${w3} their mission while remaining ${w4} every step of the way.`
-          },
-          {
-            title: `Topic: Creative Workshop & Innovation`,
-            story: `At the community studio, participants faced a ${w1} design challenge. Eager to turn this into a meaningful ${w0}, artists chose to ${w2} on new ideas. Their dedication allowed them to ${w3} a remarkable project while being ${w4} with every detail.`
-          },
-          {
-            title: `Topic: Science & Space Research`,
-            story: `Researchers in the astronomy lab observed a ${w1} signal coming from deep space. Viewing this as a pivotal ${w0}, scientists across countries joined to ${w2} on data analysis. Together, they hope to ${w3} ground-breaking discoveries by staying ${w4} with their calculations.`
-          },
-          {
-            title: `Topic: Culinary Traditions & Food Culture`,
-            story: `At the international food festival, chefs prepared a ${w1} selection of traditional dishes. It turned out to be a memorable ${w0} where culinary experts could ${w2} and share secrets. They managed to ${w3} authentic flavors while keeping ${w4} track of classic recipes.`
-          },
-          {
-            title: `Topic: Urban Architecture & City Life`,
-            story: `Walking through the historic downtown area, visitors admired a ${w1} building with modern artistic features. Urban planners saw this project as a great ${w0} and agreed to ${w2} with local historians. Their goal was to ${w3} sustainable urban growth while remaining ${w4} about preserving heritage.`
-          }
-        ];
-
-        return templates[bIdx % templates.length];
-      };
-
       const ai = getGeminiClient();
       if (!ai) {
-        const fallback = generateFallbackStory(targetWords, idx);
+        const fallback = generateFallbackStory(targetWords, wordDetailsList, idx);
         return res.json({ title: fallback.title, story: fallback.story, wordsUsed: targetWords });
       }
 
-      const prompt = `Write an engaging, clear, and cohesive English reading text (80 to 150 words) for English language learners.
-Assign a UNIQUE, distinct topic, plot, and setting (Text #${idx + 1}) specifically suited for these target vocabulary words: ${JSON.stringify(targetWords)}.
+      const wordContextsFormatted = wordDetailsList.length > 0
+        ? wordDetailsList.map((d: any) => `- WORD: "${d.word}" | POS: ${d.pos || 'unknown'} | MEANING: ${d.meaning || 'N/A'}${d.example ? ' | USAGE EXAMPLE: ' + d.example : ''}`).join('\n')
+        : targetWords.map((w: string) => `- WORD: "${w}"`).join('\n');
 
-CRITICAL REQUIREMENTS:
-1. Choose a distinct theme (e.g. Science, Art, History, Travel, Nature, Cooking, Technology, Mystery, Sports, Architecture, etc.). Make Text #${idx + 1} completely unique in plot and setting!
-2. You MUST naturally weave EVERY SINGLE ONE of the target words (${targetWords.join(", ")}) into narrative sentences as part of the story context.
-3. STRICTLY FORBIDDEN: Do NOT list or mention words meta-referentially! NEVER write phrases like "words like...", "when you practice words such as...", or "today we study...". Every target word MUST be used naturally in context (e.g., if the word is 'bizarre', write: 'He wore a bizarre hat to the ceremony.').
-4. Provide a creative topic title starting with "Topic: ..." (e.g., 'Topic: The Mysterious Art Gallery', 'Topic: Deep Sea Exploration').
-5. Keep the text engaging, grammatically correct, and easy to read.
+      const prompt = `You are a world-class TEFL textbook author, linguist, and Oxford English dictionary editor.
+Write a clear, engaging, cohesive, and 100% grammatically flawless reading passage (80 to 150 words) for English language learners.
 
-Return the output in JSON format with "title" and "story" fields.`;
+SETTING FOR TEXT #${idx + 1}:
+Select an authentic, realistic topic (e.g. Nature Exploration, Science Research, Cultural History, Culinary Arts, City Architecture, Space Investigation, Community Projects).
+
+TARGET VOCABULARY LIST (WITH PARTS OF SPEECH & DEFINITIONS):
+${wordContextsFormatted}
+
+STRICT LINGUISTIC & GRAMMATICAL RULES:
+1. PERFECT PART OF SPEECH & SEMANTIC ACCURACY:
+   - You MUST use every target word strictly in accordance with its defined Part of Speech and exact meaning.
+   - Example 1 (verb vs adjective/noun): "absorb" is a verb ("The soil can absorb water") — NEVER use it as an adjective ("a rather absorb path").
+   - Example 2 (verb inflection): "accomplish" is a verb ("They were able to accomplish their goal") — NEVER use it after 'remaining' where an adjective is required.
+   - Example 3 (verb vs noun): "abolish" is a verb ("The government decided to abolish the tax") — NEVER use it as a noun or adjective.
+   - Example 4 (adjective vs noun): "abstract" is an adjective ("an abstract idea") — use it modifying a noun.
+   - Example 5 (verb): "accommodate" is a verb ("The hotel can accommodate guests", "We must accommodate changing weather").
+2. NATURAL INFLECTION ALLOWED:
+   - You MAY inflect verbs (e.g. 'absorbed', 'abolished', 'accommodated', 'accomplishing') or pluralize nouns so the prose reads smoothly with 100% natural, idiomatic English syntax.
+3. COHESIVE PROSE:
+   - Connect the sentences into a single, flowing, natural paragraph.
+   - NO META-LANGUAGE: Do NOT list words, do NOT write "words like...", or mention language learning.
+4. LANGUAGE LEVEL HIGH QUALITY:
+   - The passage MUST serve as an exemplary, professional model of standard English syntax.
+
+Return JSON format with "title" (e.g., 'Topic: Mountain Expedition & Conservation') and "story" fields.`;
 
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
@@ -301,7 +321,7 @@ Return the output in JSON format with "title" and "story" fields.`;
               },
               story: {
                 type: Type.STRING,
-                description: "The full story text incorporating all target words into narrative context"
+                description: "The full story text incorporating all target words into natural, grammatically correct sentences"
               }
             },
             required: ["title", "story"]
@@ -320,33 +340,10 @@ Return the output in JSON format with "title" and "story" fields.`;
     } catch (err: any) {
       console.warn("Error generating learned words story with Gemini, using fallback:", err?.message || err);
       const targetWords = Array.isArray(req.body?.words) ? req.body.words : [];
+      const wordDetailsList = Array.isArray(req.body?.wordDetails) ? req.body.wordDetails : [];
       const idx = typeof req.body?.batchIndex === 'number' ? req.body.batchIndex : 0;
-      const w0 = targetWords[0] || "adventure";
-      const w1 = targetWords[1] || "unexpected";
-      const w2 = targetWords[2] || "collaborate";
-      const w3 = targetWords[3] || "achieve";
-      const w4 = targetWords[4] || "careful";
-
-      const fallbackTemplates = [
-        {
-          title: `Topic: ${w0.charAt(0).toUpperCase() + w0.slice(1)} & Outdoor Expedition`,
-          story: `During an outdoor expedition, the team noticed a rather ${w1} path through the forest. They decided to embark on this ${w0} and ${w2} carefully to reach the summit. Through constant teamwork, they were able to ${w3} their mission while remaining ${w4} every step of the way.`
-        },
-        {
-          title: `Topic: Creative Workshop & Innovation`,
-          story: `At the community studio, participants faced a ${w1} design challenge. Eager to turn this into a meaningful ${w0}, artists chose to ${w2} on new ideas. Their dedication allowed them to ${w3} a remarkable project while being ${w4} with every detail.`
-        },
-        {
-          title: `Topic: Science & Space Research`,
-          story: `Researchers in the astronomy lab observed a ${w1} signal coming from deep space. Viewing this as a pivotal ${w0}, scientists across countries joined to ${w2} on data analysis. Together, they hope to ${w3} ground-breaking discoveries by staying ${w4} with their calculations.`
-        },
-        {
-          title: `Topic: Culinary Traditions & Food Culture`,
-          story: `At the international food festival, chefs prepared a ${w1} selection of traditional dishes. It turned out to be a memorable ${w0} where culinary experts could ${w2} and share secrets. They managed to ${w3} authentic flavors while keeping ${w4} track of classic recipes.`
-        }
-      ];
-
-      const fallback = fallbackTemplates[idx % fallbackTemplates.length];
+      
+      const fallback = generateFallbackStory(targetWords, wordDetailsList, idx);
       res.json({
         title: fallback.title,
         story: fallback.story,
