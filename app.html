@@ -1365,18 +1365,7 @@ body {
 
   <!-- LEARNED WORDS STORY VIEW -->
   <div class="view" id="view-grammar">
-    <div id="grammar-topics-screen">
-      <div class="study-top" style="margin-bottom: 12px;">
-        <button class="btn-ghost" id="btnGrammarBack" style="display: inline-flex; align-items: center; gap: 6px;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Home
-        </button>
-      </div>
-      <div class="hero" style="margin-bottom: 24px; display: block; background: transparent; padding: 12px 0 0; text-align: left; box-shadow: none;">
-        <div class="hero-title" style="font-size: clamp(28px, 6vw, 36px); line-height: 1.2; font-family: var(--font-display); font-weight: 800; font-style: italic; margin-bottom: 8px;">Learned Words <span style="color: var(--ink-faint); font-weight: 400;">Reading Story</span></div>
-        <p class="hero-sub" style="font-size: 14px; color: var(--ink-dim); line-height: 1.6; max-width: 60ch; margin: 0;">Read engaging AI-generated stories containing 15 to 20 of your learned vocabulary words. Click any highlighted word for its meaning, or use AI Voice to read aloud!</p>
-      </div>
-      
+    <div id="grammar-topics-screen" style="padding-top: 0; margin-top: 0;">
       <div id="learnedStoryContainer">
         <!-- AI Story or Unlock message dynamically rendered -->
       </div>
@@ -7606,9 +7595,11 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   ];
 
   /* ---------------- LEARNED WORDS READING STORIES MODULE ---------------- */
+  var currentStoryBatchIndex = 0;
   var currentStoryText = "";
   var currentStoryWords = [];
   var isStoryAudioPlaying = false;
+  var storyCache = {};
 
   function highlightLearnedWordsInStory(text, targetWords) {
     if (!text) return '';
@@ -7647,20 +7638,24 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     return html;
   }
 
-  async function renderLearnedWordsStory() {
+  async function renderLearnedWordsStory(batchIndex, forceRefresh) {
     var container = $('learnedStoryContainer');
     if (!container) return;
+
+    // Stop previous audio
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+    isStoryAudioPlaying = false;
 
     var learnedKeys = Object.keys(Progress.learned || {});
     
     // Check if user has learned enough words
-    if (learnedKeys.length < 3) {
+    if (learnedKeys.length < 1) {
       container.innerHTML = 
         '<div style="text-align: center; padding: 40px 20px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); max-width: 520px; margin: 20px auto;">' +
           '<div style="font-size: 48px; margin-bottom: 12px;">🔒</div>' +
-          '<h3 style="font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--ink); margin-bottom: 8px;">Learn Vocabulary to Unlock Stories</h3>' +
+          '<h3 style="font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--ink); margin-bottom: 8px;">Learn Vocabulary to Unlock Reading Texts</h3>' +
           '<p style="font-size: 14px; color: var(--ink-dim); line-height: 1.5; margin-bottom: 20px;">' +
-            'You have learned <b>' + learnedKeys.length + '</b> word' + (learnedKeys.length === 1 ? '' : 's') + ' so far. Please learn at least 3 to 5 words to generate custom AI reading stories containing 15–20 learned words!' +
+            'You have learned <b>' + learnedKeys.length + '</b> words so far. Learn vocabulary words to generate custom AI reading texts containing your learned words!' +
           '</p>' +
           '<button class="btn-solid" id="btnGoToVocabFromStory" style="background: var(--ink); color: var(--bg); border: none; padding: 12px 24px; cursor: pointer;">Start Learning Vocabulary</button>' +
         '</div>';
@@ -7672,14 +7667,26 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       return;
     }
 
-    // Select 15 to 20 words from user's learned words
-    var numToPick = Math.min(20, Math.max(15, learnedKeys.length));
-    if (learnedKeys.length < 15) {
-      numToPick = learnedKeys.length;
+    var WORDS_PER_TEXT = 5;
+    var totalBatches = Math.max(1, Math.ceil(learnedKeys.length / WORDS_PER_TEXT));
+    if (typeof batchIndex !== 'number' || isNaN(batchIndex)) {
+      batchIndex = currentStoryBatchIndex || 0;
     }
-    
-    var shuffled = learnedKeys.slice().sort(function() { return 0.5 - Math.random(); });
-    currentStoryWords = shuffled.slice(0, numToPick);
+    batchIndex = Math.max(0, Math.min(batchIndex, totalBatches - 1));
+    currentStoryBatchIndex = batchIndex;
+
+    // Slice 5 words for this batch
+    var startIdx = batchIndex * WORDS_PER_TEXT;
+    var endIdx = Math.min(learnedKeys.length, (batchIndex + 1) * WORDS_PER_TEXT);
+    currentStoryWords = learnedKeys.slice(startIdx, endIdx);
+
+    // If cached and not forced refresh, render immediately
+    if (storyCache[batchIndex] && !forceRefresh) {
+      currentStoryText = storyCache[batchIndex].story || storyCache[batchIndex];
+      var cachedTitle = storyCache[batchIndex].title || ("Topic: " + (currentStoryWords[0] ? currentStoryWords[0] : "Vocabulary Practice"));
+      renderStoryContent(cachedTitle, currentStoryText, currentStoryWords, batchIndex, totalBatches, learnedKeys.length);
+      return;
+    }
 
     // Render loading view
     container.innerHTML = 
@@ -7687,101 +7694,128 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
         '<div class="loading-wrap" style="margin-bottom: 16px;">' +
           '<div class="loading-dot"><span></span><span></span><span></span></div>' +
         '</div>' +
-        '<div style="font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--ink); margin-bottom: 6px;">Generating Story with AI...</div>' +
-        '<div style="font-size: 13px; color: var(--ink-dim); font-family: var(--font-mono);">Weaving ' + currentStoryWords.length + ' of your learned words into a cohesive article.</div>' +
+        '<div style="font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--ink); margin-bottom: 6px;">Generating Text ' + (batchIndex + 1) + ' of ' + totalBatches + ' with AI...</div>' +
+        '<div style="font-size: 13px; color: var(--ink-dim); font-family: var(--font-mono);">Weaving ' + currentStoryWords.length + ' learned words into an engaging reading topic.</div>' +
       '</div>';
-
-    // Stop previous audio
-    if ('speechSynthesis' in window) speechSynthesis.cancel();
-    isStoryAudioPlaying = false;
 
     // Fetch AI Story
     try {
       var res = await fetch('/api/generate-learned-story', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ words: currentStoryWords })
+        body: JSON.stringify({ words: currentStoryWords, batchIndex: batchIndex })
       });
 
       if (!res.ok) throw new Error('HTTP ' + res.status);
       var data = await res.json();
       
       currentStoryText = data.story || '';
-      renderStoryContent(data.title || "Learned Words Story", currentStoryText, currentStoryWords);
+      var storyTitle = data.title || ("Topic: " + (currentStoryWords[0] ? currentStoryWords[0].charAt(0).toUpperCase() + currentStoryWords[0].slice(1) : "Vocabulary Practice"));
+      storyCache[batchIndex] = { story: currentStoryText, title: storyTitle };
+      renderStoryContent(storyTitle, currentStoryText, currentStoryWords, batchIndex, totalBatches, learnedKeys.length);
 
     } catch (err) {
       console.warn("AI Story generation failed, using local template:", err);
-      // Fallback local story text
-      var fallbackTitle = "A Journey of Persistent Growth";
-      var fallbackStory = "Every step in learning a new language brings greater confidence. When you " + (currentStoryWords[0] || "accomplish") + " your daily tasks, you " + (currentStoryWords[1] || "enhance") + " your knowledge naturally. Working with friends allows us to " + (currentStoryWords[2] || "collaborate") + " and " + (currentStoryWords[3] || "achieve") + " impressive goals together. Always be " + (currentStoryWords[4] || "careful") + " with your habits, as small efforts " + (currentStoryWords[5] || "accumulate") + " over time to produce " + (currentStoryWords[6] || "significant") + " progress. Keep practicing daily to " + (currentStoryWords[7] || "foster") + " your skills and " + (currentStoryWords[8] || "embrace") + " every challenge!";
-      currentStoryText = fallbackStory;
-      renderStoryContent(fallbackTitle, fallbackStory, currentStoryWords);
+      var w0 = currentStoryWords[0] || "adventure";
+      var w1 = currentStoryWords[1] || "unexpected";
+      var w2 = currentStoryWords[2] || "collaborate";
+      var w3 = currentStoryWords[3] || "achieve";
+      var w4 = currentStoryWords[4] || "careful";
+
+      var templates = [
+        {
+          title: "Topic: " + w0.charAt(0).toUpperCase() + w0.slice(1) + " & Outdoor Expedition",
+          story: "During an outdoor expedition, the team noticed a rather " + w1 + " path through the forest. They decided to embark on this " + w0 + " and " + w2 + " carefully to reach the summit. Through constant teamwork, they were able to " + w3 + " their mission while remaining " + w4 + " every step of the way."
+        },
+        {
+          title: "Topic: Creative Workshop & Innovation",
+          story: "At the community studio, participants faced a " + w1 + " design challenge. Eager to turn this into a meaningful " + w0 + ", artists chose to " + w2 + " on new ideas. Their dedication allowed them to " + w3 + " a remarkable project while being " + w4 + " with every detail."
+        },
+        {
+          title: "Topic: Science & Space Research",
+          story: "Researchers in the astronomy lab observed a " + w1 + " signal coming from deep space. Viewing this as a pivotal " + w0 + ", scientists across countries joined to " + w2 + " on data analysis. Together, they hope to " + w3 + " ground-breaking discoveries by staying " + w4 + " with their calculations."
+        },
+        {
+          title: "Topic: Culinary Traditions & Food Culture",
+          story: "At the international food festival, chefs prepared a " + w1 + " selection of traditional dishes. It turned out to be a memorable " + w0 + " where culinary experts could " + w2 + " and share secrets. They managed to " + w3 + " authentic flavors while keeping " + w4 + " track of classic recipes."
+        }
+      ];
+
+      var fallback = templates[batchIndex % templates.length];
+      currentStoryText = fallback.story;
+      storyCache[batchIndex] = { story: fallback.story, title: fallback.title };
+      renderStoryContent(fallback.title, fallback.story, currentStoryWords, batchIndex, totalBatches, learnedKeys.length);
     }
   }
 
-  function renderStoryContent(title, storyText, wordsList) {
+  function renderStoryContent(storyTitle, storyText, wordsList, batchIndex, totalBatches, totalLearnedCount) {
     var container = $('learnedStoryContainer');
     if (!container) return;
 
-    // Render word pills
-    var pillsHtml = wordsList.map(function(w) {
-      var entry = (typeof findWordEntry === 'function') ? findWordEntry(w) : null;
-      var pos = entry && entry.pos ? ' <span style="font-size:9px; opacity:0.6; font-style:italic;">' + escapeHtml(entry.pos) + '</span>' : '';
-      return '<span class="clickable-speaking-word" data-word="' + escapeHtml(w) + '" style="background: rgba(139, 92, 246, 0.12); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.25); padding: 5px 12px; border-radius: 20px; font-weight: 700; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" title="Click for definition">' +
-        '<span>' + escapeHtml(w) + '</span>' + pos +
-      '</span>';
-    }).join('');
-
     var highlightedStoryHtml = highlightLearnedWordsInStory(storyText, wordsList);
+    var WORDS_PER_TEXT = 5;
+    var startNum = batchIndex * WORDS_PER_TEXT + 1;
+    var endNum = Math.min(totalLearnedCount, (batchIndex + 1) * WORDS_PER_TEXT);
+
+    var prevDisabled = batchIndex <= 0;
+    var nextDisabled = batchIndex >= totalBatches - 1;
 
     container.innerHTML = 
-      '<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">' +
-        '<div>' +
-          '<div style="font-family: var(--font-mono); font-size: 10px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700;">READING CONTEXT</div>' +
-          '<div style="font-family: var(--font-display); font-size: 24px; font-weight: 800; font-style: italic; color: var(--ink); margin-top: 2px;">' + escapeHtml(title) + '</div>' +
-        '</div>' +
-        
-        '<div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">' +
-          '<button id="btnPlayStoryAudio" class="btn-solid" style="background: var(--accent); color: var(--accent-ink); border: none; font-size: 13px; padding: 10px 18px; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; outline: none; transition: transform 0.2s;">' +
-            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" id="storyAudioIcon"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>' +
-            '<span id="storyAudioText">🔊 Read Aloud with AI Voice</span>' +
-          '</button>' +
-          
-          '<button id="btnGenerateNewStory" class="btn-ghost" style="padding: 10px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">' +
-            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>' +
-            '<span>New Story (' + wordsList.length + ' Words)</span>' +
-          '</button>' +
+      '<!-- TOP COUNTER BADGE BAR -->' +
+      '<div style="display: flex; justify-content: center; align-items: center; margin-bottom: 16px;">' +
+        '<div style="background: rgba(139, 92, 246, 0.12); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.3); padding: 8px 18px; border-radius: 20px; font-weight: 700; font-size: 13.5px; font-family: var(--font-mono); display: inline-flex; align-items: center; gap: 6px;">' +
+          '📖 Text ' + (batchIndex + 1) + ' of ' + totalBatches + ' <span style="opacity: 0.65; font-weight: 400;">(Words ' + startNum + '–' + endNum + ' of ' + totalLearnedCount + ')</span>' +
         '</div>' +
       '</div>' +
 
-      '<!-- TARGET WORDS PILLS BAR -->' +
-      '<div style="background: var(--bg-1); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 24px;">' +
-        '<div style="font-family: var(--font-mono); font-size: 10px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">' +
-          '<span>Learned Words Practiced in this Story (' + wordsList.length + ')</span>' +
-          '<span style="color: #8b5cf6; font-weight: 700;">💜 Highlighted below</span>' +
+      '<!-- STORY READING CARD WITH DISTINCT TOPIC TITLE -->' +
+      '<div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 26px 28px 32px; box-shadow: var(--shadow); position: relative; margin-bottom: 20px;">' +
+        '<div style="font-family: var(--font-display); font-size: 20px; font-weight: 800; color: var(--ink); margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px; text-align: left;">' +
+          escapeHtml(storyTitle) +
         '</div>' +
-        '<div style="display: flex; flex-wrap: wrap; gap: 8px;">' +
-          pillsHtml +
-        '</div>' +
-      '</div>' +
-
-      '<!-- STORY READING CARD -->' +
-      '<div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 32px 28px; box-shadow: var(--shadow); position: relative; margin-bottom: 30px;">' +
         '<div id="storyMainBody" style="font-family: var(--font-display); font-size: clamp(17px, 4vw, 20px); line-height: 1.85; color: var(--ink); text-align: left; font-weight: 400;">' +
           highlightedStoryHtml +
         '</div>' +
+      '</div>' +
+
+      '<!-- THREE BUTTONS CENTERED HORIZONTALLY IN THE MIDDLE -->' +
+      '<div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 30px;">' +
+        '<!-- BACK / PREVIOUS BUTTON -->' +
+        '<button id="btnPrevStory" class="btn-ghost" ' + (prevDisabled ? 'disabled style="opacity:0.4; cursor:not-allowed; padding: 11px 18px; border-radius: 8px; font-weight: 600; font-size: 13.5px; border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 6px;"' : 'style="padding: 11px 18px; border-radius: 8px; font-weight: 600; font-size: 13.5px; border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 6px; cursor: pointer;"') + '>' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>' +
+          '<span>Back</span>' +
+        '</button>' +
+
+        '<!-- READ ALOUD BUTTON (ICON ONLY) -->' +
+        '<button id="btnPlayStoryAudio" class="btn-ghost" title="Read Aloud" aria-label="Read Aloud" style="padding: 11px 16px; border-radius: 8px; font-weight: 600; font-size: 13.5px; border: 1px solid var(--border); color: var(--ink); display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">' +
+          '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" id="storyAudioIcon"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>' +
+        '</button>' +
+
+        '<!-- NEXT BUTTON -->' +
+        '<button id="btnNextStory" class="btn-ghost" ' + (nextDisabled ? 'disabled style="opacity:0.4; cursor:not-allowed; padding: 11px 18px; border-radius: 8px; font-weight: 600; font-size: 13.5px; border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 6px;"' : 'style="padding: 11px 18px; border-radius: 8px; font-weight: 600; font-size: 13.5px; border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 6px; cursor: pointer;"') + '>' +
+          '<span>Next</span>' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>' +
+        '</button>' +
       '</div>';
 
     // Bind event handlers
-    bindTap($('btnGenerateNewStory'), function() {
-      renderLearnedWordsStory();
+    bindTap($('btnPrevStory'), function() {
+      if (batchIndex > 0) {
+        renderLearnedWordsStory(batchIndex - 1, false);
+      }
+    });
+
+    bindTap($('btnNextStory'), function() {
+      if (batchIndex < totalBatches - 1) {
+        renderLearnedWordsStory(batchIndex + 1, false);
+      }
     });
 
     bindTap($('btnPlayStoryAudio'), function() {
       toggleStoryAudio(storyText);
     });
 
-    // Bind modal clicks for highlighted words in story & pills
+    // Bind modal clicks for highlighted words in story
     bindTap($('learnedStoryContainer'), function(ev) {
       var target = ev.target.closest('.clickable-speaking-word');
       if (target) {
@@ -7798,13 +7832,18 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     }
 
     var btn = $('btnPlayStoryAudio');
-    var txtEl = $('storyAudioText');
+    var speakerSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>';
+    var pauseSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>';
 
     if (isStoryAudioPlaying) {
       speechSynthesis.cancel();
       isStoryAudioPlaying = false;
-      if (txtEl) txtEl.textContent = '🔊 Read Aloud with AI Voice';
-      if (btn) btn.style.background = 'var(--accent)';
+      if (btn) {
+        btn.innerHTML = speakerSvg;
+        btn.style.borderColor = 'var(--border)';
+        btn.style.color = 'var(--ink)';
+        btn.style.background = 'transparent';
+      }
       return;
     }
 
@@ -7817,19 +7856,31 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     utterance.pitch = 1.0;
 
     isStoryAudioPlaying = true;
-    if (txtEl) txtEl.textContent = '⏸️ Stop Reading';
-    if (btn) btn.style.background = '#8b5cf6';
+    if (btn) {
+      btn.innerHTML = pauseSvg;
+      btn.style.borderColor = '#8b5cf6';
+      btn.style.color = '#8b5cf6';
+      btn.style.background = 'rgba(139, 92, 246, 0.1)';
+    }
 
     utterance.onend = function() {
       isStoryAudioPlaying = false;
-      if (txtEl) txtEl.textContent = '🔊 Read Aloud with AI Voice';
-      if (btn) btn.style.background = 'var(--accent)';
+      if (btn) {
+        btn.innerHTML = speakerSvg;
+        btn.style.borderColor = 'var(--border)';
+        btn.style.color = 'var(--ink)';
+        btn.style.background = 'transparent';
+      }
     };
 
     utterance.onerror = function() {
       isStoryAudioPlaying = false;
-      if (txtEl) txtEl.textContent = '🔊 Read Aloud with AI Voice';
-      if (btn) btn.style.background = 'var(--accent)';
+      if (btn) {
+        btn.innerHTML = speakerSvg;
+        btn.style.borderColor = 'var(--border)';
+        btn.style.color = 'var(--ink)';
+        btn.style.background = 'transparent';
+      }
     };
 
     speechSynthesis.speak(utterance);
@@ -8965,7 +9016,8 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       }
     });
     bindTap($('cardGrammar'), function(){
-      showToast('Grammar in Context is currently locked for updates. Coming soon!');
+      showView('grammar');
+      renderLearnedWordsStory();
     });
     bindTap($('btnExit'), function(){
       if(currentAudioEl) currentAudioEl.pause();

@@ -227,28 +227,63 @@ Generate your response in the specified JSON schema. Keep the advice friendly, c
   // API Route to generate a reading story using 15-20 learned words
   app.post("/api/generate-learned-story", async (req, res) => {
     try {
-      const { words } = req.body;
+      const { words, batchIndex } = req.body;
       const targetWords = Array.isArray(words) ? words : [];
+      const idx = typeof batchIndex === 'number' ? batchIndex : 0;
 
       if (!targetWords.length) {
         return res.status(400).json({ error: "No words provided" });
       }
 
+      // Diverse fallback story templates by batch index
+      const generateFallbackStory = (wordsList: string[], bIdx: number) => {
+        const w0 = wordsList[0] || "adventure";
+        const w1 = wordsList[1] || "unexpected";
+        const w2 = wordsList[2] || "collaborate";
+        const w3 = wordsList[3] || "achieve";
+        const w4 = wordsList[4] || "careful";
+
+        const templates = [
+          {
+            title: `Topic: ${w0.charAt(0).toUpperCase() + w0.slice(1)} & Outdoor Expedition`,
+            story: `During an outdoor expedition, the team noticed a rather ${w1} path through the forest. They decided to embark on this ${w0} and ${w2} carefully to reach the summit. Through constant teamwork, they were able to ${w3} their mission while remaining ${w4} every step of the way.`
+          },
+          {
+            title: `Topic: Creative Workshop & Innovation`,
+            story: `At the community studio, participants faced a ${w1} design challenge. Eager to turn this into a meaningful ${w0}, artists chose to ${w2} on new ideas. Their dedication allowed them to ${w3} a remarkable project while being ${w4} with every detail.`
+          },
+          {
+            title: `Topic: Science & Space Research`,
+            story: `Researchers in the astronomy lab observed a ${w1} signal coming from deep space. Viewing this as a pivotal ${w0}, scientists across countries joined to ${w2} on data analysis. Together, they hope to ${w3} ground-breaking discoveries by staying ${w4} with their calculations.`
+          },
+          {
+            title: `Topic: Culinary Traditions & Food Culture`,
+            story: `At the international food festival, chefs prepared a ${w1} selection of traditional dishes. It turned out to be a memorable ${w0} where culinary experts could ${w2} and share secrets. They managed to ${w3} authentic flavors while keeping ${w4} track of classic recipes.`
+          },
+          {
+            title: `Topic: Urban Architecture & City Life`,
+            story: `Walking through the historic downtown area, visitors admired a ${w1} building with modern artistic features. Urban planners saw this project as a great ${w0} and agreed to ${w2} with local historians. Their goal was to ${w3} sustainable urban growth while remaining ${w4} about preserving heritage.`
+          }
+        ];
+
+        return templates[bIdx % templates.length];
+      };
+
       const ai = getGeminiClient();
       if (!ai) {
-        // Fallback local story generator
-        const title = "A Day of New Discoveries";
-        const story = `Every morning brings an opportunity to learn and grow. When we try to ${targetWords[0] || 'accomplish'} our goals, we must stay focused and ${targetWords[1] || 'adapt'} to changes around us. Friends often ${targetWords[2] || 'collaborate'} to ${targetWords[3] || 'achieve'} extraordinary results together. By making a ${targetWords[4] || 'careful'} plan, anyone can ${targetWords[5] || 'enhance'} their skills and ${targetWords[6] || 'obtain'} great knowledge. It is essential to ${targetWords[7] || 'foster'} curiosity and ${targetWords[8] || 'embrace'} new ideas as we journey forward.`;
-        return res.json({ title, story, wordsUsed: targetWords });
+        const fallback = generateFallbackStory(targetWords, idx);
+        return res.json({ title: fallback.title, story: fallback.story, wordsUsed: targetWords });
       }
 
-      const prompt = `Write an engaging, clear, and cohesive English story or short reading article (150 to 250 words) suitable for English language learners.
-The story MUST naturally incorporate the following ${targetWords.length} vocabulary words: ${JSON.stringify(targetWords)}.
+      const prompt = `Write an engaging, clear, and cohesive English reading text (80 to 150 words) for English language learners.
+Assign a UNIQUE, distinct topic, plot, and setting (Text #${idx + 1}) specifically suited for these target vocabulary words: ${JSON.stringify(targetWords)}.
 
-Requirements:
-1. Include ALL or as many of the target words as possible in natural context.
-2. Give the story a creative, catchy title.
-3. Keep the writing clear, grammatically correct, and easy to read.
+CRITICAL REQUIREMENTS:
+1. Choose a distinct theme (e.g. Science, Art, History, Travel, Nature, Cooking, Technology, Mystery, Sports, Architecture, etc.). Make Text #${idx + 1} completely unique in plot and setting!
+2. You MUST naturally weave EVERY SINGLE ONE of the target words (${targetWords.join(", ")}) into narrative sentences as part of the story context.
+3. STRICTLY FORBIDDEN: Do NOT list or mention words meta-referentially! NEVER write phrases like "words like...", "when you practice words such as...", or "today we study...". Every target word MUST be used naturally in context (e.g., if the word is 'bizarre', write: 'He wore a bizarre hat to the ceremony.').
+4. Provide a creative topic title starting with "Topic: ..." (e.g., 'Topic: The Mysterious Art Gallery', 'Topic: Deep Sea Exploration').
+5. Keep the text engaging, grammatically correct, and easy to read.
 
 Return the output in JSON format with "title" and "story" fields.`;
 
@@ -262,11 +297,11 @@ Return the output in JSON format with "title" and "story" fields.`;
             properties: {
               title: {
                 type: Type.STRING,
-                description: "Title of the story"
+                description: "Specific topic title starting with 'Topic: ...'"
               },
               story: {
                 type: Type.STRING,
-                description: "The full story text (150 to 250 words) incorporating the target words"
+                description: "The full story text incorporating all target words into narrative context"
               }
             },
             required: ["title", "story"]
@@ -277,7 +312,7 @@ Return the output in JSON format with "title" and "story" fields.`;
       const responseText = response.text || "{}";
       const result = JSON.parse(responseText.trim());
       res.json({
-        title: result.title || "Learned Words Story",
+        title: result.title || ("Topic: " + (targetWords[0] ? targetWords[0].charAt(0).toUpperCase() + targetWords[0].slice(1) : "Vocabulary Practice")),
         story: result.story || "Story text...",
         wordsUsed: targetWords
       });
@@ -285,9 +320,36 @@ Return the output in JSON format with "title" and "story" fields.`;
     } catch (err: any) {
       console.warn("Error generating learned words story with Gemini, using fallback:", err?.message || err);
       const targetWords = Array.isArray(req.body?.words) ? req.body.words : [];
+      const idx = typeof req.body?.batchIndex === 'number' ? req.body.batchIndex : 0;
+      const w0 = targetWords[0] || "adventure";
+      const w1 = targetWords[1] || "unexpected";
+      const w2 = targetWords[2] || "collaborate";
+      const w3 = targetWords[3] || "achieve";
+      const w4 = targetWords[4] || "careful";
+
+      const fallbackTemplates = [
+        {
+          title: `Topic: ${w0.charAt(0).toUpperCase() + w0.slice(1)} & Outdoor Expedition`,
+          story: `During an outdoor expedition, the team noticed a rather ${w1} path through the forest. They decided to embark on this ${w0} and ${w2} carefully to reach the summit. Through constant teamwork, they were able to ${w3} their mission while remaining ${w4} every step of the way.`
+        },
+        {
+          title: `Topic: Creative Workshop & Innovation`,
+          story: `At the community studio, participants faced a ${w1} design challenge. Eager to turn this into a meaningful ${w0}, artists chose to ${w2} on new ideas. Their dedication allowed them to ${w3} a remarkable project while being ${w4} with every detail.`
+        },
+        {
+          title: `Topic: Science & Space Research`,
+          story: `Researchers in the astronomy lab observed a ${w1} signal coming from deep space. Viewing this as a pivotal ${w0}, scientists across countries joined to ${w2} on data analysis. Together, they hope to ${w3} ground-breaking discoveries by staying ${w4} with their calculations.`
+        },
+        {
+          title: `Topic: Culinary Traditions & Food Culture`,
+          story: `At the international food festival, chefs prepared a ${w1} selection of traditional dishes. It turned out to be a memorable ${w0} where culinary experts could ${w2} and share secrets. They managed to ${w3} authentic flavors while keeping ${w4} track of classic recipes.`
+        }
+      ];
+
+      const fallback = fallbackTemplates[idx % fallbackTemplates.length];
       res.json({
-        title: "A Journey of Learning & Growth",
-        story: `Learning new vocabulary is a rewarding journey. When you try to ${targetWords[0] || 'accomplish'} your daily goals, you naturally ${targetWords[1] || 'enhance'} your language skills over time. Friends often ${targetWords[2] || 'collaborate'} to ${targetWords[3] || 'achieve'} extraordinary results. Keep reading and listening every day to master your vocabulary!`,
+        title: fallback.title,
+        story: fallback.story,
         wordsUsed: targetWords
       });
     }
