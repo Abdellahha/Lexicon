@@ -227,8 +227,12 @@ Generate your response in the specified JSON schema. Keep the advice friendly, c
   // API Route to evaluate spoken text for Speak & Read Practice
   app.post("/api/evaluate-speech", async (req, res) => {
     try {
-      const { targetText, spokenText, words } = req.body;
+      const { targetText, spokenText, words, alternatives } = req.body;
       const targetWordsArray = Array.isArray(words) ? words : [];
+      const alternativesArray = Array.isArray(alternatives) ? alternatives : [];
+
+      // Combine all spoken candidate texts into a search pool
+      const allSpokenCandidates = [spokenText, ...alternativesArray].filter(Boolean);
 
       const ai = getGeminiClient();
       if (!ai) {
@@ -256,28 +260,74 @@ Generate your response in the specified JSON schema. Keep the advice friendly, c
         
         let vocabMatchedCount = 0;
         const corrections: any[] = [];
+
+        // Helper: Levenshtein distance for fuzzy matching
+        const levenshtein = (a: string, b: string): number => {
+          if (!a.length) return b.length;
+          if (!b.length) return a.length;
+          const matrix: number[][] = [];
+          for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+          for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+          for (let i = 1; i <= b.length; i++) {
+            for (let j = 1; j <= a.length; j++) {
+              if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+              } else {
+                matrix[i][j] = Math.min(
+                  matrix[i - 1][j - 1] + 1,
+                  matrix[i][j - 1] + 1,
+                  matrix[i - 1][j] + 1
+                );
+              }
+            }
+          }
+          return matrix[b.length][a.length];
+        };
         
         targetWordsArray.forEach((vw: string) => {
           const normV = vw.toLowerCase().trim();
           let matched = false;
-          for (const sw of spokenWords) {
-            const cleanSw = sw.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']/g, "");
-            if (cleanSw === normV || 
-                cleanSw === (normV + 's') || 
-                cleanSw === (normV + 'es') || 
-                cleanSw === (normV + 'ed') || 
-                cleanSw === (normV + 'ing') || 
-                cleanSw === (normV + 'd') || 
-                cleanSw === (normV + 'ly') || 
-                (cleanSw.startsWith(normV) && Math.abs(cleanSw.length - normV.length) <= 3) ||
-                (normV.startsWith(cleanSw) && Math.abs(cleanSw.length - normV.length) <= 3) ||
-                (normV.includes(cleanSw) && cleanSw.length >= 4) ||
-                (cleanSw.includes(normV) && normV.length >= 4)
-            ) {
+
+          // Search across all candidate transcripts
+          for (const cand of allSpokenCandidates) {
+            const candClean = cand.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']/g, "");
+            const candWords = candClean.split(/\s+/);
+            const candNoSpaces = candClean.replace(/\s+/g, "");
+
+            // Substring or concatenated phrase match (e.g. "a mend" -> "amend", "ad zorb" -> "absorb")
+            if (candClean.includes(normV) || candNoSpaces.includes(normV) || normV.includes(candClean) && candClean.length >= 4) {
               matched = true;
               break;
             }
+
+            for (const sw of candWords) {
+              if (!sw) continue;
+              if (sw === normV || 
+                  sw === (normV + 's') || 
+                  sw === (normV + 'es') || 
+                  sw === (normV + 'ed') || 
+                  sw === (normV + 'ing') || 
+                  sw === (normV + 'd') || 
+                  sw === (normV + 'ly') || 
+                  sw === (normV + 'er') ||
+                  (sw.startsWith(normV) && Math.abs(sw.length - normV.length) <= 3) ||
+                  (normV.startsWith(sw) && Math.abs(sw.length - normV.length) <= 3)
+              ) {
+                matched = true;
+                break;
+              }
+
+              // Levenshtein fuzzy match
+              const dist = levenshtein(sw, normV);
+              const maxDist = normV.length <= 4 ? 1 : (normV.length <= 7 ? 2 : 3);
+              if (dist <= maxDist) {
+                matched = true;
+                break;
+              }
+            }
+            if (matched) break;
           }
+
           if (matched) {
             vocabMatchedCount++;
           } else {
@@ -297,7 +347,7 @@ Generate your response in the specified JSON schema. Keep the advice friendly, c
         let roundedScore = Math.round(finalScore * 10) / 10;
         if (roundedScore < 0.5 && spokenWords.length > 0) roundedScore = 0.5;
         // Make fallback scoring generally very lenient
-        if (vocabRatio >= 0.6) {
+        if (vocabRatio >= 0.5) {
           roundedScore = Math.max(roundedScore, 8.5);
         }
         if (roundedScore > 10) roundedScore = 10;
@@ -317,20 +367,28 @@ Generate your response in the specified JSON schema. Keep the advice friendly, c
         });
       }
 
+      const alternativesText = alternativesArray.length > 0
+        ? `\nAlternative STT candidate transcripts: ${JSON.stringify(alternativesArray.slice(0, 10))}`
+        : "";
+
       const prompt = `Evaluate an English language learner's speech output.
 The user was asked to read the following target sentence aloud:
 "${targetText}"
 
 The target vocabulary words of focus are: ${JSON.stringify(targetWordsArray)}
 
-The speech-to-text (STT) engine transcribed their spoken output as:
-"${spokenText}"
+Primary Speech-To-Text (STT) Transcription:
+"${spokenText}"${alternativesText}
 
-CRITICAL EVALUATION RULES:
-1. VOICE RECOGNITION ENGINES ARE IMPERFECT AND UNRELIABLE. You MUST be extremely encouraging, highly lenient, and generous.
-2. DO NOT PENALIZE minor transcription errors, accents, small filler words, or homophone/near-homophone substitutions (such as "except" for "accept", "their" for "there", "and" for "an", "is" vs "it's", plurals vs singulars, etc.).
-3. If the transcribed text is a reasonable acoustic or semantic representation of the target sentence, or if the target words are present in any recognizable phonetic or tense/plural/past form, treat them as fully correct and give a high score (8.5 to 10.0).
-4. Only mark a target word in "corrections" as "mispronounced" or "omitted" if it is completely missing and there is no phonetic equivalent, rhyme, or attempt whatsoever in the transcribed output.
+CRITICAL EVALUATION RULES FOR MAXIMUM ACCURACY AND FAIRNESS:
+1. SPEECH-TO-TEXT ENGINES IN BROWSERS ARE IMPERFECT AND REGULARLY MISHEAR ACCENTS, PAUSES, OR HOMOPHONES. You MUST be extremely encouraging, lenient, and generous.
+2. A target vocabulary word MUST BE COUNTED AS CORRECTLY SPOKEN if:
+   - It appears in the primary STT transcription OR in any of the alternative candidate transcripts.
+   - It was transcribed as a homophone, phonetic near-match, or similar-sounding word (for example: "bot" for "bought", "except" for "accept", "ad zorb" or "absorbed" for "absorb", "bizar" for "bizarre", "complane" for "complain", "whether" for "weather", "shoes" for "choose", "site" for "sight", "fostered" for "foster", "a mend" for "amend", etc.).
+   - It was split across spaces by STT (e.g. "a mend" for "amend").
+   - It has minor inflection differences (singular vs plural, present vs past tense).
+3. If the user successfully attempted or read the target vocabulary words (even with slight accent/STT variation), give a HIGH SCORE (8.5 to 10.0) and set passed: true.
+4. Do NOT mark a target word in "corrections" as "mispronounced" or "omitted" unless it is completely missing with NO phonetic, acoustic, or homophone trace whatsoever in any of the transcripts.
 5. Provide a final score out of 10 (decimal, e.g., 9.5) reflecting their reading performance. A score of 5.0 or above is a Pass.
 6. Return the output in the specified JSON schema format.`;
 
