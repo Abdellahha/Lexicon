@@ -64,16 +64,17 @@ function parseB2C1FromOcr(): { word: string; pos: string; level: string }[] {
   for (let line of lines) {
     line = line.trim();
     if (!line) continue;
-    if (line.includes("©") || line.includes("The Oxford")) continue;
+    if (line.includes("©") || line.includes("The Oxford 5000 is an expanded core")) continue;
     
-    const match = line.match(/^([a-zA-Z0-9'\s\-1]+)\s+([a-z.,\s\-]+)?\s*(B2|C1)/i);
+    const match = line.match(/^([a-zA-Z0-9\x27\s\-\u00C0-\u024F\(\)]+?)\s+([a-zA-Z.,\/\s\-\(\)]+)?\s*(B2|C1)/i);
     if (match) {
-      let word = match[1].trim();
-      // Remove trailing digits if any (like bass1 -> bass)
-      word = word.replace(/\d+$/, "");
+      let rawWord = match[1].trim();
+      let word = rawWord.replace(/\s*\([^)]*\)/g, "").trim().replace(/\d+$/, "");
       const pos = match[2] ? match[2].trim().replace(/\.$/, "") : "n";
       const level = match[3].trim().toUpperCase();
-      list.push({ word: word.toLowerCase(), pos, level });
+      if (word) {
+        list.push({ word: word.toLowerCase(), pos, level });
+      }
     }
   }
   return list;
@@ -319,7 +320,7 @@ Return a JSON array of objects containing these fields. Ensure they are genuine 
   console.log(`Found ${missingB2C1.length} B2/C1 words missing in dataset.`);
 
   if (missingB2C1.length > 0) {
-    const batchSize = 100;
+    const batchSize = 50;
     const batches = Math.ceil(missingB2C1.length / batchSize);
     console.log(`Populating details for ${missingB2C1.length} words in ${batches} batches...`);
 

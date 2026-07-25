@@ -4981,7 +4981,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   };
 
   function checkAndAutoProgress() {
-    if (!userEnglishLevel || userEnglishLevel === 'all') return false;
+    if (!userEnglishLevel) userEnglishLevel = 'A1';
     
     var remainingInLevel = TOTAL - learnedCountForCurrentPack();
     if (remainingInLevel <= 0) {
@@ -5005,11 +5005,29 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
           "Level Completed! 🎉",
           "Congratulations! You have successfully learned all words for <b>Level " + completedLevel + "</b>.<br><br>You are now being automatically advanced to <b>Level " + nextLevel + "</b>!",
           function() {
-            renderHome();
-            showView('home');
+            startStudy();
           }
         );
         return true;
+      } else if (userEnglishLevel === 'C1') {
+        var unlearnedInAll = (ALL_WORDS_LIST ? ALL_WORDS_LIST.length : 0) - learnedCountTotal();
+        if (unlearnedInAll > 0) {
+          userEnglishLevel = 'all';
+          if (ALL_WORDS_LIST && ALL_WORDS_LIST.length > 0) {
+            WORDS = ALL_WORDS_LIST;
+            TOTAL = WORDS.length;
+            Progress.index = 0;
+          }
+          saveProgress().catch(function(e){ console.error('Failed to save progress', e); });
+          showCustomAlert(
+            "C1 Level Completed! 🎉",
+            "Incredible achievement! You have completed Level C1.<br><br>Now continuing with <b>All Levels</b> so you can master every word!",
+            function() {
+              startStudy();
+            }
+          );
+          return true;
+        }
       }
     }
     return false;
@@ -5049,32 +5067,8 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
 
     var remainingInLevel = TOTAL - learnedCountForCurrentPack();
     if (remainingInLevel <= 0) {
-      var levelName = (userEnglishLevel === 'all' ? 'All Levels' : 'Level ' + userEnglishLevel);
-      showCustomConfirm(
-        "Reset Progress", 
-        "You've learned all " + TOTAL + " words for " + levelName + "!<br><br>Would you like to reset your progress so you can learn and practice them again?", 
-        async function() {
-          // Reset progress for this level's words
-          for (var i = 0; i < WORDS.length; i++) {
-            delete Progress.learned[WORDS[i].word];
-          }
-          Progress.index = 0;
-          await saveProgress();
-          renderHome();
-          showCustomAlert(
-            "Progress Reset", 
-            "Progress for " + levelName + " has been reset! You can now start learning these words again.",
-            function() {
-              startStudy();
-            }
-          );
-        }, 
-        function() {
-          $('settingsLevel').value = userEnglishLevel;
-          $('settingsWordsPerDay').value = userWordsPerDay;
-          $('settingsModal').style.display = 'flex';
-        }
-      );
+      showView('study');
+      renderAllComplete();
       return;
     }
 
