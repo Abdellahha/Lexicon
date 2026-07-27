@@ -1422,6 +1422,16 @@ body {
       </div>
     </div>
 
+    <!-- French Level Selector Bar -->
+    <div style="display: flex; gap: 6px; justify-content: center; align-items: center; margin: 12px 0 20px; flex-wrap: wrap;" id="frenchLevelBar">
+      <button class="tag" id="btnFLevelAll" style="cursor: pointer; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); font-size: 12px; font-weight: 600; outline: none;">All</button>
+      <button class="tag" id="btnFLevelA1" style="cursor: pointer; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); font-size: 12px; font-weight: 600; outline: none;">A1</button>
+      <button class="tag" id="btnFLevelA2" style="cursor: pointer; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); font-size: 12px; font-weight: 600; outline: none;">A2</button>
+      <button class="tag" id="btnFLevelB1" style="cursor: pointer; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); font-size: 12px; font-weight: 600; outline: none;">B1</button>
+      <button class="tag" id="btnFLevelB2" style="cursor: pointer; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); font-size: 12px; font-weight: 600; outline: none;">B2</button>
+      <button class="tag" id="btnFLevelC1" style="cursor: pointer; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); font-size: 12px; font-weight: 600; outline: none;">C1</button>
+    </div>
+
     <div class="stage" id="frenchStage" style="max-width: 580px; margin: 0 auto; width: 100%;">
       <!-- Container for the active French study card -->
       <div id="frenchCardContainer" style="width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
@@ -4026,9 +4036,65 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   }
 
   function checkFrenchAutoProgress() {
-    // Level changes now happen ONLY through the Settings dropdown (settingsFrenchLevel).
-    // This function no longer silently switches currentFrenchLevel — it just leaves the
-    // "level completed" state to be rendered by renderFrenchCard().
+    if (!currentFrenchLevel) currentFrenchLevel = 'A1';
+    filterFrenchVocabulary();
+    var fTotal = filteredFrenchWords.length;
+    var learnedInPack = frenchLearnedCountForCurrentPack();
+    var remainingInLevel = fTotal - learnedInPack;
+
+    if (remainingInLevel <= 0 && fTotal > 0) {
+      var levelSequence = ['A1', 'A2', 'B1', 'B2', 'C1'];
+      var currentIndex = levelSequence.indexOf(currentFrenchLevel);
+      if (currentIndex !== -1 && currentIndex < levelSequence.length - 1) {
+        var nextLevel = levelSequence[currentIndex + 1];
+        var completedLevel = currentFrenchLevel;
+        
+        currentFrenchLevel = nextLevel;
+        activeFrenchIndex = 0;
+        filterFrenchVocabulary();
+        updateFrenchLevelButtons(currentFrenchLevel);
+        
+        if (currentUser) {
+          update(ref(db, 'users/' + currentUser.uid), { frenchLevel: currentFrenchLevel })
+            .catch(function(e){ console.error('Failed to update French level', e); });
+        }
+        saveProgress().catch(function(e){ console.error('Failed to save progress', e); });
+        
+        showCustomAlert(
+          "French Level Completed! 🎉",
+          "Félicitations ! You have successfully learned all French words for <b>Level " + completedLevel + "</b>.<br><br>You are now being automatically advanced to <b>Level " + nextLevel + "</b>!",
+          function() {
+            startFrenchStudy();
+          }
+        );
+        startFrenchStudy();
+        return true;
+      } else if (currentFrenchLevel === 'C1') {
+        var unlearnedInAll = (ALL_FRENCH_WORDS_LIST ? ALL_FRENCH_WORDS_LIST.length : 0) - frenchLearnedCountTotal();
+        if (unlearnedInAll > 0) {
+          currentFrenchLevel = 'all';
+          activeFrenchIndex = 0;
+          filterFrenchVocabulary();
+          updateFrenchLevelButtons('all');
+          
+          if (currentUser) {
+            update(ref(db, 'users/' + currentUser.uid), { frenchLevel: 'all' })
+              .catch(function(e){ console.error('Failed to update French level', e); });
+          }
+          saveProgress().catch(function(e){ console.error('Failed to save progress', e); });
+          
+          showCustomAlert(
+            "French C1 Completed! 🎉",
+            "Incredible achievement! You have completed French Level C1.<br><br>Now continuing with <b>All French Levels</b> so you can master every single word!",
+            function() {
+              startFrenchStudy();
+            }
+          );
+          startFrenchStudy();
+          return true;
+        }
+      }
+    }
     return false;
   }
 
@@ -9978,13 +10044,6 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
         }
         
         renderHome();
-
-        // If the French vocabulary study screen is currently open, refresh it right away
-        // so the newly selected level takes effect immediately instead of showing stale/blank content.
-        var frenchStudyViewEl = $('view-french-study');
-        if (frenchStudyViewEl && frenchStudyViewEl.classList.contains('active')) {
-          startFrenchStudy();
-        }
         
         $('settingsModal').style.display = 'none';
       } catch(e) {
@@ -10061,13 +10120,52 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       exitFrenchGrammarPractice();
     });
 
-    // French vocabulary level is controlled solely from Settings (Preferences).
-    // Keep this helper only to keep the Settings dropdown in sync with the active level.
+    // French vocabulary levels filters
+    var frenchLevelBtns = {
+      'all': $('btnFLevelAll'),
+      'A1': $('btnFLevelA1'),
+      'A2': $('btnFLevelA2'),
+      'B1': $('btnFLevelB1'),
+      'B2': $('btnFLevelB2'),
+      'C1': $('btnFLevelC1')
+    };
+
     function updateFrenchLevelButtons(activeLvl) {
-      activeLvl = activeLvl || currentFrenchLevel || 'all';
+      activeLvl = activeLvl || currentFrenchLevel || 'A1';
+      for (var lvl in frenchLevelBtns) {
+        var btn = frenchLevelBtns[lvl];
+        if (btn) {
+          if (lvl === activeLvl) {
+            btn.style.background = 'var(--ink)';
+            btn.style.color = 'var(--bg-card)';
+            btn.style.borderColor = 'var(--ink)';
+          } else {
+            btn.style.background = 'transparent';
+            btn.style.color = 'var(--ink)';
+            btn.style.borderColor = 'var(--border)';
+          }
+        }
+      }
       var selectEl = $('settingsFrenchLevel');
       if (selectEl) selectEl.value = activeLvl;
     }
+
+    Object.keys(frenchLevelBtns).forEach(function(lvl) {
+      var btn = frenchLevelBtns[lvl];
+      if (btn) {
+        bindTap(btn, function() {
+          currentFrenchLevel = lvl;
+          activeFrenchIndex = 0;
+          updateFrenchLevelButtons(lvl);
+          filterFrenchVocabulary();
+          if (currentUser) {
+            update(ref(db, 'users/' + currentUser.uid), { frenchLevel: currentFrenchLevel })
+              .catch(function(e){ console.error('Failed to save French level', e); });
+          }
+          startFrenchStudy();
+        });
+      }
+    });
 
     // Exit views handlers
     bindTap($('btnExitFrenchStudy'), function() {
