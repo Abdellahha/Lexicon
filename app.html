@@ -6103,8 +6103,11 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   function checkAndAutoProgress() {
     if (!userEnglishLevel) userEnglishLevel = 'A1';
     
-    var remainingInLevel = TOTAL - learnedCountForCurrentPack();
-    if (remainingInLevel <= 0) {
+    var learnedInPack = learnedCountForCurrentPack();
+    var remainingInLevel = TOTAL - learnedInPack;
+    var minRequired = Math.min(1000, TOTAL);
+    
+    if (remainingInLevel <= 0 && learnedInPack >= minRequired && TOTAL > 0) {
       var levelSequence = ['A1', 'A2', 'B1', 'B2', 'C1'];
       var currentIndex = levelSequence.indexOf(userEnglishLevel);
       if (currentIndex !== -1 && currentIndex < levelSequence.length - 1) {
@@ -6123,7 +6126,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
         
         showCustomAlert(
           "Level Completed! 🎉",
-          "Congratulations! You have successfully learned all words for <b>Level " + completedLevel + "</b>.<br><br>You are now being automatically advanced to <b>Level " + nextLevel + "</b>!",
+          "Congratulations! You have successfully learned all words for <b>Level " + completedLevel + "</b> (" + learnedInPack + " words mastered).<br><br>You are now being automatically advanced to <b>Level " + nextLevel + "</b>!",
           function() {
             startStudy();
           }
@@ -6186,7 +6189,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     }
 
     var remainingInLevel = TOTAL - learnedCountForCurrentPack();
-    if (remainingInLevel <= 0) {
+    if (remainingInLevel <= 0 && learnedCountForCurrentPack() >= Math.min(1000, TOTAL) && TOTAL > 0) {
       showView('study');
       renderAllComplete();
       return;
@@ -6211,7 +6214,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     if (wordsLeftToGoal <= 0) {
       wordsLeftToGoal = userWordsPerDay;
     }
-    session.sessionTarget = Math.max(1, Math.min(wordsLeftToGoal, remainingInLevel));
+    session.sessionTarget = Math.max(1, Math.min(wordsLeftToGoal, Math.max(1, remainingInLevel)));
 
     showView('study');
     updateStudyHeader();
@@ -6232,6 +6235,21 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       // Check for auto-progression first
       if (checkAndAutoProgress()) {
         return;
+      }
+      // If there are still unlearned words in this pack, cycle back to beginning
+      var unlearnedCount = TOTAL - learnedCountForCurrentPack();
+      if (unlearnedCount > 0) {
+        Progress.index = 0;
+        entry = nextEntry();
+        if (entry) {
+          session.word = entry;
+          session.attempts = 0;
+          renderLoading();
+          var info = await getWordInfo(entry);
+          session.info = info;
+          renderListenPhase();
+          return;
+        }
       }
       renderAllComplete(); 
       return; 
