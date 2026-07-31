@@ -54,36 +54,6 @@ async function startServer() {
     }
   });
 
-  // API Route to fetch French vocabulary words database
-  app.get("/api/french-words", (req, res) => {
-    try {
-      const filePath = path.join(process.cwd(), "french-words-data.json");
-      if (fs.existsSync(filePath)) {
-        const content = fs.readFileSync(filePath, "utf8");
-        return res.json(JSON.parse(content));
-      }
-      return res.status(404).json({ error: "French vocabulary file not found" });
-    } catch (err) {
-      console.error("Error reading French words database:", err);
-      return res.status(500).json({ error: "Failed to load French vocabulary" });
-    }
-  });
-
-  // API Route to fetch French reading texts database
-  app.get("/api/french-texts", (req, res) => {
-    try {
-      const filePath = path.join(process.cwd(), "french-texts.json");
-      if (fs.existsSync(filePath)) {
-        const content = fs.readFileSync(filePath, "utf8");
-        return res.json(JSON.parse(content));
-      }
-      return res.status(404).json({ error: "French texts file not found" });
-    } catch (err) {
-      console.error("Error reading French texts database:", err);
-      return res.status(500).json({ error: "Failed to load French texts" });
-    }
-  });
-
   // API Route to translate text using Gemini (or simple dictionary fallback)
   app.post("/api/translate", async (req, res) => {
     try {
@@ -96,10 +66,9 @@ async function startServer() {
       if (!ai) {
         const cleanText = text.toLowerCase().trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']/g, "");
         const dictionary: Record<string, Record<string, string>> = {
-          "bonjour": { "en": "hello / good morning", "ar": "مرحبا" },
-          "reconcile": { "ar": "يصالح / يسوي", "fr": "réconcilier" },
-          "abolish": { "ar": "يلغي / ينهي", "fr": "abolir" },
-          "absorb": { "ar": "يمتص", "fr": "absorber" }
+          "reconcile": { "ar": "يصالح / يسوي", "en": "reconcile" },
+          "abolish": { "ar": "يلغي / ينهي", "en": "abolish" },
+          "absorb": { "ar": "يمتص", "en": "absorb" }
         };
 
         const result = dictionary[cleanText];
@@ -112,8 +81,8 @@ async function startServer() {
         return res.json({ translation });
       }
 
-      const targetLang = to === "ar" ? "Arabic" : to === "fr" ? "French" : "English";
-      const prompt = `You are a professional dictionary and translator. Translate the word or text "${text}" from ${from || "auto-detect"} to ${targetLang}. 
+      const targetLang = to === "ar" ? "Arabic" : "English";
+      const prompt = `You are a professional dictionary and translator. Translate the English word or text "${text}" to ${targetLang}. 
 If it is a single word, provide a clean, concise, 1-3 word translation. 
 Respond with ONLY the plain translated text. Do not write any explanations or punctuation.`;
 
@@ -292,18 +261,13 @@ ${wordContextsFormatted}
 STRICT LINGUISTIC & GRAMMATICAL RULES:
 1. PERFECT PART OF SPEECH & SEMANTIC ACCURACY:
    - You MUST use every target word strictly in accordance with its defined Part of Speech and exact meaning.
-   - Example 1 (verb vs adjective/noun): "absorb" is a verb ("The soil can absorb water") — NEVER use it as an adjective ("a rather absorb path").
-   - Example 2 (verb inflection): "accomplish" is a verb ("They were able to accomplish their goal") — NEVER use it after 'remaining' where an adjective is required.
-   - Example 3 (verb vs noun): "abolish" is a verb ("The government decided to abolish the tax") — NEVER use it as a noun or adjective.
-   - Example 4 (adjective vs noun): "abstract" is an adjective ("an abstract idea") — use it modifying a noun.
-   - Example 5 (verb): "accommodate" is a verb ("The hotel can accommodate guests", "We must accommodate changing weather").
 2. NATURAL INFLECTION ALLOWED:
-   - You MAY inflect verbs (e.g. 'absorbed', 'abolished', 'accommodated', 'accomplishing') or pluralize nouns so the prose reads smoothly with 100% natural, idiomatic English syntax.
+   - You MAY inflect verbs or pluralize nouns so the prose reads smoothly.
 3. COHESIVE PROSE:
    - Connect the sentences into a single, flowing, natural paragraph.
    - NO META-LANGUAGE: Do NOT list words, do NOT write "words like...", or mention language learning.
 4. LANGUAGE LEVEL HIGH QUALITY:
-   - The passage MUST serve as an exemplary, professional model of standard English syntax.
+   - The passage MUST serve as an exemplary, professional model of standard syntax.
 
 Return JSON format with "title" (e.g., 'Topic: Mountain Expedition & Conservation') and "story" fields.`;
 
@@ -317,11 +281,11 @@ Return JSON format with "title" (e.g., 'Topic: Mountain Expedition & Conservatio
             properties: {
               title: {
                 type: Type.STRING,
-                description: "Specific topic title starting with 'Topic: ...'"
+                description: "Specific topic title"
               },
               story: {
                 type: Type.STRING,
-                description: "The full story text incorporating all target words into natural, grammatically correct sentences"
+                description: "The full story text incorporating all target words"
               }
             },
             required: ["title", "story"]
