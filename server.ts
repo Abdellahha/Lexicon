@@ -1,6 +1,8 @@
 import express from "express";
 import path from "path";
 import fs from "fs";
+import http from "http";
+import { WebSocketServer, WebSocket } from "ws";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
@@ -608,7 +610,66 @@ Do not include any introductory or concluding chatter. Return ONLY the plain tex
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
+  const server = http.createServer(app);
+  const wss = new WebSocketServer({ server, path: "/ws" });
+
+  function broadcastOnlineCount() {
+    const count = wss.clients.size;
+    const payload = JSON.stringify({ type: "online_count", count });
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(payload);
+      }
+    });
+  }
+
+  wss.on("connection", (ws) => {
+    (ws as any).isAlive = true;
+
+    ws.on("pong", () => {
+      (ws as any).isAlive = true;
+    });
+
+    // Broadcast updated count immediately when a user connects
+    broadcastOnlineCount();
+
+    ws.on("close", () => {
+      // Broadcast updated count immediately when a user disconnects
+      broadcastOnlineCount();
+    });
+
+    ws.on("error", () => {
+      broadcastOnlineCount();
+    });
+
+    ws.on("message", (msg) => {
+      try {
+        const data = JSON.parse(msg.toString());
+        if (data.type === "ping") {
+          ws.send(JSON.stringify({ type: "pong" }));
+        }
+      } catch (e) {}
+    });
+  });
+
+  // Fast heartbeat interval (every 3s) to detect sudden tab drops quickly
+  const heartbeatInterval = setInterval(() => {
+    wss.clients.forEach((client: any) => {
+      if (client.isAlive === false) {
+        client.terminate();
+        return;
+      }
+      client.isAlive = false;
+      client.ping();
+    });
+    broadcastOnlineCount();
+  }, 3000);
+
+  wss.on("close", () => {
+    clearInterval(heartbeatInterval);
+  });
+
+  server.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
 }
