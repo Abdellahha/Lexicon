@@ -540,18 +540,107 @@ body {
   }
 }
 
-@media (max-width: 540px) {
+@media (max-width: 768px) {
+  /* Hide main home hero title and subtitle on tablet and phone */
+  #view-home .hero-title,
+  #view-home .hero-sub,
+  #view-home .hero > div:first-child {
+    display: none !important;
+  }
+  #view-home .hero {
+    grid-template-columns: 1fr !important;
+    gap: 0 !important;
+    padding-top: 8px !important;
+  }
+
+  /* Keep topbar horizontal on tablet and phone */
   .topbar {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 16px 0 14px !important;
+    margin-bottom: 20px !important;
   }
   .topbar-right {
-    width: 100%;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    gap: 8px;
+    width: auto !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
   }
+
+  /* Show only SVG logos for topbar buttons on tablet and phone */
+  .topbar-right .level-pill {
+    padding: 7px 10px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 34px !important;
+    box-sizing: border-box !important;
+  }
+  .topbar-right #themeText,
+  .topbar-right #levelText,
+  .topbar-right #userText {
+    display: none !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .app {
+    padding: 0 10px 40px !important;
+  }
+  .topbar {
+    padding: 12px 0 10px !important;
+    margin-bottom: 16px !important;
+  }
+  .brand-mark {
+    font-size: 21px !important;
+  }
+  .topbar-right {
+    gap: 4px !important;
+  }
+  .topbar-right .level-pill {
+    padding: 5px 7px !important;
+    height: 30px !important;
+    border-radius: 5px !important;
+  }
+  .stage {
+    padding: 18px 10px !important;
+    min-height: 300px !important;
+  }
+  .word-display {
+    font-size: clamp(24px, 8vw, 36px) !important;
+  }
+  .cards {
+    gap: 12px !important;
+  }
+  .card {
+    padding: 16px 12px !important;
+  }
+  #levelStatsGrid {
+    gap: 3px !important;
+  }
+  #levelStatsGrid > div {
+    padding: 5px 2px !important;
+  }
+}
+
+@media (max-width: 340px) {
+  .app {
+    padding: 0 6px 30px !important;
+  }
+  .brand-mark {
+    font-size: 18px !important;
+  }
+  .topbar-right .level-pill {
+    padding: 4px 5px !important;
+    height: 28px !important;
+  }
+}
+
+@media (max-width: 540px) {
   .level-pill {
     padding: 5px 10px;
     font-size: 11px;
