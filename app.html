@@ -1534,7 +1534,7 @@ body {
       <div class="word-modal-section" id="wordModalTranslationSection" style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
           <div class="word-modal-section-title" id="wordModalTranslationTitle">Translation</div>
-          <button id="btnModalTranslate" type="button" style="background: var(--bg-1); border: 1px solid var(--border); color: var(--ink); border-radius: 6px; padding: 5px 12px; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s;">
+          <button id="btnModalTranslate" type="button" style="background: var(--bg-1); border: 1px solid var(--border); color: var(--ink); border-radius: 8px; padding: 8px 14px; min-height: 38px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"/></svg>
             <span id="btnModalTranslateLabel">Show Translation</span>
           </button>
@@ -2213,31 +2213,32 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     if(!el) return;
     var lastFired = 0;
     var startX = 0, startY = 0, moved = false;
-    var MOVE_TOLERANCE = 10; // px
+    var MOVE_TOLERANCE = 24; // px (increased for touch area on mobile phones)
 
     el.addEventListener('touchstart', function(ev){
+      if(!ev.touches || !ev.touches[0]) return;
       var t = ev.touches[0];
       startX = t.clientX;
       startY = t.clientY;
       moved = false;
-    }, { passive:true });
+    }, { passive: true });
 
     el.addEventListener('touchmove', function(ev){
+      if(!ev.touches || !ev.touches[0]) return;
       var t = ev.touches[0];
       if(Math.abs(t.clientX - startX) > MOVE_TOLERANCE || Math.abs(t.clientY - startY) > MOVE_TOLERANCE){
         moved = true;
       }
-    }, { passive:true });
+    }, { passive: true });
 
     el.addEventListener('touchend', function(ev){
       if(moved) return;
-      ev.preventDefault();
       lastFired = Date.now();
       handler(ev);
-    }, { passive:false });
+    }, { passive: true });
 
     el.addEventListener('click', function(ev){
-      if(Date.now() - lastFired < 500) return;
+      if(Date.now() - lastFired < 600) return;
       handler(ev);
     });
   }
@@ -4965,7 +4966,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
         '<div class="example-text">"' + highlightWord(info.example, e.word) + '"</div>' +
       '</div>' +
       '<div style="margin-top: 14px; text-align: center;">' +
-        '<button id="btnStudyTranslate" type="button" class="btn-ghost" style="padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid var(--border); color: var(--ink); background: var(--bg-1); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.2s;">' +
+        '<button id="btnStudyTranslate" type="button" class="btn-ghost" style="padding: 8px 18px; min-height: 40px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid var(--border); color: var(--ink); background: var(--bg-1); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.2s; touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none;">' +
           '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"/></svg>' +
           '<span>Show Translation (' + getLangLabel(userTranslationLanguage) + ')</span>' +
         '</button>' +
@@ -4997,13 +4998,13 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       if (btnSpan) btnSpan.textContent = 'Translating…';
       try {
         var trText = await fetchTranslation(session.word.word, userTranslationLanguage);
-        box.textContent = trText;
+        box.textContent = trText || session.word.word;
         box.style.display = 'block';
         if (btnSpan) btnSpan.textContent = 'Hide Translation';
       } catch (err) {
-        box.textContent = 'Translation failed';
+        box.textContent = (session.info && session.info.meaning) ? session.info.meaning : session.word.word;
         box.style.display = 'block';
-        if (btnSpan) btnSpan.textContent = 'Retry Translation';
+        if (btnSpan) btnSpan.textContent = 'Hide Translation';
       } finally {
         btn.disabled = false;
       }
@@ -7844,14 +7845,38 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
 
   async function fetchTranslation(text, targetLang) {
     var target = targetLang || userTranslationLanguage || 'arabic';
-    var res = await fetch('/api/translate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: text, to: target })
-    });
-    if (!res.ok) throw new Error('Translation failed');
-    var data = await res.json();
-    return data.translation || text;
+    var cleanWord = String(text || '').trim();
+    if (!cleanWord) return '';
+
+    try {
+      var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      var timeoutId = controller ? setTimeout(function() { controller.abort(); }, 7000) : null;
+
+      var res = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: cleanWord, to: target }),
+        signal: controller ? controller.signal : undefined
+      });
+      if (timeoutId) clearTimeout(timeoutId);
+
+      if (res.ok) {
+        var data = await res.json();
+        if (data && data.translation && typeof data.translation === 'string' && data.translation.trim() !== '' && data.translation !== '[Translation failed]') {
+          return data.translation.trim();
+        }
+      }
+    } catch (e) {
+      console.warn("API translation request failed, using fallback:", e);
+    }
+
+    // Local Dictionary Fallback
+    var entry = findWordEntry(cleanWord);
+    if (entry) {
+      if (target === 'arabic' && entry.arabic) return entry.arabic;
+      if (entry.meaning) return entry.meaning;
+    }
+    return cleanWord;
   }
 
   var currentModalWord = null;
@@ -7922,27 +7947,27 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     if (btnModalTransLabel) btnModalTransLabel.textContent = 'Show Translation';
     if (btnModalTrans) {
       btnModalTrans.disabled = false;
-      btnModalTrans.onclick = async function() {
+      bindTap(btnModalTrans, async function() {
         if (transBox.style.display !== 'none' && transBox.textContent.trim() !== '') {
           transBox.style.display = 'none';
-          btnModalTransLabel.textContent = 'Show Translation';
+          if (btnModalTransLabel) btnModalTransLabel.textContent = 'Show Translation';
           return;
         }
         btnModalTrans.disabled = true;
-        btnModalTransLabel.textContent = 'Translating…';
+        if (btnModalTransLabel) btnModalTransLabel.textContent = 'Translating…';
         try {
           var trText = await fetchTranslation(e.word, targetLang);
-          transBox.textContent = trText;
+          transBox.textContent = trText || e.word;
           transBox.style.display = 'block';
-          btnModalTransLabel.textContent = 'Hide Translation';
+          if (btnModalTransLabel) btnModalTransLabel.textContent = 'Hide Translation';
         } catch (err) {
-          transBox.textContent = 'Translation failed';
+          transBox.textContent = e.meaning || e.word;
           transBox.style.display = 'block';
-          btnModalTransLabel.textContent = 'Retry Translation';
+          if (btnModalTransLabel) btnModalTransLabel.textContent = 'Hide Translation';
         } finally {
           btnModalTrans.disabled = false;
         }
-      };
+      });
     }
 
     // Show backdrop
