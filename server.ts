@@ -28,6 +28,26 @@ function getGeminiClient() {
   return aiClient;
 }
 
+// Helper to try multiple models in sequence in case of quota/rate limits
+async function generateGeminiContent(ai: GoogleGenAI, params: { contents: any; config?: any }) {
+  const modelsToTry = ["gemini-flash-latest", "gemini-2.5-flash", "gemini-2.5-flash"];
+  let lastError: any = null;
+  for (const model of modelsToTry) {
+    try {
+      const response = await ai.models.generateContent({
+        model,
+        contents: params.contents,
+        config: params.config,
+      });
+      return response;
+    } catch (err: any) {
+      console.warn(`Gemini model ${model} failed (${err?.status || err?.message}), trying fallback...`);
+      lastError = err;
+    }
+  }
+  throw lastError;
+}
+
 async function startServer() {
   const app = express();
   const PORT = 3000;
@@ -56,46 +76,58 @@ async function startServer() {
 
   // API Route to translate text using Gemini (or simple dictionary fallback)
   app.post("/api/translate", async (req, res) => {
+    const text = String(req.body?.text || "");
+    const to = req.body?.to;
     try {
-      const { text, from, to } = req.body;
       if (!text) {
         return res.status(400).json({ error: "Text is required" });
       }
+
+      const langMap: Record<string, string> = {
+        ar: "Arabic", arabic: "Arabic",
+        fr: "French", french: "French",
+        es: "Spanish", spanish: "Spanish",
+        de: "German", german: "German",
+        it: "Italian", italian: "Italian",
+        tr: "Turkish", turkish: "Turkish",
+        ru: "Russian", russian: "Russian",
+        pt: "Portuguese", portuguese: "Portuguese",
+        en: "English", english: "English"
+      };
+      const rawTo = String(to || "arabic").toLowerCase().trim();
+      const targetLang = langMap[rawTo] || (rawTo.charAt(0).toUpperCase() + rawTo.slice(1));
 
       const ai = getGeminiClient();
       if (!ai) {
         const cleanText = text.toLowerCase().trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']/g, "");
         const dictionary: Record<string, Record<string, string>> = {
-          "reconcile": { "ar": "يصالح / يسوي", "en": "reconcile" },
-          "abolish": { "ar": "يلغي / ينهي", "en": "abolish" },
-          "absorb": { "ar": "يمتص", "en": "absorb" }
+          "reconcile": { "arabic": "يصالح / يسوي", "french": "réconcilier", "english": "reconcile" },
+          "abolish": { "arabic": "يلغي / ينهي", "french": "abolir", "english": "abolish" },
+          "absorb": { "arabic": "يمتص", "french": "absorber", "english": "absorb" }
         };
 
         const result = dictionary[cleanText];
         let translation = "";
-        if (result && result[to]) {
-          translation = result[to];
+        if (result && result[rawTo]) {
+          translation = result[rawTo];
         } else {
-          translation = `[Translation of "${text}" to ${to === "ar" ? "Arabic" : "English"}]`;
+          translation = text;
         }
         return res.json({ translation });
       }
 
-      const targetLang = to === "ar" ? "Arabic" : "English";
-      const prompt = `You are a professional dictionary and translator. Translate the English word or text "${text}" to ${targetLang}. 
-If it is a single word, provide a clean, concise, 1-3 word translation. 
-Respond with ONLY the plain translated text. Do not write any explanations or punctuation.`;
+      const prompt = `You are a professional dictionary and translator. Translate the word or phrase "${text}" into ${targetLang}. 
+If it is a single word, provide a clean, concise, 1-3 word accurate translation. 
+Respond with ONLY the plain translated text in ${targetLang}. Do not write any explanations, quotes, or extra punctuation.`;
 
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-      });
+      const response = await generateGeminiContent(ai, { contents: prompt });
 
-      const translation = response.text ? response.text.trim() : `[Translation: ${text}]`;
+      const translation = response.text ? response.text.trim() : text;
       res.json({ translation });
     } catch (err) {
       console.error("Error translating text with Gemini:", err);
-      res.json({ translation: `[Translation failed]` });
+      // Clean fallback: return the original word rather than ugly failure text
+      res.json({ translation: text });
     }
   });
 
@@ -152,8 +184,7 @@ Learner Stats:
 
 Generate your response in the specified JSON schema. Keep the advice friendly, clear, and action-oriented.`;
 
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+      const response = await generateGeminiContent(ai, {
         contents: prompt,
         config: {
           responseMimeType: "application/json",
@@ -271,8 +302,7 @@ STRICT LINGUISTIC & GRAMMATICAL RULES:
 
 Return JSON format with "title" (e.g., 'Topic: Mountain Expedition & Conservation') and "story" fields.`;
 
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+      const response = await generateGeminiContent(ai, {
         contents: prompt,
         config: {
           responseMimeType: "application/json",
@@ -484,8 +514,7 @@ CRITICAL EVALUATION RULES FOR MAXIMUM ACCURACY AND FAIRNESS:
 5. Provide a final score out of 10 (decimal, e.g., 9.5) reflecting their reading performance. A score of 5.0 or above is a Pass.
 6. Return the output in the specified JSON schema format.`;
 
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+      const response = await generateGeminiContent(ai, {
         contents: prompt,
         config: {
           responseMimeType: "application/json",
@@ -571,8 +600,7 @@ CRITICAL EVALUATION RULES FOR MAXIMUM ACCURACY AND FAIRNESS:
 The vocabulary words MUST be used in their correct forms (or simple variations like plurals/past tense) and flow completely naturally.
 Do not include any introductory or concluding chatter. Return ONLY the plain text paragraph.`;
 
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+      const response = await generateGeminiContent(ai, {
         contents: prompt,
       });
 

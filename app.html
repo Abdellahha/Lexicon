@@ -1481,8 +1481,15 @@ body {
         <div>
           <label style="font-family: var(--font-mono); font-size: 10px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; display: block; margin-bottom: 8px;">Translation Language</label>
           <select id="settingsTranslationLanguage" style="width: 100%; background: var(--bg-1); color: var(--ink); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; font-size: 14px; outline: none;">
-            <option value="english" style="background: var(--bg-card); color: var(--ink);">English · l'anglais 🇬🇧</option>
             <option value="arabic" style="background: var(--bg-card); color: var(--ink);">Arabic · العربية 🇲🇦</option>
+            <option value="french" style="background: var(--bg-card); color: var(--ink);">French · Français 🇫🇷</option>
+            <option value="spanish" style="background: var(--bg-card); color: var(--ink);">Spanish · Español 🇪🇸</option>
+            <option value="german" style="background: var(--bg-card); color: var(--ink);">German · Deutsch 🇩🇪</option>
+            <option value="italian" style="background: var(--bg-card); color: var(--ink);">Italian · Italiano 🇮🇹</option>
+            <option value="turkish" style="background: var(--bg-card); color: var(--ink);">Turkish · Türkçe 🇹🇷</option>
+            <option value="russian" style="background: var(--bg-card); color: var(--ink);">Russian · Русский 🇷🇺</option>
+            <option value="portuguese" style="background: var(--bg-card); color: var(--ink);">Portuguese · Português 🇵🇹</option>
+            <option value="english" style="background: var(--bg-card); color: var(--ink);">English · English 🇬🇧</option>
           </select>
           <span style="font-size: 11px; color: var(--ink-dim); margin-top: 6px; display: block; line-height: 1.4;">The target language used when revealing translations for English words.</span>
         </div>
@@ -1522,6 +1529,17 @@ body {
       <div class="word-modal-section" id="wordModalExampleSection">
         <div class="word-modal-section-title">Example</div>
         <p class="word-modal-example" id="wordModalExample"></p>
+      </div>
+
+      <div class="word-modal-section" id="wordModalTranslationSection" style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <div class="word-modal-section-title" id="wordModalTranslationTitle">Translation</div>
+          <button id="btnModalTranslate" type="button" style="background: var(--bg-1); border: 1px solid var(--border); color: var(--ink); border-radius: 6px; padding: 5px 12px; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"/></svg>
+            <span id="btnModalTranslateLabel">Show Translation</span>
+          </button>
+        </div>
+        <div id="wordModalTranslationText" style="font-size: 15px; font-weight: 600; color: var(--accent); display: none; line-height: 1.5; padding: 10px 14px; background: rgba(var(--accent-rgb, 59, 130, 246), 0.08); border-radius: 8px; border: 1px solid rgba(var(--accent-rgb, 59, 130, 246), 0.2);"></div>
       </div>
 
       <button class="word-modal-speak-btn" id="wordModalSpeakBtn">
@@ -4946,6 +4964,13 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
         (info.synonyms ? '<div style="margin-top:12px;"><div class="synonyms-text"><span class="synonyms-label">Simple Synonyms:</span> ' + escapeHtml(info.synonyms) + '</div></div>' : '') +
         '<div class="example-text">"' + highlightWord(info.example, e.word) + '"</div>' +
       '</div>' +
+      '<div style="margin-top: 14px; text-align: center;">' +
+        '<button id="btnStudyTranslate" type="button" class="btn-ghost" style="padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid var(--border); color: var(--ink); background: var(--bg-1); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.2s;">' +
+          '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"/></svg>' +
+          '<span>Show Translation (' + getLangLabel(userTranslationLanguage) + ')</span>' +
+        '</button>' +
+        '<div id="studyWordTranslationBox" style="display: none; margin-top: 10px; font-size: 16px; font-weight: 700; color: var(--accent); padding: 10px 16px; background: rgba(var(--accent-rgb, 59, 130, 246), 0.08); border-radius: 8px; border: 1px solid rgba(var(--accent-rgb, 59, 130, 246), 0.2); max-width: 360px; margin-left: auto; margin-right: auto;' + (userTranslationLanguage === 'arabic' ? ' direction: rtl;' : '') + '"></div>' +
+      '</div>' +
       '<div class="action-row">' +
         '<button class="ready-btn" id="readyBtn">' +
           "I've got it — let's type it" +
@@ -4957,6 +4982,32 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     bindTap($('readyBtn'), startVanishAndType);
     bindTap($('skipBtn'), skipWord);
     bindTap($('soundBtn'), function(){ playPronunciation(true); });
+
+    bindTap($('btnStudyTranslate'), async function(){
+      var box = $('studyWordTranslationBox');
+      var btn = $('btnStudyTranslate');
+      if (!box || !btn) return;
+      var btnSpan = btn.querySelector('span');
+      if (box.style.display !== 'none' && box.textContent.trim() !== '') {
+        box.style.display = 'none';
+        if (btnSpan) btnSpan.textContent = 'Show Translation (' + getLangLabel(userTranslationLanguage) + ')';
+        return;
+      }
+      btn.disabled = true;
+      if (btnSpan) btnSpan.textContent = 'Translating…';
+      try {
+        var trText = await fetchTranslation(session.word.word, userTranslationLanguage);
+        box.textContent = trText;
+        box.style.display = 'block';
+        if (btnSpan) btnSpan.textContent = 'Hide Translation';
+      } catch (err) {
+        box.textContent = 'Translation failed';
+        box.style.display = 'block';
+        if (btnSpan) btnSpan.textContent = 'Retry Translation';
+      } finally {
+        btn.disabled = false;
+      }
+    });
 
     playPronunciation(false);
   }
@@ -7775,6 +7826,34 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     return html;
   }
 
+  function getLangLabel(langCode) {
+    var map = {
+      'arabic': 'Arabic 🇲🇦',
+      'french': 'French 🇫🇷',
+      'spanish': 'Spanish 🇪🇸',
+      'german': 'German 🇩🇪',
+      'italian': 'Italian 🇮🇹',
+      'turkish': 'Turkish 🇹🇷',
+      'russian': 'Russian 🇷🇺',
+      'portuguese': 'Portuguese 🇵🇹',
+      'english': 'English 🇬🇧'
+    };
+    var code = String(langCode || 'arabic').toLowerCase().trim();
+    return map[code] || (code.charAt(0).toUpperCase() + code.slice(1));
+  }
+
+  async function fetchTranslation(text, targetLang) {
+    var target = targetLang || userTranslationLanguage || 'arabic';
+    var res = await fetch('/api/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: text, to: target })
+    });
+    if (!res.ok) throw new Error('Translation failed');
+    var data = await res.json();
+    return data.translation || text;
+  }
+
   var currentModalWord = null;
 
   function showWordMeaningModal(word) {
@@ -7819,6 +7898,53 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       exSec.style.display = 'none';
     }
     
+    // Translation Section
+    var targetLang = userTranslationLanguage || 'arabic';
+    var targetLabel = getLangLabel(targetLang);
+    var transTitleEl = $('wordModalTranslationTitle');
+    if (transTitleEl) transTitleEl.textContent = 'Translation (' + targetLabel + ')';
+    
+    var transBox = $('wordModalTranslationText');
+    var btnModalTrans = $('btnModalTranslate');
+    var btnModalTransLabel = $('btnModalTranslateLabel');
+    
+    if (transBox) {
+      transBox.style.display = 'none';
+      transBox.textContent = '';
+      if (targetLang === 'arabic') {
+        transBox.style.direction = 'rtl';
+        transBox.style.textAlign = 'right';
+      } else {
+        transBox.style.direction = 'ltr';
+        transBox.style.textAlign = 'left';
+      }
+    }
+    if (btnModalTransLabel) btnModalTransLabel.textContent = 'Show Translation';
+    if (btnModalTrans) {
+      btnModalTrans.disabled = false;
+      btnModalTrans.onclick = async function() {
+        if (transBox.style.display !== 'none' && transBox.textContent.trim() !== '') {
+          transBox.style.display = 'none';
+          btnModalTransLabel.textContent = 'Show Translation';
+          return;
+        }
+        btnModalTrans.disabled = true;
+        btnModalTransLabel.textContent = 'Translating…';
+        try {
+          var trText = await fetchTranslation(e.word, targetLang);
+          transBox.textContent = trText;
+          transBox.style.display = 'block';
+          btnModalTransLabel.textContent = 'Hide Translation';
+        } catch (err) {
+          transBox.textContent = 'Translation failed';
+          transBox.style.display = 'block';
+          btnModalTransLabel.textContent = 'Retry Translation';
+        } finally {
+          btnModalTrans.disabled = false;
+        }
+      };
+    }
+
     // Show backdrop
     $('wordDetailsModal').classList.add('active');
   }
