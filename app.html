@@ -1797,7 +1797,8 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     frenchLearned: {}, // word -> {meaning, level, pos, translation_en, translation_ar, synonyms, learnedAt}
     index: 0,         // pointer into WORDS for next word to study
     score: 0,
-    streak: 0
+    streak: 0,
+    storyBatchIndex: 0
   };
 
   var userEnglishLevel = 'all';
@@ -1836,6 +1837,12 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     Progress.index = parsed.index || 0;
     Progress.score = parsed.score || 0;
     Progress.streak = parsed.streak || 0;
+
+    var savedLocalBatch = 0;
+    try { savedLocalBatch = parseInt(window.localStorage.getItem('lexicon_story_batch_index') || '0', 10) || 0; } catch(e){}
+    Progress.storyBatchIndex = parsed.storyBatchIndex !== undefined ? parsed.storyBatchIndex : savedLocalBatch;
+    currentStoryBatchIndex = Progress.storyBatchIndex;
+
     userEnglishLevel = data.englishLevel || 'all';
     currentFrenchLevel = data.frenchLevel || 'all';
     userWordsPerDay = parseInt(data.wordsPerDay, 10) || 10;
@@ -2496,21 +2503,14 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     var dailyPct = Math.min(100, Math.round((todayCount / userWordsPerDay) * 100));
     $('cardProgressFill').style.width = dailyPct + '%';
     
-    // Calculate and update grammar card progress
-    Progress.grammar = Progress.grammar || {};
-    var completedGrammarCount = 0;
-    for (var tId in Progress.grammar) {
-      var topicAnswers = Progress.grammar[tId] || {};
-      for (var qIdx in topicAnswers) {
-        if (topicAnswers[qIdx]) {
-          completedGrammarCount++;
-        }
-      }
-    }
-    var grammarPct = Math.round((completedGrammarCount / 120) * 100);
+    // Calculate and update Learned Words Story card progress
+    var WORDS_PER_TEXT = 5;
+    var totalStoryBatches = Math.max(1, Math.ceil(countTotal / WORDS_PER_TEXT));
+    var currentBatch = (typeof Progress.storyBatchIndex === 'number') ? Progress.storyBatchIndex : (currentStoryBatchIndex || 0);
+    var storyPct = totalStoryBatches > 0 ? Math.min(100, Math.round(((currentBatch + 1) / totalStoryBatches) * 100)) : 0;
     var grammarProgressFillEl = $('grammarProgressFill');
     if (grammarProgressFillEl) {
-      grammarProgressFillEl.style.width = grammarPct + '%';
+      grammarProgressFillEl.style.width = storyPct + '%';
     }
 
     // Calculate and update speaking card progress
@@ -7452,10 +7452,19 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     var WORDS_PER_TEXT = 5;
     var totalBatches = Math.max(1, Math.ceil(learnedKeys.length / WORDS_PER_TEXT));
     if (typeof batchIndex !== 'number' || isNaN(batchIndex)) {
-      batchIndex = currentStoryBatchIndex || 0;
+      if (typeof Progress.storyBatchIndex === 'number' && !isNaN(Progress.storyBatchIndex)) {
+        batchIndex = Progress.storyBatchIndex;
+      } else {
+        batchIndex = currentStoryBatchIndex || 0;
+      }
     }
     batchIndex = Math.max(0, Math.min(batchIndex, totalBatches - 1));
     currentStoryBatchIndex = batchIndex;
+    if (Progress.storyBatchIndex !== batchIndex) {
+      Progress.storyBatchIndex = batchIndex;
+      saveProgress();
+    }
+    try { window.localStorage.setItem('lexicon_story_batch_index', String(batchIndex)); } catch(e){}
 
     // Slice 5 words for this batch
     var startIdx = batchIndex * WORDS_PER_TEXT;
