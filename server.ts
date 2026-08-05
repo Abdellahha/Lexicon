@@ -59,6 +59,26 @@ async function startServer() {
     res.json({ status: "ok" });
   });
 
+  // API Route to fetch VAST 3.0 Ad XML
+  app.get("/api/vast-ad", async (req, res) => {
+    const defaultVastUrl = "https://surprisedplate.com/ddmSF.z/d_GSNDv/ZQGXUM/uegmY9EuhZeUmlAkJPWTgcPy/O/TqIC1RNoDuEhtINszEIO5/MAjuUk0SN/Qi";
+    const targetUrl = (req.query.url as string) || defaultVastUrl;
+    try {
+      const response = await fetch(targetUrl, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          "Accept": "application/xml, text/xml, */*"
+        }
+      });
+      const xmlText = await response.text();
+      res.setHeader("Content-Type", "application/xml");
+      return res.send(xmlText);
+    } catch (err) {
+      console.error("Error proxying VAST ad:", err);
+      return res.status(500).send("<VAST version=\"3.0\"><Error>Failed to fetch VAST tag</Error></VAST>");
+    }
+  });
+
   // API Route to fetch vocabulary words database
   app.get("/api/words", (req, res) => {
     try {
