@@ -1644,7 +1644,7 @@ body {
       <!-- Video Container & Player -->
       <div style="position: relative; width: 100%; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 260px;">
         <!-- HTML5 Video element -->
-        <video id="vastVideoElement" playsinline autoplay controls style="width: 100%; max-height: 320px; object-fit: contain; background: #000;"></video>
+        <video id="vastVideoElement" playsinline webkit-playsinline muted autoplay controls preload="auto" style="width: 100%; max-height: 320px; object-fit: contain; background: #000;"></video>
         
         <!-- Fallback Simulated Video Canvas -->
         <div id="vastSimulatedCanvas" style="display: none; width: 100%; height: 260px; background: linear-gradient(135deg, #0f172a, #1e1b4b); flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; color: #fff; position: relative; overflow: hidden;">
@@ -9014,23 +9014,57 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       }, 1000);
     }
 
-    function showSimulatedAd() {
-      if (video) {
-        video.pause();
-        video.style.display = 'none';
+    var DEFAULT_FALLBACK_VIDEO_URL = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
+
+    function playInVideoPlayer(url) {
+      if (!video) {
+        startAdCountdown();
+        return;
       }
-      if (simCanvas) simCanvas.style.display = 'flex';
-      startAdCountdown();
+      if (simCanvas) simCanvas.style.display = 'none';
+      video.style.display = 'block';
+      video.setAttribute('playsinline', 'true');
+      video.setAttribute('webkit-playsinline', 'true');
+      video.muted = true;
+      video.src = url;
+      video.load();
+      
+      var playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.then(function() {
+          startAdCountdown();
+        }).catch(function(err) {
+          console.warn("Muted video autoplay retry:", err);
+          video.muted = true;
+          video.play().then(function() {
+            startAdCountdown();
+          }).catch(function() {
+            startAdCountdown();
+          });
+        });
+      } else {
+        startAdCountdown();
+      }
     }
 
     try {
+      var videoUrl = null;
       var res = await fetch('/api/vast-ad?url=' + encodeURIComponent(VAST_AD_TAG_URL));
-      if (res.ok) {
+      
+      if (!res.ok) {
+        // Fallback for GitHub Pages static server where /api/vast-ad returns 404
+        try {
+          res = await fetch(VAST_AD_TAG_URL);
+        } catch (directErr) {
+          console.warn("Direct VAST fetch failed on static host:", directErr);
+        }
+      }
+
+      if (res && res.ok) {
         var xmlText = await res.text();
         var parser = new DOMParser();
         var xmlDoc = parser.parseFromString(xmlText, "text/xml");
         var mediaFiles = xmlDoc.getElementsByTagName("MediaFile");
-        var videoUrl = null;
 
         for (var i = 0; i < mediaFiles.length; i++) {
           var src = mediaFiles[i].textContent ? mediaFiles[i].textContent.trim() : '';
@@ -9039,27 +9073,16 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
             break;
           }
         }
+      }
 
-        if (videoUrl && video) {
-          simCanvas.style.display = 'none';
-          video.style.display = 'block';
-          video.src = videoUrl;
-          video.play().catch(function() {
-            video.muted = true;
-            video.play().catch(function() {
-              showSimulatedAd();
-            });
-          });
-          startAdCountdown();
-        } else {
-          showSimulatedAd();
-        }
+      if (videoUrl) {
+        playInVideoPlayer(videoUrl);
       } else {
-        showSimulatedAd();
+        playInVideoPlayer(DEFAULT_FALLBACK_VIDEO_URL);
       }
     } catch (e) {
-      console.warn("VAST fetch error, showing fallback video player:", e);
-      showSimulatedAd();
+      console.warn("VAST fetch error, using fallback video player:", e);
+      playInVideoPlayer(DEFAULT_FALLBACK_VIDEO_URL);
     }
 
     if ($('vastAdCloseBtn')) {
