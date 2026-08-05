@@ -3,20 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="4f8e4a7c80bf5a056ca39ef366b5bb7ddb0d1e0d" content="4f8e4a7c80bf5a056ca39ef366b5bb7ddb0d1e0d" />
 <title>Lexicon — Learn Simple English</title>
-<script>
-(function(ets){
-var d = document,
-    s = d.createElement('script'),
-    l = d.scripts[d.scripts.length - 1];
-s.settings = ets || {};
-s.src = "//relieved-understanding.com/bDX/VqsXd.GJlR0/YdWGci/weNmI9/uRZhUql/kIP/Trcjy/OwTfM_0/NojvUztEN/ziIh5eMnzSQd2iOYQw";
-s.async = true;
-s.referrerPolicy = 'no-referrer-when-downgrade';
-l.parentNode.insertBefore(s, l);
-})({})
-</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -45,15 +32,13 @@ l.parentNode.insertBefore(s, l);
   --shadow:0 12px 45px -10px rgba(28,28,28,0.08);
 }
 *{box-sizing:border-box;}
-html,body{margin:0;padding:0;touch-action:pan-x pan-y;overflow-x:hidden;max-width:100vw;}
+html,body{margin:0;padding:0;touch-action:pan-x pan-y;}
 body{
   background:var(--bg);
   color:var(--ink);
   font-family:var(--font-body);
   min-height:100vh;
   -webkit-font-smoothing:antialiased;
-  overflow-x:hidden;
-  width:100%;
 }
 ::selection{background:var(--accent-soft);color:var(--ink);}
 button{font-family:inherit;cursor:pointer;}
@@ -85,11 +70,7 @@ a{color:inherit;}
 }
 
 /* ---------- shell ---------- */
-.app{max-width:920px;margin:0 auto;padding:0 24px 80px;position:relative;width:100%;overflow-x:hidden;}
-#studyMenuBtn[style*="display: none"],
-#studyMenuBtn.hidden {
-  display: none !important;
-}
+.app{max-width:920px;margin:0 auto;padding:0 24px 80px;position:relative;}
 .topbar{
   display:flex;align-items:center;justify-content:space-between;
   padding:32px 0 16px;
@@ -249,13 +230,6 @@ a{color:inherit;}
 }
 .hero-title .accent{color:var(--ink);font-style:italic;}
 .hero-sub{color:var(--ink-dim);font-size:15px;line-height:1.6;margin-top:14px;max-width:46ch;}
-
-.desktop-banner-ad { display: flex !important; }
-.mobile-banner-ad { display: none !important; }
-@media (max-width: 720px) {
-  .desktop-banner-ad { display: none !important; }
-  .mobile-banner-ad { display: flex !important; }
-}
 
 .ring-card{
   background:var(--bg-card);border:1px solid var(--border);border-radius:8px;
@@ -598,7 +572,7 @@ body {
   }
 
   /* Show only SVG logos for topbar buttons on tablet and phone */
-  .topbar-right .level-pill:not(.hidden):not([style*="display: none"]) {
+  .topbar-right .level-pill {
     padding: 7px 10px !important;
     display: inline-flex !important;
     align-items: center !important;
@@ -610,30 +584,6 @@ body {
   .topbar-right #levelText,
   .topbar-right #userText {
     display: none !important;
-  }
-}
-
-@media (max-width: 640px) {
-  .dual-meters {
-    grid-template-columns: 1fr !important;
-    gap: 16px !important;
-  }
-  .oxford-meter-container,
-  .coin-widget-container {
-    border-left: none !important;
-    padding-left: 0 !important;
-    border-top: 1px dashed var(--border) !important;
-    padding-top: 14px !important;
-  }
-  #historySearchContainer {
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 10px !important;
-    padding: 0 !important;
-  }
-  #searchWrapper, #matchWrapper {
-    flex: 1 1 100% !important;
-    width: 100% !important;
   }
 }
 
@@ -1089,10 +1039,6 @@ body {
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 2 4 6v6c0 5 3.4 8.5 8 10 4.6-1.5 8-5 8-10V6l-8-4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
         <span id="levelText">Level 1</span>
       </div>
-      <div class="level-pill coin-pill" id="coinPill" style="cursor:pointer; background: rgba(245, 158, 11, 0.12); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.3); font-weight: 700;" title="Coins Balance — Click to Watch Ad & Earn +15 Coins!">
-        <span style="font-size: 13px;">🪙</span>
-        <span id="coinText">0 Coins</span>
-      </div>
       <div class="level-pill" id="userPill" style="cursor:pointer;" title="Log out">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Zm-7 9a7 7 0 0 1 14 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span id="userText">…</span>
@@ -1182,25 +1128,6 @@ body {
       <div>
         <div class="hero-title">Build your <span class="accent">vocabulary</span>,<br>one word at a time.</div>
         <p class="hero-sub">Listen to clear pronunciation, see each word used in a simple sentence, then prove you've got it by typing it from memory.</p>
-        
-        <!-- Desktop Banner Ad Container (Computer size: under hero-sub text) -->
-        <div class="desktop-banner-ad" style="margin-top: 20px; width: 100%; display: flex; flex-direction: column; align-items: flex-start;">
-          <a href="https://relieved-understanding.com/bTX.Vps/daGOlG0mY/WLcM/HeZmy9NuVZ/U/lDkWPSTeczyyO_T_Mm0KNCjxUataNBzZIw5/MtzZQS2sOlQj" target="_blank" rel="noopener noreferrer" style="display: inline-block; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-            <img src="https://www.cornyband.pro/2190/958050/1309376_5524b.jpg" width="300" height="250" style="border:0 !important;width:300px;height:250px;display:block;" alt="Sponsored Banner">
-          </a>
-          <script>
-          (function(nza){
-          var d = document,
-              s = d.createElement('script'),
-              l = d.scripts[d.scripts.length - 1];
-          s.settings = nza || {};
-          s.src = "//relieved-understanding.com/bTX.Vps/daGOlG0mY/WLcM/HeZmy9NuVZ/U/lDkWPSTeczyyO_T_Mm0KNCjxUataNBzZIw5/MtzZQS2sOlQj";
-          s.async = true;
-          s.referrerPolicy = 'no-referrer-when-downgrade';
-          l.parentNode.insertBefore(s, l);
-          })({})
-          </script>
-        </div>
       </div>
       <div class="ring-card" style="display: flex; flex-direction: column; gap: 20px; align-items: stretch; width: 100%;">
         <!-- Dual Percentage Meters -->
@@ -1238,21 +1165,6 @@ body {
               <div id="oxfordWordsCount" style="font-size: 11px; color: var(--ink-dim); margin-top: 2px; font-family: var(--font-mono);">0 of 5000 words</div>
             </div>
           </div>
-
-          <!-- Widget 3: Earn Coins (Watch VAST 3.0 Video Ad) -->
-          <div id="coinEarnWidget" style="display: flex; align-items: center; gap: 14px; border-left: 1px solid var(--border); padding-left: 16px;" class="coin-widget-container">
-            <div style="position: relative; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; background: rgba(245, 158, 11, 0.12); border-radius: 50%; border: 2px solid rgba(245, 158, 11, 0.35); flex-shrink: 0; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.18);">
-              <span style="font-size: 28px;">🪙</span>
-            </div>
-            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
-              <div style="font-family: var(--font-mono); font-size: 9px; color: #d97706; text-transform: uppercase; letter-spacing: .08em; font-weight: 700;">Coin Balance</div>
-              <div id="homeCoinBalanceDisplay" style="font-family: var(--font-display); font-size: 17px; font-weight: 800; color: var(--ink);">0 Coins</div>
-              <button id="btnHomeWatchAd" type="button" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #ffffff; border: none; padding: 6px 14px; border-radius: 18px; font-family: var(--font-sans); font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 3px 10px rgba(245, 158, 11, 0.35); transition: all 0.2s; touch-action: manipulation; user-select: none;">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                Watch Ad (+15 Coins)
-              </button>
-            </div>
-          </div>
         </div>
 
         <!-- AI Level Advisor Box -->
@@ -1286,25 +1198,6 @@ body {
           </div>
         </div>
 
-        <!-- Mobile/Tablet Banner Ad Container (Phone & Tablet size: between AI Level Advisor and Words Learned by Level) -->
-        <div class="mobile-banner-ad" style="width: 100%; display: flex; justify-content: center; margin: 10px 0;">
-          <a href="https://relieved-understanding.com/bTX.Vps/daGOlG0mY/WLcM/HeZmy9NuVZ/U/lDkWPSTeczyyO_T_Mm0KNCjxUataNBzZIw5/MtzZQS2sOlQj" target="_blank" rel="noopener noreferrer" style="display: inline-block; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-            <img src="https://www.cornyband.pro/2190/958050/1309376_5524b.jpg" width="300" height="250" style="border:0 !important;width:300px;height:250px;display:block;" alt="Sponsored Banner">
-          </a>
-          <script>
-          (function(nza){
-          var d = document,
-              s = d.createElement('script'),
-              l = d.scripts[d.scripts.length - 1];
-          s.settings = nza || {};
-          s.src = "//relieved-understanding.com/bTX.Vps/daGOlG0mY/WLcM/HeZmy9NuVZ/U/lDkWPSTeczyyO_T_Mm0KNCjxUataNBzZIw5/MtzZQS2sOlQj";
-          s.async = true;
-          s.referrerPolicy = 'no-referrer-when-downgrade';
-          l.parentNode.insertBefore(s, l);
-          })({})
-          </script>
-        </div>
-
         <!-- Words Learned by Level Breakdown -->
         <div style="background: var(--bg-1); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-top: 2px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
@@ -1335,10 +1228,7 @@ body {
     <div class="section-label">Classes</div>
     <div class="cards">
       <div class="card active-card" id="cardOxford">
-        <div class="card-index" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-          <span>01 · Vocabulary</span>
-          <span class="coin-badge-pill" id="badgeCostOxford" style="font-family: var(--font-mono); font-size: 10px; font-weight: 700; background: rgba(245, 158, 11, 0.12); color: #d97706; padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(245, 158, 11, 0.25); display: inline-flex; align-items: center; gap: 4px;">🪙 1 Coin / Word</span>
-        </div>
+        <div class="card-index">01 · Vocabulary</div>
         <div class="card-title">Learn New Vocabulary</div>
         <div class="card-desc">Essential English vocabulary explained with simple meanings, synonyms, and helpful examples.</div>
         <div class="card-foot">
@@ -1347,10 +1237,7 @@ body {
         </div>
       </div>
       <div class="card active-card" id="cardSpeaking">
-        <div class="card-index" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-          <span>02 · Speaking</span>
-          <span class="coin-badge-pill" id="badgeCostSpeaking" style="font-family: var(--font-mono); font-size: 10px; font-weight: 700; background: rgba(245, 158, 11, 0.12); color: #d97706; padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(245, 158, 11, 0.25); display: inline-flex; align-items: center; gap: 4px;">🪙 4 Coins / Text</span>
-        </div>
+        <div class="card-index">02 · Speaking</div>
         <div class="card-title">Speak &amp; Read Practice</div>
         <div class="card-desc">Read short texts containing words you learned and get instant microphone feedback on your spelling &amp; pronunciation!</div>
         <div class="card-foot">
@@ -1359,10 +1246,7 @@ body {
         </div>
       </div>
       <div class="card active-card" id="cardGrammar">
-        <div class="card-index" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-          <span>03 · Reading Context</span>
-          <span class="coin-badge-pill" id="badgeCostGrammar" style="font-family: var(--font-mono); font-size: 10px; font-weight: 700; background: rgba(245, 158, 11, 0.12); color: #d97706; padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(245, 158, 11, 0.25); display: inline-flex; align-items: center; gap: 4px;">🪙 4 Coins / Text</span>
-        </div>
+        <div class="card-index">03 · Reading Context</div>
         <div class="card-title">Learned Words Story</div>
         <div class="card-desc">Read full custom stories built using 15–20 of your learned words. Listen with AI Voice &amp; explore highlighted vocabulary!</div>
         <div class="card-foot">
@@ -1677,116 +1561,6 @@ body {
       <div style="padding: 16px 24px; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border); background: var(--bg-1);" id="customDialogActions">
         <button id="customDialogCancelBtn" class="btn-ghost" style="padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--ink);">Cancel</button>
         <button id="customDialogConfirmBtn" class="btn-solid" style="padding: 8px 18px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; background: var(--ink); color: var(--bg); border: none;">Confirm</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Banner Ad Modal -->
-  <div id="vastAdModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 30000; align-items: center; justify-content: center; backdrop-filter: blur(8px); padding: 16px;">
-    <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; max-width: 520px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.5); overflow: hidden; display: flex; flex-direction: column;">
-      <!-- Modal Header -->
-      <div style="padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--bg-1);">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <span style="font-size: 22px;">🏷️</span>
-          <div>
-            <h3 style="font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--ink); margin: 0;">Sponsored Ad Banner</h3>
-            <div style="font-family: var(--font-mono); font-size: 10px; color: #d97706; margin-top: 1px; font-weight: 600;">Watch Ad (+10 Coins) • Click Banner (+20 Coins)</div>
-          </div>
-        </div>
-        <button id="vastAdCloseBtn" type="button" style="background: transparent; border: none; color: var(--ink-dim); cursor: pointer; padding: 6px; border-radius: 6px; display: flex; align-items: center;" title="Close">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-
-      <!-- Banner Container & Interactive Ad Slot -->
-      <div id="bannerAdContainer" style="position: relative; width: 100%; background: var(--bg-1); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; min-height: 250px; text-align: center; border-bottom: 1px solid var(--border); cursor: pointer;" title="Click banner to earn +20 Coins!">
-        <div id="bannerAdSlot" style="width: 100%; max-width: 468px; min-height: 180px; background: linear-gradient(135deg, #0f172a, #1e1b4b); border-radius: 12px; border: 2px dashed #f59e0b; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; color: #fff; position: relative; overflow: hidden; box-sizing: border-box;">
-          <div id="bannerAdScriptContainer" style="width: 100%; display: flex; justify-content: center; align-items: center; margin-bottom: 8px;">
-            <script>
-            (function(ets){
-            var d = document,
-                s = d.createElement('script'),
-                l = d.scripts[d.scripts.length - 1];
-            s.settings = ets || {};
-            s.src = "//relieved-understanding.com/bDX/VqsXd.GJlR0/YdWGci/weNmI9/uRZhUql/kIP/Trcjy/OwTfM_0/NojvUztEN/ziIh5eMnzSQd2iOYQw";
-            s.async = true;
-            s.referrerPolicy = 'no-referrer-when-downgrade';
-            l.parentNode.insertBefore(s, l);
-            })({})
-            </script>
-          </div>
-          <div style="font-size: 28px; margin-bottom: 6px; animation: pulse 1.5s infinite;">🪙</div>
-          <div style="font-family: var(--font-display); font-size: 16px; font-weight: 800; color: #fbbf24; margin-bottom: 4px;">Sponsored Banner Ad</div>
-          <div style="font-size: 13px; color: #cbd5e1; margin-bottom: 12px; max-width: 320px; line-height: 1.4;">
-            Click this banner to earn <strong>+20 Coins</strong> instantly! Or watch for 10s for <strong>+10 Coins</strong>.
-          </div>
-          <div style="background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; color: #fbbf24; padding: 8px 18px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
-            👆 Click Banner (+20 Coins)
-          </div>
-        </div>
-
-        <!-- Live Countdown Badge Overlay -->
-        <div style="position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.25); color: #fff; font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 5px 10px; border-radius: 16px; backdrop-filter: blur(4px); display: flex; align-items: center; gap: 6px; z-index: 10;">
-          <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #ef4444; animation: blink 1s infinite;"></span>
-          <span>Ad: <strong id="vastAdCountdownText" style="color: #fbbf24;">10</strong>s remaining</span>
-        </div>
-      </div>
-
-      <!-- Footer Controls & Notice -->
-      <div style="padding: 16px 20px; background: var(--bg-1); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
-        <div style="font-size: 12px; color: var(--ink-dim); display: flex; align-items: center; gap: 6px;">
-          Watch: <span style="color: #f59e0b; font-weight: 700;">+10 Coins</span> | Click: <span style="color: #10b981; font-weight: 700;">+20 Coins</span>
-        </div>
-        <button id="btnVastClaimReward" type="button" disabled style="background: var(--border); color: var(--ink-faint); border: none; padding: 8px 18px; border-radius: 8px; font-family: var(--font-sans); font-size: 13px; font-weight: 700; cursor: not-allowed; transition: all 0.2s;">
-          Watching Banner Ad (10s)...
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Reward Claim Success Modal -->
-  <div id="vastSuccessModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 35000; align-items: center; justify-content: center; backdrop-filter: blur(6px); padding: 20px;">
-    <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; max-width: 380px; width: 100%; box-shadow: var(--shadow); text-align: center; padding: 28px 24px;">
-      <div style="width: 72px; height: 72px; border-radius: 50%; background: rgba(245, 158, 11, 0.15); border: 2px solid #f59e0b; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 36px; animation: bounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
-        🪙
-      </div>
-      <h3 id="vastSuccessTitle" style="font-family: var(--font-display); font-size: 20px; font-weight: 800; color: var(--ink); margin: 0 0 8px;">+10 Coins Earned!</h3>
-      <p id="vastSuccessDesc" style="font-size: 14px; color: var(--ink-dim); margin: 0 0 20px; line-height: 1.5;">
-        Great job! You have watched the ad banner and earned <strong>10 coins</strong>.
-      </p>
-      <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 10px; padding: 12px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; color: #d97706; font-size: 15px;">
-        Total Balance: <span id="vastSuccessNewBalance" style="font-size: 18px; font-weight: 800;">10 Coins</span>
-      </div>
-      <button id="btnVastSuccessClose" type="button" class="btn-solid" style="width: 100%; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 700; background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; border: none; cursor: pointer; touch-action: manipulation;">
-        Continue Learning ✨
-      </button>
-    </div>
-  </div>
-
-  <!-- Insufficient Coins Modal -->
-  <div id="coinsRequiredModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 25000; align-items: center; justify-content: center; backdrop-filter: blur(5px); padding: 20px;">
-    <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; max-width: 400px; width: 100%; box-shadow: var(--shadow); overflow: hidden; text-align: center; padding: 28px 24px;">
-      <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(239, 68, 68, 0.12); border: 2px solid rgba(239, 68, 68, 0.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 32px;">
-        🔒
-      </div>
-      <h3 style="font-family: var(--font-display); font-size: 19px; font-weight: 800; color: var(--ink); margin: 0 0 8px;">Coins Required to Unlock</h3>
-      <p id="coinsRequiredText" style="font-size: 14px; color: var(--ink-dim); margin: 0 0 20px; line-height: 1.5;">
-        You need coins to access this learning section. Watch an ad banner for <strong>+10 coins</strong> or click it for <strong>+20 coins</strong>!
-      </p>
-      
-      <div style="background: var(--bg-1); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
-        <span style="font-size: 13px; color: var(--ink-dim); font-weight: 600;">Your Current Balance:</span>
-        <span id="coinsRequiredCurrentBalance" style="font-family: var(--font-display); font-size: 16px; font-weight: 800; color: #d97706;">0 Coins</span>
-      </div>
-
-      <div style="display: flex; flex-direction: column; gap: 10px;">
-        <button id="btnCoinsRequiredWatchAd" type="button" style="width: 100%; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 700; background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35); touch-action: manipulation;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          Watch Banner Ad (+10 / +20 Coins)
-        </button>
-        <button id="btnCoinsRequiredCancel" type="button" class="btn-ghost" style="width: 100%; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1px solid var(--border); background: transparent; color: var(--ink); cursor: pointer; touch-action: manipulation;">
-          Maybe Later
-        </button>
       </div>
     </div>
   </div>
@@ -2963,8 +2737,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
         userPill.style.boxSizing = '';
       }
       if (studyMenuBtn) {
-        studyMenuBtn.style.setProperty('display', 'none', 'important');
-        studyMenuBtn.classList.add('hidden');
+        studyMenuBtn.style.display = 'none';
       }
       closeSidebar();
     } else {
@@ -2991,8 +2764,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
         userPill.style.boxSizing = 'border-box';
       }
       if (studyMenuBtn) {
-        studyMenuBtn.style.setProperty('display', 'inline-flex', 'important');
-        studyMenuBtn.classList.remove('hidden');
+        studyMenuBtn.style.display = 'flex';
       }
     }
   }
@@ -5107,10 +4879,6 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   }
 
   async function loadNextWord(){
-    if (!checkAndSpendCoins(1, "Learn New Vocabulary (1 coin per word)")) {
-      showView('home');
-      return;
-    }
     var entry = nextEntry();
     if(!entry){
       if (session.repassingSkipped) {
@@ -5145,7 +4913,6 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     }
     session.word = entry;
     session.attempts = 0;
-    session.wordJustAwarded = false;
     renderLoading();
     var info = await getWordInfo(entry);
     session.info = info;
@@ -5213,35 +4980,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
         '<button class="skip-btn" id="skipBtn" type="button">Skip</button>' +
       '</div>';
 
-    bindTap($('readyBtn'), function() {
-      if (session.word && session.word.word) {
-        if (!Progress.learned[session.word.word]) {
-          var localDate = new Date();
-          var year = localDate.getFullYear();
-          var month = String(localDate.getMonth() + 1).padStart(2, '0');
-          var day = String(localDate.getDate()).padStart(2, '0');
-          var todayStr = year + '-' + month + '-' + day;
-
-          Progress.learned[session.word.word] = {
-            pos: session.word.pos,
-            level: session.word.level,
-            meaning: session.info ? session.info.meaning : '',
-            synonyms: (session.info && session.info.synonyms) ? session.info.synonyms : null,
-            learnedAt: todayStr
-          };
-
-          Progress.score += 10;
-          Progress.streak = (Progress.streak || 0) + 1;
-          session.sessionLearned++;
-          session.wordJustAwarded = true;
-
-          saveProgress().catch(function(e){ console.error('Failed to save progress', e); });
-          updateStudyHeader();
-          showToast("Well done! +10 points — Word learned! 🎉");
-        }
-      }
-      startVanishAndType();
-    });
+    bindTap($('readyBtn'), startVanishAndType);
     bindTap($('skipBtn'), skipWord);
     bindTap($('soundBtn'), function(){ playPronunciation(true); });
 
@@ -5382,14 +5121,10 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       }
 
       var hintUsed = session.attempts >= 3;
-      if (!session.wordJustAwarded) {
-        Progress.score += hintUsed ? 5 : 10;
-        Progress.streak += 1;
-        feedback.textContent = 'Correct! +' + (hintUsed?5:10) + ' points';
-      } else {
-        feedback.textContent = 'Correct! Excellent typing!';
-      }
+      feedback.textContent = 'Correct! +' + (hintUsed?5:10) + ' points';
       feedback.className = 'feedback ok';
+      Progress.score += hintUsed ? 5 : 10;
+      Progress.streak += 1;
       var localDate = new Date();
       var year = localDate.getFullYear();
       var month = String(localDate.getMonth() + 1).padStart(2, '0');
@@ -5406,10 +5141,10 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
 
       if (session.repassingSkipped) {
         session.skippedIndex++;
-        if (!session.wordJustAwarded) session.sessionLearned++;
+        session.sessionLearned++;
       } else {
         Progress.index++;
-        if (!session.wordJustAwarded) session.sessionLearned++;
+        session.sessionLearned++;
       }
 
       saveProgress().catch(function(e){ console.error('Failed to save progress', e); });
@@ -7766,10 +7501,6 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       return;
     }
 
-    if (!checkAndSpendCoins(4, "Learned Words Story (4 coins per text)")) {
-      return;
-    }
-
     var WORDS_PER_TEXT = 5;
     var totalBatches = Math.max(1, Math.ceil(learnedKeys.length / WORDS_PER_TEXT));
     if (typeof batchIndex !== 'number' || isNaN(batchIndex)) {
@@ -8315,10 +8046,6 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     var learnedKeys = Object.keys(Progress.learned || {});
     if (learnedKeys.length < 3) {
       startSpeakingPractice();
-      return;
-    }
-
-    if (!checkAndSpendCoins(4, "Speak & Read Practice (4 coins per text)")) {
       return;
     }
 
@@ -8892,280 +8619,6 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     }
   }
 
-  /* ---------------- COIN BALANCE & VAST 3.0 AD REWARD SYSTEM ---------------- */
-  var VAST_AD_TAG_URL = "https://surprisedplate.com/ddmSF.z/d_GSNDv/ZQGXUM/uegmY9EuhZeUmlAkJPWTgcPy/O/TqIC1RNoDuEhtINszEIO5/MAjuUk0SN/Qi";
-
-  function getUserCoins() {
-    var stored = localStorage.getItem('lexicon_user_coins');
-    if (stored === null || stored === undefined) return 0;
-    var val = parseInt(stored, 10);
-    return isNaN(val) ? 0 : val;
-  }
-
-  function setUserCoins(amount) {
-    var num = Math.max(0, parseInt(amount, 10) || 0);
-    localStorage.setItem('lexicon_user_coins', num.toString());
-    updateCoinDisplays();
-  }
-
-  function addCoins(amount) {
-    setUserCoins(getUserCoins() + amount);
-  }
-
-  function deductCoins(amount) {
-    setUserCoins(getUserCoins() - amount);
-  }
-
-  function updateCoinDisplays() {
-    var c = getUserCoins();
-
-    var coinTextEl = $('coinText');
-    if (coinTextEl) coinTextEl.textContent = c + ' Coins';
-
-    var homeCoinEl = $('homeCoinBalanceDisplay');
-    if (homeCoinEl) homeCoinEl.textContent = c + ' Coins';
-
-    var reqBalance = $('coinsRequiredCurrentBalance');
-    if (reqBalance) reqBalance.textContent = c + ' Coins';
-
-    var succBalance = $('vastSuccessNewBalance');
-    if (succBalance) succBalance.textContent = c + ' Coins';
-
-    updateCardLockBadges();
-  }
-
-  function updateCardLockBadges() {
-    var c = getUserCoins();
-
-    // Card 1: Oxford Vocabulary (Needs 1 Coin / Word)
-    var badgeOxford = $('badgeCostOxford');
-    if (badgeOxford) {
-      if (c < 1) {
-        badgeOxford.innerHTML = '🔒 🪙 1 Coin (Locked)';
-        badgeOxford.style.background = 'rgba(239, 68, 68, 0.12)';
-        badgeOxford.style.color = '#ef4444';
-        badgeOxford.style.borderColor = 'rgba(239, 68, 68, 0.3)';
-      } else {
-        badgeOxford.innerHTML = '🔓 🪙 1 Coin / Word';
-        badgeOxford.style.background = 'rgba(245, 158, 11, 0.12)';
-        badgeOxford.style.color = '#d97706';
-        badgeOxford.style.borderColor = 'rgba(245, 158, 11, 0.25)';
-      }
-    }
-
-    // Card 2: Speaking Practice (Needs 4 Coins / Text)
-    var badgeSpeaking = $('badgeCostSpeaking');
-    if (badgeSpeaking) {
-      if (c < 4) {
-        badgeSpeaking.innerHTML = '🔒 🪙 4 Coins (Locked)';
-        badgeSpeaking.style.background = 'rgba(239, 68, 68, 0.12)';
-        badgeSpeaking.style.color = '#ef4444';
-        badgeSpeaking.style.borderColor = 'rgba(239, 68, 68, 0.3)';
-      } else {
-        badgeSpeaking.innerHTML = '🔓 🪙 4 Coins / Text';
-        badgeSpeaking.style.background = 'rgba(245, 158, 11, 0.12)';
-        badgeSpeaking.style.color = '#d97706';
-        badgeSpeaking.style.borderColor = 'rgba(245, 158, 11, 0.25)';
-      }
-    }
-
-    // Card 3: Grammar / Reading Context (Needs 4 Coins / Text)
-    var badgeGrammar = $('badgeCostGrammar');
-    if (badgeGrammar) {
-      if (c < 4) {
-        badgeGrammar.innerHTML = '🔒 🪙 4 Coins (Locked)';
-        badgeGrammar.style.background = 'rgba(239, 68, 68, 0.12)';
-        badgeGrammar.style.color = '#ef4444';
-        badgeGrammar.style.borderColor = 'rgba(239, 68, 68, 0.3)';
-      } else {
-        badgeGrammar.innerHTML = '🔓 🪙 4 Coins / Text';
-        badgeGrammar.style.background = 'rgba(245, 158, 11, 0.12)';
-        badgeGrammar.style.color = '#d97706';
-        badgeGrammar.style.borderColor = 'rgba(245, 158, 11, 0.25)';
-      }
-    }
-  }
-
-  function checkAndSpendCoins(cost, activityName) {
-    var coins = getUserCoins();
-    if (coins >= cost) {
-      deductCoins(cost);
-      return true;
-    }
-    showCoinsRequiredModal(cost, activityName);
-    return false;
-  }
-
-  function showCoinsRequiredModal(cost, activityName) {
-    var modal = $('coinsRequiredModal');
-    var textEl = $('coinsRequiredText');
-    var currentBalanceEl = $('coinsRequiredCurrentBalance');
-    if (!modal) return;
-
-    if (textEl) {
-      textEl.innerHTML = 'You need <strong>' + cost + ' coin' + (cost > 1 ? 's' : '') + '</strong> to access <b>' + (activityName || 'this activity') + '</b>.<br>Watch a quick video ad to earn <strong>+15 coins</strong> instantly!';
-    }
-    if (currentBalanceEl) {
-      currentBalanceEl.textContent = getUserCoins() + ' Coins';
-    }
-    modal.style.display = 'flex';
-  }
-
-  function playCoinChimeSound() {
-    try {
-      var ctx = new (window.AudioContext || window.webkitAudioContext)();
-      var now = ctx.currentTime;
-      
-      var osc1 = ctx.createOscillator();
-      var gain1 = ctx.createGain();
-      osc1.type = 'sine';
-      osc1.frequency.setValueAtTime(987.77, now);
-      osc1.frequency.exponentialRampToValueAtTime(1318.51, now + 0.12);
-      gain1.gain.setValueAtTime(0.3, now);
-      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-      osc1.connect(gain1);
-      gain1.connect(ctx.destination);
-      osc1.start(now);
-      osc1.stop(now + 0.4);
-
-      var osc2 = ctx.createOscillator();
-      var gain2 = ctx.createGain();
-      osc2.type = 'sine';
-      osc2.frequency.setValueAtTime(1318.51, now + 0.12);
-      osc2.frequency.exponentialRampToValueAtTime(1760.00, now + 0.25);
-      gain2.gain.setValueAtTime(0.35, now + 0.12);
-      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
-      osc2.connect(gain2);
-      gain2.connect(ctx.destination);
-      osc2.start(now + 0.12);
-      osc2.stop(now + 0.65);
-    } catch(e) { }
-  }
-
-  async function openVastAdModal() {
-    var modal = $('vastAdModal');
-    var bannerContainer = $('bannerAdContainer');
-    var bannerSlot = $('bannerAdSlot');
-    var countdownText = $('vastAdCountdownText');
-    var claimBtn = $('btnVastClaimReward');
-    if (!modal) return;
-
-    // Trigger video ad script
-    try {
-      var scriptContainer = $('bannerAdScriptContainer') || bannerSlot;
-      if (scriptContainer) {
-        scriptContainer.innerHTML = '';
-        var refScript = document.createElement('script');
-        scriptContainer.appendChild(refScript);
-
-        (function(nza){
-          var d = document,
-              s = d.createElement('script'),
-              l = d.scripts[d.scripts.length - 1];
-          s.settings = nza || {};
-          s.src = "//relieved-understanding.com/bxX/VFs/d.Gcll0bYEWEcC/Feomi9LuAZIU/lZkAPwTmc/yKOaTMI/2/NFzGMbtdNGzqIR5WM/jAY-3MNvwH";
-          s.async = true;
-          s.referrerPolicy = 'no-referrer-when-downgrade';
-          if (l && l.parentNode) {
-            l.parentNode.insertBefore(s, l);
-          } else {
-            scriptContainer.appendChild(s);
-          }
-        })({});
-      }
-    } catch(e) {
-      console.warn("Video ad script trigger error:", e);
-    }
-
-    modal.style.display = 'flex';
-    claimBtn.disabled = true;
-    claimBtn.style.background = 'var(--border)';
-    claimBtn.style.color = 'var(--ink-faint)';
-    claimBtn.style.cursor = 'not-allowed';
-
-    var secondsLeft = 10;
-    if (countdownText) countdownText.textContent = secondsLeft;
-    if (claimBtn) claimBtn.textContent = 'Watching Video Ad (10s)...';
-
-    var adTimer = null;
-
-    function startAdCountdown() {
-      if (adTimer) clearInterval(adTimer);
-      adTimer = setInterval(function() {
-        secondsLeft--;
-        if (countdownText) countdownText.textContent = Math.max(0, secondsLeft);
-        if (claimBtn) claimBtn.textContent = 'Watching Video Ad (' + Math.max(0, secondsLeft) + 's)...';
-        if (secondsLeft <= 0) {
-          clearInterval(adTimer);
-          claimBtn.disabled = false;
-          claimBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
-          claimBtn.style.color = '#ffffff';
-          claimBtn.style.cursor = 'pointer';
-          claimBtn.textContent = 'Claim +10 Coins ✨';
-        }
-      }, 1000);
-    }
-
-    startAdCountdown();
-
-    // Clicking ad awards +20 coins and opens ad destination in a new tab
-    if (bannerContainer) {
-      bannerContainer.onclick = function(e) {
-        if (e && e.target && (e.target.id === 'vastAdCloseBtn' || e.target.closest('#vastAdCloseBtn'))) return;
-
-        var adUrl = "https://relieved-understanding.com/bxX/VFs/d.Gcll0bYEWEcC/Feomi9LuAZIU/lZkAPwTmc/yKOaTMI/2/NFzGMbtdNGzqIR5WM/jAY-3MNvwH";
-        var clickedAnchor = e && e.target ? e.target.closest('a') : null;
-        if (clickedAnchor && clickedAnchor.href) {
-          clickedAnchor.target = "_blank";
-        } else {
-          try {
-            window.open(adUrl, '_blank', 'noopener,noreferrer');
-          } catch(err) {
-            console.warn("Could not open ad link:", err);
-          }
-        }
-
-        if (adTimer) clearInterval(adTimer);
-        modal.style.display = 'none';
-
-        addCoins(20);
-        playCoinChimeSound();
-
-        var succModal = $('vastSuccessModal');
-        var succTitle = $('vastSuccessTitle');
-        var succDesc = $('vastSuccessDesc');
-        if (succTitle) succTitle.textContent = '+20 Coins Earned!';
-        if (succDesc) succDesc.innerHTML = 'Awesome! You clicked the ad banner and earned <strong>20 coins</strong>!';
-        if (succModal) succModal.style.display = 'flex';
-      };
-    }
-
-    if ($('vastAdCloseBtn')) {
-      $('vastAdCloseBtn').onclick = function(e) {
-        if (e) e.stopPropagation();
-        if (adTimer) clearInterval(adTimer);
-        modal.style.display = 'none';
-      };
-    }
-
-    claimBtn.onclick = function(e) {
-      if (e) e.stopPropagation();
-      if (claimBtn.disabled) return;
-      if (adTimer) clearInterval(adTimer);
-      modal.style.display = 'none';
-
-      addCoins(10);
-      playCoinChimeSound();
-
-      var succModal = $('vastSuccessModal');
-      var succTitle = $('vastSuccessTitle');
-      var succDesc = $('vastSuccessDesc');
-      if (succTitle) succTitle.textContent = '+10 Coins Earned!';
-      if (succDesc) succDesc.innerHTML = 'Great job! You watched the ad banner and earned <strong>10 coins</strong>!';
-      if (succModal) succModal.style.display = 'flex';
-    };
-  }
-
   async function init(){
     try{
       await loadProgress();
@@ -9213,32 +8666,8 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     TOTAL = WORDS.length;
 
     userLearningLanguage = 'english';
-    updateCoinDisplays();
     renderHome();
     showView('home');
-
-    // Coin & Ad Event Bindings
-    if ($('btnHomeWatchAd')) bindTap($('btnHomeWatchAd'), openVastAdModal);
-    if ($('coinPill')) bindTap($('coinPill'), openVastAdModal);
-    if ($('btnCoinsRequiredWatchAd')) {
-      bindTap($('btnCoinsRequiredWatchAd'), function(){
-        var modal = $('coinsRequiredModal');
-        if (modal) modal.style.display = 'none';
-        openVastAdModal();
-      });
-    }
-    if ($('btnCoinsRequiredCancel')) {
-      bindTap($('btnCoinsRequiredCancel'), function(){
-        var modal = $('coinsRequiredModal');
-        if (modal) modal.style.display = 'none';
-      });
-    }
-    if ($('btnVastSuccessClose')) {
-      bindTap($('btnVastSuccessClose'), function(){
-        var modal = $('vastSuccessModal');
-        if (modal) modal.style.display = 'none';
-      });
-    }
 
     initReminderSwipe();
     initThemeHandlers();
@@ -9308,12 +8737,8 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       }
     });
 
-    bindTap($('cardOxford'), function(){
-      if (!checkAndSpendCoins(1, "Learn New Vocabulary (1 coin per word)")) return;
-      startStudy();
-    });
+    bindTap($('cardOxford'), startStudy);
     bindTap($('cardSpeaking'), function(){
-      if (!checkAndSpendCoins(4, "Speak & Read Practice (4 coins per text)")) return;
       showView('speaking');
       startSpeakingPractice();
     });
@@ -9376,7 +8801,6 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       }
     });
     bindTap($('cardGrammar'), function(){
-      if (!checkAndSpendCoins(4, "Learned Words Story (4 coins per text)")) return;
       showView('grammar');
       renderLearnedWordsStory();
     });
