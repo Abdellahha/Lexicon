@@ -572,7 +572,7 @@ body {
   }
 
   /* Show only SVG logos for topbar buttons on tablet and phone */
-  .topbar-right .level-pill {
+  .topbar-right .level-pill:not(#studyMenuBtn) {
     padding: 7px 10px !important;
     display: inline-flex !important;
     align-items: center !important;
@@ -584,6 +584,40 @@ body {
   .topbar-right #levelText,
   .topbar-right #userText {
     display: none !important;
+  }
+}
+
+/* Hide menu button and left sidebar drawer completely on tablet and phone sizes */
+@media (max-width: 1024px) {
+  #studyMenuBtn,
+  #leftSidebar,
+  #sidebarBackdrop {
+    display: none !important;
+  }
+}
+
+.ad-banner-slot {
+  margin: 12px 0;
+  padding: 8px;
+  text-align: center;
+  max-width: 100%;
+  border-radius: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--shadow);
+  box-sizing: border-box;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+@media (max-width: 600px) {
+  .ad-banner-slot {
+    margin: 8px 0 !important;
+    padding: 6px 4px !important;
+    border-radius: 8px !important;
+    max-width: 100% !important;
   }
 }
 
@@ -1000,7 +1034,6 @@ body {
 }
 </style>
 </head>
-
 <body>
 
 <div id="authGate" style="position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:999;padding:24px;text-align:center;">
@@ -1197,6 +1230,26 @@ body {
               </button>
             </div>
           </div>
+        </div>
+
+        <div class="ad-banner-slot">
+          <div style="font-size: 9.5px; color: var(--ink-faint); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; font-weight: 600;">Sponsored</div>
+          <script>
+          (function(axbffz){
+          var d = document,
+              s = d.createElement('script'),
+              l = d.scripts[d.scripts.length - 1];
+          s.settings = axbffz || {};
+          s.src = "//relieved-understanding.com/bKXhV/s/d.GYl/0bY/W/cU/teMms9vuhZcUylSkHPpT/ccylOPTBUj0/NNT-MdtaNNzzIr5uNJT/Q/1qN_wf";
+          s.async = true;
+          s.referrerPolicy = 'no-referrer-when-downgrade';
+          if (l && l.parentNode) {
+            l.parentNode.insertBefore(s, l);
+          } else {
+            (d.head || d.body || d.documentElement).appendChild(s);
+          }
+          })({})
+          </script>
         </div>
 
         <!-- Words Learned by Level Breakdown -->
@@ -2714,8 +2767,10 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       brand.style.display = (name === 'home') ? 'flex' : 'none';
     }
 
-    if (name === 'home') {
-      // Return pills to topbar
+    var isTabletOrPhone = window.innerWidth <= 1024;
+
+    if (name === 'home' || isTabletOrPhone) {
+      // Return pills to topbar on home or tablet/phone sizes
       if (topbarRight && themeToggle && levelPill && userPill) {
         topbarRight.insertBefore(themeToggle, studyMenuBtn);
         topbarRight.insertBefore(levelPill, studyMenuBtn);
@@ -2724,17 +2779,17 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
         // Reset styles for topbar
         themeToggle.style.width = '';
         themeToggle.style.justifyContent = '';
-        themeToggle.style.padding = '6px 12px';
+        themeToggle.style.padding = '';
         themeToggle.style.boxSizing = '';
         
         levelPill.style.width = '';
         levelPill.style.justifyContent = '';
-        levelPill.style.padding = '6px 14px';
+        levelPill.style.padding = '';
         levelPill.style.boxSizing = '';
         
         userPill.style.width = '';
         userPill.style.justifyContent = '';
-        userPill.style.padding = '6px 14px';
+        userPill.style.padding = '';
         userPill.style.boxSizing = '';
       }
       if (studyMenuBtn) {
@@ -2742,7 +2797,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       }
       closeSidebar();
     } else {
-      // Move pills to sidebar
+      // Move pills to sidebar on desktop non-home views
       if (sidebarContent && themeToggle && levelPill && userPill) {
         sidebarContent.appendChild(themeToggle);
         sidebarContent.appendChild(levelPill);
@@ -4281,7 +4336,9 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   }
 
   /* ---------------- navigation ---------------- */
+  var currentActiveViewName = 'home';
   function showView(name){
+    currentActiveViewName = name;
     hideWordMeaningModal();
     [viewHome, viewStudy, viewHistory, viewMatch, viewGrammar, viewSpeaking, $('view-language-select')].forEach(function(v){ if(v) v.classList.remove('active'); });
     if(name==='home'){
@@ -4313,6 +4370,12 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     // Customize topbar depending on view name
     updateTopbarAndSidebar(name);
   }
+
+  window.addEventListener('resize', function() {
+    if (typeof updateTopbarAndSidebar === 'function') {
+      updateTopbarAndSidebar(currentActiveViewName);
+    }
+  });
 
   /* ---------------- reminder banner ---------------- */
   var reminderTimeout = null, reminderHideTimeout = null, reminderLoop = false;
@@ -8937,75 +9000,5 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
 })();
 
 </script>
-
-<script>
-(function(zrnl){
-var d = document,
-    s = d.createElement('script'),
-    l = d.scripts[d.scripts.length - 1];
-s.settings = zrnl || {};
-s.src = "\/\/relieved-understanding.com\/bzXgVYs.dOGcl\/0fYGWscQ\/_eEmI9VupZ-Uzl\/kPPhT\/cdyeOmT\/Ub0\/N\/TrMht\/N\/zBIu5\/NwTPQE1gNPwp";
-s.async = true;
-s.referrerPolicy = 'no-referrer-when-downgrade';
-l.parentNode.insertBefore(s, l);
-})({})
-</script>
-
-<script>
-(function(zrnl){
-var d = document,
-    s = d.createElement('script'),
-    l = d.scripts[d.scripts.length - 1];
-s.settings = zrnl || {};
-s.src = "\/\/relieved-understanding.com\/beX.V\/sKdMGJlN0ZYSWEcO\/jeSmz9XuoZAU_l\/kePZTPc_ytOuTGU\/0CNdDFEot_NPzSIw5CNGT\/Qp0SN\/QE";
-s.async = true;
-s.referrerPolicy = 'no-referrer-when-downgrade';
-l.parentNode.insertBefore(s, l);
-})({})
-</script>
-
-<script>
-(function(zrnl){
-var d = document,
-    s = d.createElement('script'),
-    l = d.scripts[d.scripts.length - 1];
-s.settings = zrnl || {};
-s.src = "\/\/relieved-understanding.com\/bKXVV.sEdnGZlI0UYqWXcm\/He\/mV9PuHZkUYlwk\/P\/TscpyAOBTcMd0HN\/jiUetwN\/z_I\/5_M\/zHQr2vOkQI";
-s.async = true;
-s.referrerPolicy = 'no-referrer-when-downgrade';
-l.parentNode.insertBefore(s, l);
-})({})
-</script>
-
-<script>
-(function(zrnl){
-var d = document,
-    s = d.createElement('script'),
-    l = d.scripts[d.scripts.length - 1];
-s.settings = zrnl || {};
-s.src = "\/\/relieved-understanding.com\/bKXVV.sEdnGZlI0UYqWXcm\/He\/mV9PuHZkUYlwk\/P\/TscpyAOBTcMd0HN\/jiUetwN\/z_I\/5_M\/zHQr2vOkQI";
-s.async = true;
-s.referrerPolicy = 'no-referrer-when-downgrade';
-l.parentNode.insertBefore(s, l);
-})({})
-</script>
-
-<script>
-(function(zrnl){
-var d = document,
-    s = d.createElement('script'),
-    l = d.scripts[d.scripts.length - 1];
-s.settings = zrnl || {};
-s.src = "\/\/relieved-understanding.com\/b.XcVIsOdaGzl\/0gYMWlcW\/MeBmQ9zuvZeUmlckPPpT-cAyiOqTZIt2\/N\/zXM\/tnNHzAIL5XMjjrYJ3iNTwq";
-s.async = true;
-s.referrerPolicy = 'no-referrer-when-downgrade';
-l.parentNode.insertBefore(s, l);
-})({})
-</script>
-
-
-
-
-
 </body>
 </html>
