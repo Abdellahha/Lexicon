@@ -580,6 +580,7 @@ body {
     height: 34px !important;
     box-sizing: border-box !important;
   }
+  .topbar-right #noAdsBtnText,
   .topbar-right #themeText,
   .topbar-right #levelText,
   .topbar-right #userText {
@@ -1055,6 +1056,10 @@ body {
       <div class="brand-mark">Lex<em>icon</em></div>
     </div>
     <div class="topbar-right">
+      <button class="level-pill" id="noAdsBtn" style="cursor:pointer; outline: none; border-radius: 6px; padding: 6px 12px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(234, 179, 8, 0.2)); border: 1px solid rgba(245, 158, 11, 0.4); color: #b45309; display: flex; align-items: center; gap: 5px; font-weight: 700;" title="Remove Ads / Enter Premium Code">
+        <span style="font-size: 13px;">🚫</span>
+        <span id="noAdsBtnText" style="font-size: 11px;">No Ads</span>
+      </button>
       <button class="level-pill" id="themeToggle" style="cursor:pointer; outline: none; border-radius: 6px; padding: 6px 12px;" title="Toggle Dark/Light Mode">
         <span id="themeIconSun" style="display: flex; align-items: center;">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
@@ -1592,6 +1597,71 @@ body {
     </div>
   </div>
 
+  <!-- REMOVE ADS / PREMIUM MODAL -->
+  <div id="noAdsModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 20px;">
+    <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; max-width: 440px; width: 100%; box-shadow: var(--shadow); overflow: hidden; position: relative;">
+      
+      <!-- Header with Close Button -->
+      <div style="padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--bg-1);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #fef3c7, #fde68a); border: 1px solid #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 16px;">
+            👑
+          </div>
+          <h3 style="font-family: var(--font-display); font-size: 17px; font-weight: 700; color: var(--ink); margin: 0;">Remove Ads &amp; Premium</h3>
+        </div>
+        <button id="closeNoAdsModalBtn" style="background: none; border: none; color: var(--ink-dim); cursor: pointer; padding: 6px; border-radius: 6px; display: flex; align-items: center; justify-content: center;" aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <div style="padding: 24px; display: flex; flex-direction: column; gap: 18px;">
+        
+        <!-- Text description requested by user -->
+        <div style="text-align: center; margin-bottom: 4px;">
+          <div style="font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 6px;">enter the code to remove ads</div>
+          <div style="font-size: 12px; color: var(--ink-dim); line-height: 1.5;">Get full ad-free access to all features by entering your secret premium activation code below.</div>
+        </div>
+
+        <!-- Premium Status OR Code Input Container -->
+        <div id="premiumFormContainer" style="display: flex; flex-direction: column; gap: 12px;">
+          <label style="font-family: var(--font-mono); font-size: 10px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .08em; font-weight: 700; display: block;">Activation Code</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="premiumCodeInput" placeholder="Enter code here..." style="flex: 1; background: var(--bg-1); color: var(--ink); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-family: var(--font-mono); font-size: 14px; outline: none; text-transform: uppercase; letter-spacing: 0.05em;" />
+            <button id="btnSubmitPremiumCode" style="background: #f59e0b; color: #ffffff; border: none; border-radius: 8px; padding: 12px 18px; font-weight: 700; font-size: 13px; cursor: pointer; white-space: nowrap; transition: opacity 0.2s;">
+              Unlock
+            </button>
+          </div>
+          <div id="premiumCodeMsg" style="font-size: 12px; font-weight: 600; display: none; line-height: 1.4; padding: 8px 12px; border-radius: 6px;"></div>
+        </div>
+
+        <!-- Active Premium Card (Shown if already premium) -->
+        <div id="premiumActiveCard" style="display: none; background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.15)); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 12px; padding: 16px; text-align: center;">
+          <div style="font-size: 20px; margin-bottom: 6px;">✨</div>
+          <div style="font-size: 14px; font-weight: 700; color: #15803d; margin-bottom: 2px;">Premium Active</div>
+          <div style="font-size: 12px; color: #166534;">Ads are removed and full access is granted!</div>
+        </div>
+
+        <!-- Divider -->
+        <div style="display: flex; align-items: center; gap: 12px; margin: 4px 0;">
+          <div style="flex: 1; height: 1px; background: var(--border);"></div>
+          <span style="font-size: 10px; color: var(--ink-faint); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Need a Code?</span>
+          <div style="flex: 1; height: 1px; background: var(--border);"></div>
+        </div>
+
+        <!-- Instagram Contact Button -->
+        <a id="btnInstagramContact" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 12px 16px; background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045); color: #ffffff; text-decoration: none; border-radius: 10px; font-weight: 700; font-size: 13.5px; box-shadow: 0 4px 12px rgba(253, 29, 29, 0.2); transition: all 0.2s; box-sizing: border-box;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+          </svg>
+          <span>Contact on Instagram to Buy Code</span>
+        </a>
+
+      </div>
+    </div>
+  </div>
+
 </div>
 
   <!-- Word Details Modal -->
@@ -1817,6 +1887,7 @@ body {
 <script id="french-text-data" type="application/json">
 []
 </script>
+<script src="./premium-codes.js"></script>
 <script type="module">
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
@@ -1908,8 +1979,102 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     score: 0,
     streak: 0,
     coins: 10,        // Coins balance for unlocking study sections
-    storyBatchIndex: 0
+    storyBatchIndex: 0,
+    isPremium: false
   };
+
+  /* ---------------- Premium & No Ads Logic ---------------- */
+  function applyPremiumStatus() {
+    var isPrem = Progress.isPremium || false;
+    try {
+      if (window.localStorage.getItem('lexicon_is_premium') === 'true') {
+        isPrem = true;
+      }
+    } catch(e){}
+
+    if (isPrem) {
+      Progress.isPremium = true;
+      
+      // Update topbar / sidebar No Ads button label and style
+      var noAdsBtnText = $('noAdsBtnText');
+      var noAdsBtn = $('noAdsBtn');
+      if (noAdsBtnText) noAdsBtnText.textContent = '✨ Premium';
+      if (noAdsBtn) {
+        noAdsBtn.style.background = 'linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(16, 185, 129, 0.2))';
+        noAdsBtn.style.borderColor = 'rgba(34, 197, 94, 0.4)';
+        noAdsBtn.style.color = '#15803d';
+        noAdsBtn.title = 'Premium Active — Ad Free Access';
+      }
+
+      // Hide all ad banner slots
+      var adSlots = document.querySelectorAll('.ad-banner-slot');
+      adSlots.forEach(function(el) {
+        el.style.display = 'none';
+      });
+
+      // Update Earn Coins banner to show Premium Ad-Free status
+      var btnEarnCoins = $('btnEarnCoins');
+      if (btnEarnCoins) {
+        btnEarnCoins.style.background = 'linear-gradient(135deg, #dcfce7, #bbf7d0)';
+        btnEarnCoins.style.borderColor = '#22c55e';
+        btnEarnCoins.style.color = '#15803d';
+        btnEarnCoins.innerHTML = 
+          '<div style="display: flex; align-items: center; gap: 10px;">' +
+            '<div style="width: 32px; height: 32px; border-radius: 50%; background: #22c55e; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; font-weight: bold;">✨</div>' +
+            '<div style="display: flex; flex-direction: column; text-align: left;">' +
+              '<span style="font-family: var(--font-display); font-size: 13px; font-weight: 700; color: #14532d; line-height: 1.2;">Premium Unlocked (Ad-Free)</span>' +
+              '<span style="font-size: 11px; color: #15803d; font-weight: 600; margin-top: 2px;">Full Access Granted · Unlimited Learning</span>' +
+            '</div>' +
+          '</div>' +
+          '<div style="display: flex; align-items: center; gap: 4px; background: #22c55e; color: #ffffff; padding: 6px 12px; border-radius: 6px; font-family: var(--font-mono); font-size: 11px; font-weight: 700; white-space: nowrap; flex-shrink: 0;">👑 Active</div>';
+      }
+
+      // Update modal view
+      var formCont = $('premiumFormContainer');
+      var activeCard = $('premiumActiveCard');
+      if (formCont) formCont.style.display = 'none';
+      if (activeCard) activeCard.style.display = 'block';
+    }
+  }
+
+  function handlePremiumCodeSubmit() {
+    var inputEl = $('premiumCodeInput');
+    var msgEl = $('premiumCodeMsg');
+    if (!inputEl || !msgEl) return;
+
+    var enteredCode = inputEl.value ? inputEl.value.trim().toUpperCase() : '';
+    if (!enteredCode) {
+      msgEl.style.display = 'block';
+      msgEl.style.background = 'rgba(239, 68, 68, 0.1)';
+      msgEl.style.color = '#b91c1c';
+      msgEl.style.border = '1px solid rgba(239, 68, 68, 0.2)';
+      msgEl.textContent = '⚠️ Please enter a premium activation code.';
+      return;
+    }
+
+    var validCodes = window.VALID_PREMIUM_CODES || ['PREMIUM2026', 'NOADS100', 'VIPACCESS', 'LEXICONPRO', 'LEX2026', 'FREEPASS', 'INSTAGRAM2026'];
+    if (validCodes.indexOf(enteredCode) !== -1) {
+      Progress.isPremium = true;
+      try { window.localStorage.setItem('lexicon_is_premium', 'true'); } catch(e){}
+      
+      msgEl.style.display = 'block';
+      msgEl.style.background = 'rgba(34, 197, 94, 0.15)';
+      msgEl.style.color = '#15803d';
+      msgEl.style.border = '1px solid rgba(34, 197, 94, 0.3)';
+      msgEl.textContent = '🎉 Code Accepted! Premium activated and ads removed.';
+      
+      applyPremiumStatus();
+      saveProgress().catch(function(e){ console.error(e); });
+      showToast('👑 Premium Activated! Ad-free access enabled.');
+      inputEl.value = '';
+    } else {
+      msgEl.style.display = 'block';
+      msgEl.style.background = 'rgba(239, 68, 68, 0.1)';
+      msgEl.style.color = '#b91c1c';
+      msgEl.style.border = '1px solid rgba(239, 68, 68, 0.2)';
+      msgEl.textContent = '❌ Invalid code. Please contact us on Instagram to purchase a valid code.';
+    }
+  }
 
   // Track sections unlocked during the current app run/session
   var unlockedInSession = {
@@ -1955,6 +2120,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     Progress.score = parsed.score || 0;
     Progress.streak = parsed.streak || 0;
     Progress.coins = parsed.coins !== undefined ? parsed.coins : 10;
+    Progress.isPremium = parsed.isPremium || false;
 
     var savedLocalBatch = 0;
     try { savedLocalBatch = parseInt(window.localStorage.getItem('lexicon_story_batch_index') || '0', 10) || 0; } catch(e){}
@@ -1967,6 +2133,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     userLearningLanguage = data.learningLanguage || null;
     userTranslationLanguage = data.translationLanguage || 'english';
     updateSidebarStats();
+    applyPremiumStatus();
   }
 
   function withTimeout(promise, ms){
@@ -2597,6 +2764,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   }
 
   function renderHome(){
+    applyPremiumStatus();
     if (userLearningLanguage === 'french') {
       switchUIForLanguage();
       updateSidebarStats();
@@ -2826,7 +2994,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
 
   /* ---------------- Section Unlock & Coin Deductions ---------------- */
   async function tryEnterVocabulary() {
-    if (unlockedInSession.vocabulary) {
+    if (unlockedInSession.vocabulary || Progress.isPremium) {
       startStudy();
       return;
     }
@@ -2841,7 +3009,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     } else {
       showCustomAlert(
         'Coins Needed 🪙',
-        'You need <b>3 coins</b> to enter <b>Learn New Vocabulary</b>.<br>Your current balance: <b>' + currentCoins + ' 🪙</b>.<br><br>Click the <b>Earn 5 Coins</b> banner at the top to get +5 coins!',
+        'You need <b>3 coins</b> to enter <b>Learn New Vocabulary</b>.<br>Your current balance: <b>' + currentCoins + ' 🪙</b>.<br><br>Click the <b>Earn 5 Coins</b> banner at the top to get +5 coins, or unlock Premium for unlimited access!',
         function() {
           var btn = $('btnEarnCoins');
           if (btn) btn.scrollIntoView({ behavior: 'smooth' });
@@ -2851,7 +3019,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   }
 
   async function tryEnterSpeaking() {
-    if (unlockedInSession.speaking) {
+    if (unlockedInSession.speaking || Progress.isPremium) {
       showView('speaking');
       startSpeakingPractice();
       return;
@@ -2868,7 +3036,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     } else {
       showCustomAlert(
         'Coins Needed 🪙',
-        'You need <b>5 coins</b> to enter <b>Speak & Read Practice</b>.<br>Your current balance: <b>' + currentCoins + ' 🪙</b>.<br><br>Click the <b>Earn 5 Coins</b> banner at the top to get +5 coins!',
+        'You need <b>5 coins</b> to enter <b>Speak & Read Practice</b>.<br>Your current balance: <b>' + currentCoins + ' 🪙</b>.<br><br>Click the <b>Earn 5 Coins</b> banner at the top to get +5 coins, or unlock Premium for unlimited access!',
         function() {
           var btn = $('btnEarnCoins');
           if (btn) btn.scrollIntoView({ behavior: 'smooth' });
@@ -2878,7 +3046,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   }
 
   async function tryEnterStory() {
-    if (unlockedInSession.story) {
+    if (unlockedInSession.story || Progress.isPremium) {
       showView('grammar');
       renderLearnedWordsStory();
       return;
@@ -2931,6 +3099,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
   }
 
   function updateTopbarAndSidebar(name) {
+    var noAdsBtn = $('noAdsBtn');
     var themeToggle = $('themeToggle');
     var levelPill = $('levelPill');
     var userPill = $('userPill');
@@ -2948,11 +3117,19 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     if (name === 'home') {
       // Return pills to topbar on home screen
       if (topbarRight && themeToggle && levelPill && userPill) {
+        if (noAdsBtn) topbarRight.insertBefore(noAdsBtn, studyMenuBtn);
         topbarRight.insertBefore(themeToggle, studyMenuBtn);
         topbarRight.insertBefore(levelPill, studyMenuBtn);
         topbarRight.insertBefore(userPill, studyMenuBtn);
         
         // Reset styles for topbar
+        if (noAdsBtn) {
+          noAdsBtn.style.width = '';
+          noAdsBtn.style.justifyContent = '';
+          noAdsBtn.style.padding = '6px 12px';
+          noAdsBtn.style.boxSizing = '';
+        }
+
         themeToggle.style.width = '';
         themeToggle.style.justifyContent = '';
         themeToggle.style.padding = '';
@@ -2975,11 +3152,19 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     } else {
       // Move pills to sidebar on all non-home section views (Vocabulary, Speaking, Story, History, Match)
       if (sidebarContent && themeToggle && levelPill && userPill) {
+        if (noAdsBtn) sidebarContent.appendChild(noAdsBtn);
         sidebarContent.appendChild(themeToggle);
         sidebarContent.appendChild(levelPill);
         sidebarContent.appendChild(userPill);
         
         // Style them for a vertical list inside the sidebar drawer
+        if (noAdsBtn) {
+          noAdsBtn.style.width = '100%';
+          noAdsBtn.style.justifyContent = 'flex-start';
+          noAdsBtn.style.padding = '12px 16px';
+          noAdsBtn.style.boxSizing = 'border-box';
+        }
+
         themeToggle.style.width = '100%';
         themeToggle.style.justifyContent = 'flex-start';
         themeToggle.style.padding = '12px 16px';
@@ -8971,6 +9156,42 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       }
     });
 
+    // No Ads & Premium modal bindings
+    bindTap($('noAdsBtn'), function(){
+      closeSidebar();
+      var msgEl = $('premiumCodeMsg');
+      if (msgEl) msgEl.style.display = 'none';
+      var inputEl = $('premiumCodeInput');
+      if (inputEl) inputEl.value = '';
+      applyPremiumStatus();
+      $('noAdsModal').style.display = 'flex';
+    });
+
+    bindTap($('closeNoAdsModalBtn'), function(){
+      $('noAdsModal').style.display = 'none';
+    });
+
+    var noAdsModalEl = $('noAdsModal');
+    if (noAdsModalEl) {
+      noAdsModalEl.addEventListener('click', function(e){
+        if (e.target === noAdsModalEl) {
+          noAdsModalEl.style.display = 'none';
+        }
+      });
+    }
+
+    bindTap($('btnSubmitPremiumCode'), handlePremiumCodeSubmit);
+
+    var codeInput = $('premiumCodeInput');
+    if (codeInput) {
+      codeInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          handlePremiumCodeSubmit();
+        }
+      });
+    }
+
     bindTap($('cardOxford'), tryEnterVocabulary);
     bindTap($('cardSpeaking'), tryEnterSpeaking);
     bindTap($('btnSpeakingBack'), function(){
@@ -9157,6 +9378,8 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     var appRoot = $('appRoot');
     if(gate) gate.style.display = 'none';
     if(appRoot) appRoot.style.display = '';
+
+    applyPremiumStatus();
   }
 
   function boot(){
