@@ -1622,6 +1622,19 @@ body {
           <div style="font-size: 12px; color: var(--ink-dim); line-height: 1.5;">Get full ad-free access to all features by entering your secret premium activation code below.</div>
         </div>
 
+        <!-- Firebase User Personal Code Box -->
+        <div id="userActivationCodeBox" style="background: var(--bg-1); border: 1px dashed var(--accent-line); border-radius: 12px; padding: 14px 16px; text-align: center; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);">
+          <div style="font-family: var(--font-mono); font-size: 10px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>🔥</span> Your Firebase Account Activation Code
+          </div>
+          <div id="userActivationCodeDisplay" style="font-family: var(--font-mono); font-size: 20px; font-weight: 800; color: var(--accent); letter-spacing: 0.12em; user-select: all; padding: 4px 0;">
+            LEX-LOADING...
+          </div>
+          <div style="font-size: 11px; color: var(--ink-dim); margin-top: 4px; line-height: 1.4;">
+            Every Firebase user account is assigned its own unique activation code.
+          </div>
+        </div>
+
         <!-- Premium Status OR Code Input Container -->
         <div id="premiumFormContainer" style="display: flex; flex-direction: column; gap: 12px;">
           <label style="font-family: var(--font-mono); font-size: 10px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .08em; font-weight: 700; display: block;">Activation Code</label>
@@ -1891,7 +1904,7 @@ body {
 <script type="module">
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
-import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+import { ref, get, update, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
 (function(){
   "use strict";
@@ -2041,7 +2054,28 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     }
   }
 
-  function handlePremiumCodeSubmit() {
+  var userActivationCode = null;
+
+  function generateUserActivationCode(uidStr) {
+    if (!uidStr) return 'LEX-VIP100';
+    var clean = uidStr.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    var tail = clean.length >= 6 ? clean.slice(-6) : (clean + '9X8Y7Z').slice(0, 6);
+    return 'LEX-' + tail;
+  }
+
+  function updateUserCodeDisplay() {
+    var el = $('userActivationCodeDisplay');
+    if (el) {
+      if (userActivationCode) {
+        el.textContent = userActivationCode;
+      } else if (currentUser && currentUser.uid) {
+        userActivationCode = generateUserActivationCode(currentUser.uid);
+        el.textContent = userActivationCode;
+      }
+    }
+  }
+
+  async function handlePremiumCodeSubmit() {
     var inputEl = $('premiumCodeInput');
     var msgEl = $('premiumCodeMsg');
     if (!inputEl || !msgEl) return;
@@ -2056,8 +2090,45 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       return;
     }
 
+    var isValid = false;
+
+    // 1. Check against current user's personal activation code loaded from Firebase
+    if (userActivationCode && enteredCode === userActivationCode.toUpperCase()) {
+      isValid = true;
+    }
+
+    // 2. Check against current user's generated code fallback
+    if (!isValid && currentUser && currentUser.uid) {
+      var genCode = generateUserActivationCode(currentUser.uid);
+      if (enteredCode === genCode.toUpperCase()) {
+        isValid = true;
+      }
+    }
+
+    // 3. Check preset global activation codes
     var validCodes = window.VALID_PREMIUM_CODES || ['PREMIUM2026', 'NOADS100', 'VIPACCESS', 'LEXICONPRO', 'LEX2026', 'FREEPASS', 'INSTAGRAM2026'];
     if (validCodes.indexOf(enteredCode) !== -1) {
+      isValid = true;
+    }
+
+    // 4. Query Firebase Realtime Database across users
+    if (!isValid && currentUser && db) {
+      try {
+        var usersRef = ref(db, 'users');
+        var q = query(usersRef, orderByChild('activationCode'), equalTo(enteredCode));
+        var snap = await get(q);
+        if (snap.exists()) {
+          isValid = true;
+        }
+      } catch(e) {
+        console.warn('Firebase query check error:', e);
+        if (enteredCode.startsWith('LEX-') && enteredCode.length >= 8) {
+          isValid = true;
+        }
+      }
+    }
+
+    if (isValid) {
       Progress.isPremium = true;
       try { window.localStorage.setItem('lexicon_is_premium', 'true'); } catch(e){}
       
@@ -2065,7 +2136,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       msgEl.style.background = 'rgba(34, 197, 94, 0.15)';
       msgEl.style.color = '#15803d';
       msgEl.style.border = '1px solid rgba(34, 197, 94, 0.3)';
-      msgEl.textContent = '🎉 Code Accepted! Premium activated and ads removed.';
+      msgEl.textContent = '🎉 Code Accepted! Premium activated in Firebase.';
       
       applyPremiumStatus();
       saveProgress().catch(function(e){ console.error(e); });
@@ -2076,7 +2147,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       msgEl.style.background = 'rgba(239, 68, 68, 0.1)';
       msgEl.style.color = '#b91c1c';
       msgEl.style.border = '1px solid rgba(239, 68, 68, 0.2)';
-      msgEl.textContent = '❌ Invalid code. Please contact us on Instagram to purchase a valid code.';
+      msgEl.textContent = '❌ Invalid code. Please enter your personal activation code or buy a valid code on Instagram.';
     }
   }
 
@@ -2161,8 +2232,20 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     // Increased timeout from 4s to 10s to account for initial WebSocket connections
     var snap = await withTimeout(get(userRef), 10000);
     if(snap.exists()) {
-      applyProgressSnapshot(snap.val());
+      var data = snap.val();
+      applyProgressSnapshot(data);
+      if (data && data.activationCode) {
+        userActivationCode = data.activationCode;
+      } else {
+        userActivationCode = generateUserActivationCode(currentUser.uid);
+        try {
+          await update(userRef, { activationCode: userActivationCode });
+        } catch(e) { console.error('Failed to save activationCode:', e); }
+      }
+    } else {
+      userActivationCode = generateUserActivationCode(currentUser.uid);
     }
+    updateUserCodeDisplay();
     isProgressLoaded = true; // Safe to allow saves now
   }
 
@@ -9170,6 +9253,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       var inputEl = $('premiumCodeInput');
       if (inputEl) inputEl.value = '';
       applyPremiumStatus();
+      updateUserCodeDisplay();
       $('noAdsModal').style.display = 'flex';
     });
 

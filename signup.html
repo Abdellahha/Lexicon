@@ -282,12 +282,22 @@ input:-webkit-autofill:active {
 
       await updateProfile(cred.user, { displayName: username });
 
+      // Helper to generate a unique activation code for new users
+      function generateActivationCode(uidStr) {
+        const clean = (uidStr || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+        const tail = clean.length >= 6 ? clean.slice(-6) : (clean + '9X8Y7Z').slice(0, 6);
+        return 'LEX-' + tail;
+      }
+
+      const userCode = generateActivationCode(cred.user.uid);
+
       // Create the user's profile + fresh progress record in the Realtime Database.
       await set(ref(db, 'users/' + cred.user.uid), {
         username: username,
         email: email, // Store their real email address here
         englishLevel: englishLevel,
         wordsPerDay: wordsPerDay,
+        activationCode: userCode,
         createdAt: serverTimestamp(),
         progress: { learned: {}, index: 0, score: 0, streak: 0 }
       });
