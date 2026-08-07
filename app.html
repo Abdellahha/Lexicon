@@ -1113,6 +1113,15 @@ body {
     <!-- STATS SECTION -->
     <div style="font-size: 11px; font-family: var(--font-mono); color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-bottom: 12px; flex-shrink: 0;">Your Progress</div>
     <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; flex-shrink: 0;">
+      <!-- Coins Balance -->
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: linear-gradient(135deg, #fef3c7, #fde68a); border: 1px solid #f59e0b; border-radius: 8px;">
+        <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; color: #78350f;">
+          <span style="font-size: 16px;">🪙</span>
+          Coins
+        </div>
+        <span id="sidebarCoins" style="font-family: var(--font-mono); font-size: 15px; font-weight: 800; color: #b45309;">10</span>
+      </div>
+
       <!-- Score -->
       <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--bg-1); border: 1px solid var(--border); border-radius: 8px;">
         <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; color: var(--ink-dim);">
@@ -1209,11 +1218,11 @@ body {
             </div>
             <div style="display: flex; flex-direction: column; text-align: left;">
               <span style="font-family: var(--font-display); font-size: 13px; font-weight: 700; color: #78350f; line-height: 1.2;">Earn 5 Coins to Keep Learning</span>
-              <span style="font-size: 11px; color: #a16207; font-weight: 500; margin-top: 2px;">Click to get +5 coins for your study session</span>
+              <span id="earnCoinsBalance" style="font-size: 11px; color: #a16207; font-weight: 600; margin-top: 2px;">Balance: 10 🪙</span>
             </div>
           </div>
           <div style="display: flex; align-items: center; gap: 4px; background: #f59e0b; color: #ffffff; padding: 6px 12px; border-radius: 6px; font-family: var(--font-mono); font-size: 11px; font-weight: 700; white-space: nowrap; flex-shrink: 0;">
-            +5 🪙
+            +5 🪙 Get Coins
           </div>
         </a>
 
@@ -1298,7 +1307,12 @@ body {
     <div class="section-label">Classes</div>
     <div class="cards">
       <div class="card active-card" id="cardOxford">
-        <div class="card-index">01 · Vocabulary</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+          <div class="card-index">01 · Vocabulary</div>
+          <div id="costTagOxford" style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; background: rgba(245, 158, 11, 0.15); color: #d97706; padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(245, 158, 11, 0.3); display: flex; align-items: center; gap: 4px;">
+            <span>🪙 3 Coins</span>
+          </div>
+        </div>
         <div class="card-title">Learn New Vocabulary</div>
         <div class="card-desc">Essential English vocabulary explained with simple meanings, synonyms, and helpful examples.</div>
         <div class="card-foot">
@@ -1307,7 +1321,12 @@ body {
         </div>
       </div>
       <div class="card active-card" id="cardSpeaking">
-        <div class="card-index">02 · Speaking</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+          <div class="card-index">02 · Speaking</div>
+          <div id="costTagSpeaking" style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; background: rgba(245, 158, 11, 0.15); color: #d97706; padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(245, 158, 11, 0.3); display: flex; align-items: center; gap: 4px;">
+            <span>🪙 5 Coins</span>
+          </div>
+        </div>
         <div class="card-title">Speak &amp; Read Practice</div>
         <div class="card-desc">Read short texts containing words you learned and get instant microphone feedback on your spelling &amp; pronunciation!</div>
         <div class="card-foot">
@@ -1316,7 +1335,12 @@ body {
         </div>
       </div>
       <div class="card active-card" id="cardGrammar">
-        <div class="card-index">03 · Reading Context</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+          <div class="card-index">03 · Reading Context</div>
+          <div id="costTagGrammar" style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; background: rgba(245, 158, 11, 0.15); color: #d97706; padding: 2px 8px; border-radius: 12px; border: 1px solid rgba(245, 158, 11, 0.3); display: flex; align-items: center; gap: 4px;">
+            <span>🪙 5 Coins</span>
+          </div>
+        </div>
         <div class="card-title">Learned Words Story</div>
         <div class="card-desc">Read full custom stories built using 15–20 of your learned words. Listen with AI Voice &amp; explore highlighted vocabulary!</div>
         <div class="card-foot">
