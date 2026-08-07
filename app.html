@@ -1910,7 +1910,15 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     index: 0,         // pointer into WORDS for next word to study
     score: 0,
     streak: 0,
+    coins: 10,        // Coins balance for unlocking study sections
     storyBatchIndex: 0
+  };
+
+  // Track sections unlocked during the current app run/session
+  var unlockedInSession = {
+    vocabulary: false,
+    speaking: false,
+    story: false
   };
 
   var userEnglishLevel = 'all';
@@ -1949,6 +1957,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     Progress.index = parsed.index || 0;
     Progress.score = parsed.score || 0;
     Progress.streak = parsed.streak || 0;
+    Progress.coins = parsed.coins !== undefined ? parsed.coins : 10;
 
     var savedLocalBatch = 0;
     try { savedLocalBatch = parseInt(window.localStorage.getItem('lexicon_story_batch_index') || '0', 10) || 0; } catch(e){}
@@ -1960,6 +1969,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     userWordsPerDay = parseInt(data.wordsPerDay, 10) || 10;
     userLearningLanguage = data.learningLanguage || null;
     userTranslationLanguage = data.translationLanguage || 'english';
+    updateSidebarStats();
   }
 
   function withTimeout(promise, ms){
@@ -2753,17 +2763,148 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     var goalVal = userWordsPerDay || 10;
     var scoreVal = Progress.score || 0;
     var streakVal = Progress.streak || 0;
+    var coinsVal = Progress.coins !== undefined ? Progress.coins : 10;
     var pct = Math.min(100, Math.round((todayCount / goalVal) * 100));
 
     var sidebarScore = $('sidebarScore');
     var sidebarStreak = $('sidebarStreak');
     var sidebarGoal = $('sidebarGoal');
     var sidebarGoalProgress = $('sidebarGoalProgress');
+    var sidebarCoins = $('sidebarCoins');
+    var earnCoinsBalance = $('earnCoinsBalance');
 
     if (sidebarScore) sidebarScore.textContent = scoreVal;
     if (sidebarStreak) sidebarStreak.textContent = streakVal;
     if (sidebarGoal) sidebarGoal.textContent = todayCount + '/' + goalVal;
     if (sidebarGoalProgress) sidebarGoalProgress.style.width = pct + '%';
+    if (sidebarCoins) sidebarCoins.textContent = coinsVal;
+    if (earnCoinsBalance) earnCoinsBalance.textContent = 'Balance: ' + coinsVal + ' 🪙';
+
+    // Update cost badges on cards
+    var costTagOxford = $('costTagOxford');
+    if (costTagOxford) {
+      if (unlockedInSession.vocabulary) {
+        costTagOxford.innerHTML = '<span>🔓 Unlocked</span>';
+        costTagOxford.style.background = 'rgba(34, 197, 94, 0.15)';
+        costTagOxford.style.color = '#15803d';
+        costTagOxford.style.borderColor = 'rgba(34, 197, 94, 0.3)';
+      } else {
+        costTagOxford.innerHTML = '<span>🪙 3 Coins</span>';
+        costTagOxford.style.background = 'rgba(245, 158, 11, 0.15)';
+        costTagOxford.style.color = '#d97706';
+        costTagOxford.style.borderColor = 'rgba(245, 158, 11, 0.3)';
+      }
+    }
+
+    var costTagSpeaking = $('costTagSpeaking');
+    if (costTagSpeaking) {
+      if (unlockedInSession.speaking) {
+        costTagSpeaking.innerHTML = '<span>🔓 Unlocked</span>';
+        costTagSpeaking.style.background = 'rgba(34, 197, 94, 0.15)';
+        costTagSpeaking.style.color = '#15803d';
+        costTagSpeaking.style.borderColor = 'rgba(34, 197, 94, 0.3)';
+      } else {
+        costTagSpeaking.innerHTML = '<span>🪙 5 Coins</span>';
+        costTagSpeaking.style.background = 'rgba(245, 158, 11, 0.15)';
+        costTagSpeaking.style.color = '#d97706';
+        costTagSpeaking.style.borderColor = 'rgba(245, 158, 11, 0.3)';
+      }
+    }
+
+    var costTagGrammar = $('costTagGrammar');
+    if (costTagGrammar) {
+      if (unlockedInSession.story) {
+        costTagGrammar.innerHTML = '<span>🔓 Unlocked</span>';
+        costTagGrammar.style.background = 'rgba(34, 197, 94, 0.15)';
+        costTagGrammar.style.color = '#15803d';
+        costTagGrammar.style.borderColor = 'rgba(34, 197, 94, 0.3)';
+      } else {
+        costTagGrammar.innerHTML = '<span>🪙 5 Coins</span>';
+        costTagGrammar.style.background = 'rgba(245, 158, 11, 0.15)';
+        costTagGrammar.style.color = '#d97706';
+        costTagGrammar.style.borderColor = 'rgba(245, 158, 11, 0.3)';
+      }
+    }
+  }
+
+  /* ---------------- Section Unlock & Coin Deductions ---------------- */
+  async function tryEnterVocabulary() {
+    if (unlockedInSession.vocabulary) {
+      startStudy();
+      return;
+    }
+    var currentCoins = Progress.coins !== undefined ? Progress.coins : 10;
+    if (currentCoins >= 3) {
+      Progress.coins = currentCoins - 3;
+      unlockedInSession.vocabulary = true;
+      showToast('🪙 Unlocked Vocabulary for 3 coins!');
+      updateSidebarStats();
+      saveProgress().catch(function(e){ console.error(e); });
+      startStudy();
+    } else {
+      showCustomAlert(
+        'Coins Needed 🪙',
+        'You need <b>3 coins</b> to enter <b>Learn New Vocabulary</b>.<br>Your current balance: <b>' + currentCoins + ' 🪙</b>.<br><br>Click the <b>Earn 5 Coins</b> banner at the top to get +5 coins!',
+        function() {
+          var btn = $('btnEarnCoins');
+          if (btn) btn.scrollIntoView({ behavior: 'smooth' });
+        }
+      );
+    }
+  }
+
+  async function tryEnterSpeaking() {
+    if (unlockedInSession.speaking) {
+      showView('speaking');
+      startSpeakingPractice();
+      return;
+    }
+    var currentCoins = Progress.coins !== undefined ? Progress.coins : 10;
+    if (currentCoins >= 5) {
+      Progress.coins = currentCoins - 5;
+      unlockedInSession.speaking = true;
+      showToast('🪙 Unlocked Speaking Practice for 5 coins!');
+      updateSidebarStats();
+      saveProgress().catch(function(e){ console.error(e); });
+      showView('speaking');
+      startSpeakingPractice();
+    } else {
+      showCustomAlert(
+        'Coins Needed 🪙',
+        'You need <b>5 coins</b> to enter <b>Speak & Read Practice</b>.<br>Your current balance: <b>' + currentCoins + ' 🪙</b>.<br><br>Click the <b>Earn 5 Coins</b> banner at the top to get +5 coins!',
+        function() {
+          var btn = $('btnEarnCoins');
+          if (btn) btn.scrollIntoView({ behavior: 'smooth' });
+        }
+      );
+    }
+  }
+
+  async function tryEnterStory() {
+    if (unlockedInSession.story) {
+      showView('grammar');
+      renderLearnedWordsStory();
+      return;
+    }
+    var currentCoins = Progress.coins !== undefined ? Progress.coins : 10;
+    if (currentCoins >= 5) {
+      Progress.coins = currentCoins - 5;
+      unlockedInSession.story = true;
+      showToast('🪙 Unlocked Learned Words Story for 5 coins!');
+      updateSidebarStats();
+      saveProgress().catch(function(e){ console.error(e); });
+      showView('grammar');
+      renderLearnedWordsStory();
+    } else {
+      showCustomAlert(
+        'Coins Needed 🪙',
+        'You need <b>5 coins</b> to enter <b>Learned Words Story</b>.<br>Your current balance: <b>' + currentCoins + ' 🪙</b>.<br><br>Click the <b>Earn 5 Coins</b> banner at the top to get +5 coins!',
+        function() {
+          var btn = $('btnEarnCoins');
+          if (btn) btn.scrollIntoView({ behavior: 'smooth' });
+        }
+      );
+    }
   }
 
   /* ---------------- sidebar menu ---------------- */
@@ -7598,10 +7739,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
           '<button class="btn-solid" id="btnGoToVocabFromStory" style="background: var(--ink); color: var(--bg); border: none; padding: 12px 24px; cursor: pointer;">Start Learning Vocabulary</button>' +
         '</div>';
 
-      bindTap($('btnGoToVocabFromStory'), function() {
-        showView('study');
-        startStudy();
-      });
+      bindTap($('btnGoToVocabFromStory'), tryEnterVocabulary);
       return;
     }
 
@@ -8114,10 +8252,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
         '</p>' +
         '<button class="btn-solid" id="btnGoToStudyFromSpeaking" style="margin-top: 12px; background: var(--ink); color: var(--bg); border: none; padding: 12px 24px;">Start Learning Vocabulary</button>';
       
-      bindTap($('btnGoToStudyFromSpeaking'), function(){
-        showView('study');
-        startStudy();
-      });
+      bindTap($('btnGoToStudyFromSpeaking'), tryEnterVocabulary);
       return;
     }
     
@@ -8841,11 +8976,8 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       }
     });
 
-    bindTap($('cardOxford'), startStudy);
-    bindTap($('cardSpeaking'), function(){
-      showView('speaking');
-      startSpeakingPractice();
-    });
+    bindTap($('cardOxford'), tryEnterVocabulary);
+    bindTap($('cardSpeaking'), tryEnterSpeaking);
     bindTap($('btnSpeakingBack'), function(){
       if (isRecording) {
         stopSpeakingRecording();
@@ -8904,10 +9036,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
         showWordMeaningModal(word);
       }
     });
-    bindTap($('cardGrammar'), function(){
-      showView('grammar');
-      renderLearnedWordsStory();
-    });
+    bindTap($('cardGrammar'), tryEnterStory);
     bindTap($('btnExit'), function(){
       if(currentAudioEl) currentAudioEl.pause();
       if('speechSynthesis' in window) speechSynthesis.cancel();
