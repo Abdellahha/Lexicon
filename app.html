@@ -220,21 +220,25 @@ a{color:inherit;}
 
 /* ---------- home hero ---------- */
 .hero{
-  padding:24px 0 16px;
-  display:grid;grid-template-columns:1.3fr 1fr;gap:36px;align-items:center;
+  padding:16px 0 12px;
+  display:block;
+  width:100%;
 }
-@media(max-width:720px){.hero{grid-template-columns:1fr;gap:24px;}}
 .hero-title{
   font-family:var(--font-display);font-weight:700;
-  font-size:clamp(32px,5vw,46px);line-height:1.1;letter-spacing:-.02em;
+  font-size:clamp(22px,3.5vw,28px);line-height:1.2;letter-spacing:-.02em;
 }
 .hero-title .accent{color:var(--ink);font-style:italic;}
-.hero-sub{color:var(--ink-dim);font-size:15px;line-height:1.6;margin-top:14px;max-width:46ch;}
+.hero-sub{color:var(--ink-dim);font-size:14px;line-height:1.5;margin-top:6px;max-width:none;}
 
 .ring-card{
   background:var(--bg-card);border:1px solid var(--border);border-radius:8px;
-  padding:24px;display:flex;align-items:center;gap:20px;
+  padding:24px;display:flex;flex-direction:column;gap:16px;align-items:stretch;width:100%;
   box-shadow:none;
+}
+.ring-card-header{
+  border-bottom:1px dashed var(--border);
+  padding-bottom:14px;
 }
 .ring-svg{flex:0 0 auto;transform:rotate(-90deg);}
 .ring-track{fill:none;stroke:var(--bg-1);stroke-width:8;}
@@ -541,15 +545,11 @@ body {
 }
 
 @media (max-width: 768px) {
-  /* Hide main home hero title and subtitle on tablet and phone */
-  #view-home .hero-title,
-  #view-home .hero-sub,
-  #view-home .hero > div:first-child {
+  /* Hide hero title header inside ring card on tablet and phone */
+  #view-home .ring-card-header {
     display: none !important;
   }
   #view-home .hero {
-    grid-template-columns: 1fr !important;
-    gap: 0 !important;
     padding-top: 8px !important;
   }
 
@@ -1168,13 +1168,15 @@ body {
   <!-- HOME VIEW -->
   <div class="view active" id="view-home">
     <div class="hero">
-      <div>
-        <div class="hero-title">Build your <span class="accent">vocabulary</span>,<br>one word at a time.</div>
-        <p class="hero-sub">Listen to clear pronunciation, see each word used in a simple sentence, then prove you've got it by typing it from memory.</p>
-      </div>
-      <div class="ring-card" style="display: flex; flex-direction: column; gap: 20px; align-items: stretch; width: 100%;">
+      <div class="ring-card" style="display: flex; flex-direction: column; gap: 16px; align-items: stretch; width: 100%;">
+        <!-- Hero Header inside top of Ring Card (Computer Size) -->
+        <div class="ring-card-header">
+          <div class="hero-title">Build your <span class="accent">vocabulary</span>, one word at a time.</div>
+          <p class="hero-sub">Listen to clear pronunciation, see each word used in a simple sentence, then prove you've got it by typing it from memory.</p>
+        </div>
+
         <!-- Dual Percentage Meters -->
-        <div class="dual-meters" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; border-bottom: 1px dashed var(--border); padding-bottom: 16px;">
+        <div class="dual-meters" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; border-bottom: 1px dashed var(--border); padding-bottom: 16px;">
           <!-- Meter 1: Daily Goal -->
           <div id="dailyGoalMeter" style="display: flex; align-items: center; gap: 14px;">
             <div style="position: relative; width: 68px; height: 68px; display: flex; align-items: center; justify-content: center;">
@@ -9145,8 +9147,8 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     var btnEarnCoins = $('btnEarnCoins');
     if (btnEarnCoins) {
       btnEarnCoins.addEventListener('click', async function() {
-        Progress.score = (Progress.score || 0) + 5;
-        showToast('🪙 +5 Coins added! Total Score: ' + Progress.score);
+        Progress.coins = (Progress.coins !== undefined ? Progress.coins : 10) + 5;
+        showToast('🪙 +5 Coins added! Balance: ' + Progress.coins + ' 🪙');
         updateSidebarStats();
         if (typeof renderHome === 'function') renderHome();
         await saveProgress();
