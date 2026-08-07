@@ -587,13 +587,8 @@ body {
   }
 }
 
-/* Hide menu button and left sidebar drawer completely on tablet and phone sizes */
-@media (max-width: 1024px) {
-  #studyMenuBtn,
-  #leftSidebar,
-  #sidebarBackdrop {
-    display: none !important;
-  }
+.brand {
+  cursor: pointer;
 }
 
 .ad-banner-slot {
@@ -2947,13 +2942,11 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
     updateSidebarStats();
 
     if (brand) {
-      brand.style.display = (name === 'home') ? 'flex' : 'none';
+      brand.style.display = 'flex';
     }
 
-    var isTabletOrPhone = window.innerWidth <= 1024;
-
-    if (name === 'home' || isTabletOrPhone) {
-      // Return pills to topbar on home or tablet/phone sizes
+    if (name === 'home') {
+      // Return pills to topbar on home screen
       if (topbarRight && themeToggle && levelPill && userPill) {
         topbarRight.insertBefore(themeToggle, studyMenuBtn);
         topbarRight.insertBefore(levelPill, studyMenuBtn);
@@ -2980,13 +2973,13 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       }
       closeSidebar();
     } else {
-      // Move pills to sidebar on desktop non-home views
+      // Move pills to sidebar on all non-home section views (Vocabulary, Speaking, Story, History, Match)
       if (sidebarContent && themeToggle && levelPill && userPill) {
         sidebarContent.appendChild(themeToggle);
         sidebarContent.appendChild(levelPill);
         sidebarContent.appendChild(userPill);
         
-        // Style them for a beautiful vertical list inside the sidebar
+        // Style them for a vertical list inside the sidebar drawer
         themeToggle.style.width = '100%';
         themeToggle.style.justifyContent = 'flex-start';
         themeToggle.style.padding = '12px 16px';
@@ -9155,6 +9148,7 @@ import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.1/fir
       });
     }
 
+    bindTap($('topbarBrand'), function() { showView('home'); });
     bindTap($('studyMenuBtn'), openSidebar);
     bindTap($('closeSidebarBtn'), closeSidebar);
     bindTap($('sidebarBackdrop'), closeSidebar);
