@@ -5,11 +5,11 @@
  * Any code added here will work in the app to remove ads and grant full premium access.
  */
 window.VALID_PREMIUM_CODES = [
-  "PREMIUM2026",
-  "NOADS100",
-  "VIPACCESS",
-  "LEXICONPRO",
-  "LEX2026",
-  "FREEPASS",
-  "INSTAGRAM2026"
+  "76275",
+  "65775",
+  "76565",
+  "65676",
+  "54775",
+  "65776",
+  "76575"
 ];
