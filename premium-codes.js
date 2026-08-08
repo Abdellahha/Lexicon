@@ -5,11 +5,11 @@
  * Any code added here will work in the app to remove ads and grant full premium access.
  */
 window.VALID_PREMIUM_CODES = [
-  "76275",
-  "65775",
-  "76565",
-  "65676",
-  "54775",
-  "65776",
-  "76575"
+  "LEXICON76275",
+  "LEXICON65775",
+  "LEXICON76565",
+  "LEXICON65676",
+  "LEXICON54775",
+  "LEXICON65776",
+  "LEXICON76575"
 ];
