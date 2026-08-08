@@ -1662,7 +1662,7 @@ body {
         </div>
 
         <!-- Instagram Contact Button -->
-        <a id="btnInstagramContact" href="https://www.instagram.com/abdellah.7a?igsh=MXdmZDZxamR1dW5vNw%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 12px 16px; background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045); color: #ffffff; text-decoration: none; border-radius: 10px; font-weight: 700; font-size: 13.5px; box-shadow: 0 4px 12px rgba(253, 29, 29, 0.2); transition: all 0.2s; box-sizing: border-box;">
+        <a id="btnInstagramContact" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 12px 16px; background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045); color: #ffffff; text-decoration: none; border-radius: 10px; font-weight: 700; font-size: 13.5px; box-shadow: 0 4px 12px rgba(253, 29, 29, 0.2); transition: all 0.2s; box-sizing: border-box;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
             <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
@@ -1999,11 +1999,13 @@ import { ref, get, update, query, orderByChild, equalTo } from "https://www.gsta
   /* ---------------- Premium & No Ads Logic ---------------- */
   function applyPremiumStatus() {
     var isPrem = Progress.isPremium || false;
-    try {
-      if (window.localStorage.getItem('lexicon_is_premium') === 'true') {
-        isPrem = true;
-      }
-    } catch(e){}
+    if (currentUser && currentUser.uid) {
+      try {
+        if (window.localStorage.getItem('lexicon_is_premium_' + currentUser.uid) === 'true') {
+          isPrem = true;
+        }
+      } catch(e){}
+    }
 
     if (isPrem) {
       Progress.isPremium = true;
@@ -2051,6 +2053,53 @@ import { ref, get, update, query, orderByChild, equalTo } from "https://www.gsta
       var activeCard = $('premiumActiveCard');
       if (formCont) formCont.style.display = 'none';
       if (activeCard) activeCard.style.display = 'block';
+    } else {
+      Progress.isPremium = false;
+
+      // Reset topbar / sidebar No Ads button
+      var noAdsBtnText = $('noAdsBtnText');
+      var noAdsBtn = $('noAdsBtn');
+      if (noAdsBtnText) noAdsBtnText.textContent = 'No Ads';
+      if (noAdsBtn) {
+        noAdsBtn.style.background = '';
+        noAdsBtn.style.borderColor = '';
+        noAdsBtn.style.color = '';
+        noAdsBtn.title = '';
+      }
+
+      // Show all ad banner slots
+      var adSlots = document.querySelectorAll('.ad-banner-slot');
+      adSlots.forEach(function(el) {
+        el.style.display = 'block';
+      });
+
+      // Restore Earn Coins banner to default state with ad link
+      var btnEarnCoins = $('btnEarnCoins');
+      if (btnEarnCoins) {
+        btnEarnCoins.style.background = 'linear-gradient(135deg, #fef3c7, #fde68a)';
+        btnEarnCoins.style.borderColor = '#f59e0b';
+        btnEarnCoins.style.color = '#92400e';
+        btnEarnCoins.style.cursor = 'pointer';
+        btnEarnCoins.setAttribute('href', 'https://plump-plastic.com/b.3HVO0VPQ3_pAveb/m/VxJRZ/Dq0G3KMEj/kezjNIjgYox/LbTpcFy_O/TaM_2QNDjpUR');
+        btnEarnCoins.setAttribute('target', '_blank');
+        btnEarnCoins.setAttribute('rel', 'noopener noreferrer');
+        var coinsVal = Progress.coins !== undefined ? Progress.coins : 10;
+        btnEarnCoins.innerHTML = 
+          '<div style="display: flex; align-items: center; gap: 10px;">' +
+            '<div style="width: 32px; height: 32px; border-radius: 50%; background: #f59e0b; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">🪙</div>' +
+            '<div style="display: flex; flex-direction: column; text-align: left;">' +
+              '<span style="font-family: var(--font-display); font-size: 13px; font-weight: 700; color: #78350f; line-height: 1.2;">Earn 5 Coins to Keep Learning</span>' +
+              '<span id="earnCoinsBalance" style="font-size: 11px; color: #a16207; font-weight: 600; margin-top: 2px;">Balance: ' + coinsVal + ' 🪙</span>' +
+            '</div>' +
+          '</div>' +
+          '<div style="display: flex; align-items: center; gap: 4px; background: #f59e0b; color: #ffffff; padding: 6px 12px; border-radius: 6px; font-family: var(--font-mono); font-size: 11px; font-weight: 700; white-space: nowrap; flex-shrink: 0;">+5 🪙 Get Coins</div>';
+      }
+
+      // Update modal view
+      var formCont = $('premiumFormContainer');
+      var activeCard = $('premiumActiveCard');
+      if (formCont) formCont.style.display = 'flex';
+      if (activeCard) activeCard.style.display = 'none';
     }
   }
 
@@ -2130,7 +2179,9 @@ import { ref, get, update, query, orderByChild, equalTo } from "https://www.gsta
 
     if (isValid) {
       Progress.isPremium = true;
-      try { window.localStorage.setItem('lexicon_is_premium', 'true'); } catch(e){}
+      if (currentUser && currentUser.uid) {
+        try { window.localStorage.setItem('lexicon_is_premium_' + currentUser.uid, 'true'); } catch(e){}
+      }
       
       msgEl.style.display = 'block';
       msgEl.style.background = 'rgba(34, 197, 94, 0.15)';
@@ -2588,9 +2639,10 @@ import { ref, get, update, query, orderByChild, equalTo } from "https://www.gsta
 
     el.addEventListener('touchend', function(ev){
       if(moved) return;
+      if(ev && ev.cancelable) ev.preventDefault();
       lastFired = Date.now();
       handler(ev);
-    }, { passive: true });
+    });
 
     el.addEventListener('click', function(ev){
       if(Date.now() - lastFired < 600) return;
@@ -3033,7 +3085,7 @@ import { ref, get, update, query, orderByChild, equalTo } from "https://www.gsta
     if (earnCoinsBalance) earnCoinsBalance.textContent = 'Balance: ' + coinsVal + ' 🪙';
 
     // Update cost badges on cards
-    var isPrem = Progress.isPremium || (function(){ try{ return window.localStorage.getItem('lexicon_is_premium')==='true'; }catch(e){return false;} })();
+    var isPrem = Progress.isPremium === true;
 
     var costTagOxford = $('costTagOxford');
     if (costTagOxford) {
@@ -9430,10 +9482,15 @@ import { ref, get, update, query, orderByChild, equalTo } from "https://www.gsta
     var userPill = $('userPill');
     if(userText) userText.textContent = currentUser.displayName || currentUser.email.split('@')[0];
     if(userPill) {
-      bindTap(userPill, function(){
+      bindTap(userPill, function(ev){
+        if (ev && ev.stopPropagation) ev.stopPropagation();
         closeSidebar();
         showCustomConfirm("Logout", "Are you sure you want to log out?", async function(){
           try {
+            if (currentUser && currentUser.uid) {
+              try { window.localStorage.removeItem('lexicon_is_premium_' + currentUser.uid); } catch(e){}
+            }
+            try { window.localStorage.removeItem('lexicon_is_premium'); } catch(e){}
             await signOut(auth);
             window.location.href = 'index.html';
           } catch(e) {
@@ -9451,7 +9508,7 @@ import { ref, get, update, query, orderByChild, equalTo } from "https://www.gsta
     var btnEarnCoins = $('btnEarnCoins');
     if (btnEarnCoins) {
       btnEarnCoins.addEventListener('click', async function(e) {
-        var isPrem = Progress.isPremium || (function(){ try{ return window.localStorage.getItem('lexicon_is_premium')==='true'; }catch(err){return false;} })();
+        var isPrem = Progress.isPremium === true;
         if (isPrem) {
           if (e && e.preventDefault) e.preventDefault();
           if (e && e.stopPropagation) e.stopPropagation();
